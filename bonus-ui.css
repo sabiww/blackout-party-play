@@ -1,0 +1,210 @@
+/* ===== Окна бонусов: материал D1 «Красная сталь» (ui-kit.html#d1, владелец 2026-10-10) =====
+   Три окна одной семьи: Buy bonus (#fmenu), вход в бонус (#ovl .bu-gate: «10 FREE SPINS» / «3 RESPINS»), итог бонуса (.bp-wrap .bu-end).
+   Корпус — красная крашеная сталь пульта (ui2/panel-frame.webp + uikit/steel-red.webp), тонкая латунная кромка #c98a2c, как у плашки множителя;
+   карточки режимов — экраны-мониторы (тёмное стекло, янтарь, строки VT323 только внутри экрана); BUY/ACTIVATE — тёмные клавиши пульта;
+   CONTINUE и подтверждающий BUY — горящая линза, как Play; закрытие окна Buy bonus — крестовой винт (.bu-x > .bu-screw, как в окнах F).
+   Шрифты: Black Ops One — заголовки, цены, кнопки; VT323 — только на стекле; Barlow SC — мелкие подписи.
+   Все классы с префиксом bu-: старые стили #fmenu / .gate в index.html и ui.css больше не нужны (bonus-ui-cleanup.patch). Разметка — fmenuHTML(), ворота в index.html, bonusEnd() в ui.js. */
+
+.bu-panel{--bu-bw:16px;--bu-trim:#c98a2c;--bu-trim-l:#e2b564;--bu-trim-d:#6a4513;--bu-edge:#140504;--bu-seam:#5a130d;
+ --bu-ink:#f3e8cc;--bu-ink2:#e8cba2;--bu-amber:#FFC861;--bu-dim:#c9a46a;--bu-glow:rgba(255,170,60,.42);--bu-glass:#0e0b09;
+ --bu-disp:"Black Ops One",Impact,sans-serif;--bu-mono:"VT323",ui-monospace,monospace;--bu-ui:"Barlow SC","Barlow Semi Condensed",system-ui,sans-serif;
+ position:relative;box-sizing:border-box;margin:0;color:var(--bu-ink);font-family:var(--bu-ui);text-align:left;
+ border:var(--bu-bw) solid transparent;border-image:url(assets/ui2/panel-frame.webp?bpv=5e3ed38e) 110 95 115 95 round stretch;
+ background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.26)),url(assets/uikit/steel-red.webp?bpv=e884f8e5) 0 0/640px #8a2017;background-origin:padding-box;background-clip:padding-box;
+ box-shadow:0 22px 46px rgba(0,0,0,.7)}
+/* шов и тонкая латунная линия внутри рамки (как вокруг стекла у множителя), по краям — лёгкое затемнение */
+.bu-panel::before{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px var(--bu-seam),inset 0 0 0 2px var(--bu-edge),inset 0 0 0 3px var(--bu-trim),inset 0 0 0 4px rgba(0,0,0,.45),inset 0 0 80px rgba(0,0,0,.4)}
+.bu-panel>*{position:relative}
+.bu-in{max-height:calc(100vh - max(var(--sa-t,0px),12px) - max(var(--sa-b,0px),12px) - 2*var(--bu-bw));max-height:calc(100dvh - max(var(--sa-t,0px),12px) - max(var(--sa-b,0px),12px) - 2*var(--bu-bw));overflow:auto;overscroll-behavior:contain;padding:14px 22px 22px}
+.bu-h{margin:0;text-align:center;font:400 38px/1.05 var(--bu-disp);letter-spacing:.07em;color:var(--bu-ink);text-shadow:0 2px 0 rgba(20,4,3,.7);text-wrap:balance}
+.bu-tag{display:block;text-align:center;font:700 12px/1 var(--bu-ui);letter-spacing:.4em;text-transform:uppercase;color:var(--bu-ink2)}
+.bu-panel{--bu-plate:#22120b;--bu-plate2:#1b0e09;--bu-plate-hi:#3a1a10} /* «Ржавая жилка» — коричневая плита окон F (схема 2, dialogs-f.css): фон карточек режимов */
+/* закрытие Buy bonus — крестовой винт, как в окнах F (разметка buScrew() в index.html; стили перенесены из dialogs-f.css, .x .scr): выпуклая шляпка с бликом,
+   медный ободок, тень и царапины; крест повёрнут на 45° и читается как «×»; при наведении «откручивается» ещё на 90°. Зона нажатия 44×44, винт 30 px по центру. */
+.bu-x{position:absolute;right:8px;top:8px;z-index:3;width:44px;height:44px;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bu-x .bu-screw{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none;transition:filter .15s,transform .15s}
+.bu-x .bu-screw .cross{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.bu-x:hover .bu-screw{filter:brightness(1.18)}
+.bu-x:hover .bu-screw .cross{transform:rotate(135deg)!important}
+.bu-x:active .bu-screw{transform:scale(.94)}
+.bu-x:focus-visible{outline:0}
+.bu-x:focus-visible .bu-screw{outline:3px solid #fff3d0;outline-offset:2px;border-radius:50%}   /* кольцо вокруг винта: целиком внутри окна, не обрезается */
+
+/* ---- стекло экрана: тёмное, чуть тёплое, янтарь, едва заметные строки; вокруг — тонкая латунная линия ---- */
+.bu-scr{position:relative;display:flex;align-items:center;justify-content:center;gap:.28em;min-width:0;padding:2px 12px 3px;border-radius:6px;
+ background:radial-gradient(ellipse at 50% 35%,#17120d,var(--bu-glass) 80%);
+ box-shadow:inset 0 0 12px #000,inset 0 0 0 1px #000,0 0 0 1px #000,0 0 0 2px var(--bu-trim),0 0 0 3px rgba(0,0,0,.55);
+ font:400 30px/1 var(--bu-mono);letter-spacing:.03em;color:var(--bu-amber);text-shadow:0 0 6px var(--bu-glow);white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
+.bu-scr::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.17) 0 1px,transparent 1px 3px)}
+.bu-scr small{font:700 11px/1 var(--bu-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--bu-dim);text-shadow:none}
+
+/* ---- клавиши пульта: тёмная сталь с медной окантовкой; главная кнопка — горящая линза, как Play ---- */
+.bu-key{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-width:44px;min-height:44px;height:44px;margin:0;padding:0 14px;border:0;border-radius:9px;cursor:pointer;color:var(--bu-ink);white-space:nowrap;
+ font:400 24px/1 var(--bu-disp);letter-spacing:.04em;background:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.18)),url(assets/uikit/steel-gun.webp?bpv=a3bcd854) 0 0/260px #2a2523;-webkit-tap-highlight-color:transparent;
+ box-shadow:inset 0 0 0 2px #bb682c,inset 0 0 0 4px rgba(0,0,0,.72),0 3px 0 #000,0 6px 10px -2px rgba(0,0,0,.6)}
+.bu-key:hover{color:#fff6dc;box-shadow:inset 0 0 0 2px var(--bu-amber),inset 0 0 0 4px rgba(0,0,0,.72),0 3px 0 #000,0 0 14px rgba(255,200,97,.3)}
+.bu-key:focus-visible{outline:3px solid #fff3d0;outline-offset:3px;color:#fff6dc;box-shadow:inset 0 0 0 2px var(--bu-amber),inset 0 0 0 4px rgba(0,0,0,.72),0 3px 0 #000,0 0 14px rgba(255,200,97,.3)}
+.bu-key:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px #bb682c,inset 0 0 0 4px rgba(0,0,0,.72),0 1px 0 #000}
+.bu-key:disabled{opacity:.45;cursor:default}
+.bu-panel .bu-lens{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:220px;min-height:54px;max-width:100%;margin:0;padding:8px 30px;border:0;border-radius:12px;cursor:pointer;color:#2a1405;text-align:center;
+ font:400 24px/1.05 var(--bu-disp);letter-spacing:.06em;background:radial-gradient(ellipse at 50% 42%,#ffd07a,#f0a93c 66%,#c27a1c);-webkit-tap-highlight-color:transparent;
+ box-shadow:inset 0 0 0 2px #5d3a0b,inset 0 0 0 4px rgba(0,0,0,.4),0 0 0 3px #0a0706,0 0 0 5px var(--bu-trim),0 0 20px rgba(255,190,80,.28),0 5px 0 #000}
+.bu-panel .bu-lens:hover{filter:brightness(1.08)}
+.bu-panel .bu-lens:focus-visible{outline:2px solid #fff3d0;outline-offset:7px;filter:brightness(1.08)}
+.bu-panel .bu-lens:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px #5d3a0b,inset 0 0 0 4px rgba(0,0,0,.4),0 0 0 3px #0a0706,0 0 0 5px var(--bu-trim),0 2px 0 #000}
+.bu-btns{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:20px;padding:0 6px}
+.bu-quiet{min-height:44px;margin:0;padding:6px 16px;border:0;background:none;cursor:pointer;color:var(--bu-ink2);font:700 14px/1 var(--bu-ui);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px}
+.bu-quiet:hover{color:#fff6dc}
+.bu-quiet:focus-visible{outline:3px solid #fff3d0;outline-offset:1px;border-radius:6px}
+
+/* ---- Buy bonus ---- */
+#fmenu .bu-panel{width:min(980px,96%)}
+#fmenu .bu-panel.bu-sm{width:min(520px,96%)}
+.bu-bet{display:flex;align-items:center;justify-content:center;gap:14px;margin:12px 0 20px}
+.bu-bet .bu-scr{min-width:150px;flex-direction:column;gap:3px;padding:5px 18px 5px;font-size:30px}
+.bu-bet .bu-key{width:44px;padding:0;font-size:26px}
+.bu-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 16px}
+.bu-card{display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0;text-align:center;container-type:inline-size} /* контейнер — для подгонки длинной цены (.bu-pr) */
+.bu-mon{position:relative;padding:8px;border-radius:12px;background:linear-gradient(180deg,var(--bu-plate),var(--bu-plate2));
+ box-shadow:inset 0 0 0 2px #bb682c,inset 0 0 0 4px rgba(0,0,0,.7),0 0 0 2px var(--bu-edge),0 6px 10px -2px rgba(0,0,0,.6)}
+.bu-mon::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+ background:radial-gradient(circle at 8px 8px,#d49a52 0 1px,#4a2a14 1.2px 2.6px,transparent 3px),radial-gradient(circle at calc(100% - 8px) 8px,#d49a52 0 1px,#4a2a14 1.2px 2.6px,transparent 3px),
+ radial-gradient(circle at 8px calc(100% - 8px),#d49a52 0 1px,#4a2a14 1.2px 2.6px,transparent 3px),radial-gradient(circle at calc(100% - 8px) calc(100% - 8px),#d49a52 0 1px,#4a2a14 1.2px 2.6px,transparent 3px)}
+.bu-glass{position:relative;container-type:inline-size;aspect-ratio:4/5;border-radius:8px/11px;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,var(--bu-plate-hi),var(--bu-plate) 62%,var(--bu-plate2));box-shadow:inset 0 0 18px rgba(0,0,0,.5),inset 0 0 0 1px #000}
+.bu-glass::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px),linear-gradient(rgba(190,70,40,.05),rgba(190,70,40,.05))}
+.bu-glass img{position:absolute;left:8%;top:10%;width:84%;height:68%;object-fit:contain;filter:sepia(.5) saturate(1.1) brightness(.95) drop-shadow(0 6px 10px rgba(0,0,0,.7))}
+.bu-glass .bu-cn{position:absolute;left:9px;top:7px;z-index:2;font:400 15px/1 var(--bu-mono);color:var(--bu-amber);text-shadow:0 0 5px var(--bu-glow)}
+.bu-glass .bu-on{position:absolute;right:9px;top:7px;z-index:2;display:none;align-items:center;gap:.4em;font:400 14px/1 var(--bu-mono);color:#ff7a5a}
+.bu-glass .bu-on i{width:.6em;height:.6em;border-radius:50%;background:#e0402a;box-shadow:0 0 6px rgba(255,90,60,.8)}
+.bu-glass .bu-nm{position:absolute;left:4%;right:4%;bottom:7%;z-index:2;text-align:center;font:400 16px/1 var(--bu-mono);font-size:clamp(15px,9.5cqi,21px);letter-spacing:.08em;color:var(--bu-amber);text-shadow:0 0 6px var(--bu-glow)}
+.bu-card.on .bu-on{display:flex}
+.bu-card.on .bu-mon{box-shadow:inset 0 0 0 2px var(--bu-amber),inset 0 0 0 4px rgba(0,0,0,.7),0 0 0 2px var(--bu-edge),0 0 16px rgba(255,190,80,.3)}
+.bu-d{min-height:2.5em;padding:0 2px;font:600 14px/1.25 var(--bu-ui);color:var(--bu-ink);text-shadow:0 1px 0 rgba(0,0,0,.45);text-wrap:balance}
+.bu-pr{font:400 26px/1 var(--bu-disp);letter-spacing:.04em;color:var(--bu-ink);text-shadow:0 2px 0 rgba(20,4,3,.7);
+ font-size:min(var(--bu-prs,26px),calc(100cqi / (var(--n,8) * .75)))} /* длинная сумма («150,000,000.00 ARS») ужимается под ширину карточки; --n — число знаков числа (ставит fmenuHTML), --bu-prs — обычный размер; на «$150.00» ничего не меняется */
+.bu-go{width:100%;height:46px;font-size:19px;letter-spacing:.1em}
+.bu-go::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:#3a2412;box-shadow:0 0 0 1px #000}
+.bu-card.on .bu-go{color:#2a1405;background:var(--bu-amber);box-shadow:inset 0 0 0 2px #5d3a0b,inset 0 0 0 4px rgba(0,0,0,.25),0 3px 0 #000}
+.bu-card.on .bu-go::before{background:#7a2a10}
+.bu-card.on .bu-go:focus-visible{outline-color:#fff3d0}
+/* второй шаг покупки: одна карточка по центру */
+.bu-conf{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:380px;margin:0 auto;text-align:center;container-type:inline-size}
+.bu-conf .bu-mon{width:min(230px,100%)}
+.bu-conf .bu-glass{aspect-ratio:1/1}
+.bu-conf .bu-glass img{top:9%;height:82%}
+.bu-conf .bu-d{font-size:16px;min-height:0}
+.bu-conf .bu-pr{--bu-prs:34px}
+.bu-conf .bu-btns{margin-top:8px;align-self:stretch}
+
+/* ---- ворота бонуса и итог ---- */
+.bu-gate,.bu-end{width:min(500px,94%)}
+.bu-gate .bu-in,.bu-end .bu-in{text-align:center;padding:12px 26px 24px}
+.bu-gate .bu-h,.bu-end .bu-h{font-size:42px;margin:4px 0 14px}
+.bu-gate .bu-fit{width:100%}
+.bu-hero{margin:0 auto;padding:8px 16px;max-width:100%;width:max-content;gap:.36em;font:400 34px/1 var(--bu-disp);font-size:clamp(22px,8.6cqi,42px);text-shadow:0 0 8px var(--bu-glow)}
+.bu-hero img{flex:none;height:1.5em;width:auto;filter:sepia(.35) saturate(1.1) brightness(.95) drop-shadow(0 4px 8px rgba(0,0,0,.7))}
+.bu-hero .big{font:inherit;color:inherit;line-height:1;white-space:nowrap}
+.bu-list{list-style:none;margin:20px auto 0;padding:0;max-width:420px;text-align:left}
+.bu-list li{position:relative;margin:9px 0;padding-left:26px;font:600 17px/1.25 var(--bu-ui);text-shadow:0 1px 0 rgba(0,0,0,.5)}
+.bu-list li::before{content:"";position:absolute;left:3px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--bu-amber);box-shadow:0 0 0 2px #000,0 0 0 3px var(--bu-trim-d),0 0 8px rgba(255,190,80,.5)}
+.bu-gate .bu-btns,.bu-end .bu-btns{margin-top:22px}
+.bu-auto{margin:14px 0 0;font:700 16px/1.2 var(--bu-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;color:var(--bu-amber);text-shadow:0 1px 0 rgba(0,0,0,.6)} /* «Камеры»: игроку ничего нажимать не нужно, дальше всё играет само */
+.bu-auto+.bu-btns{margin-top:12px}
+/* итог: сумма на стекле; шрифт подгоняется под число знаков (--n ставит bonusEnd), контейнер — .bu-fit */
+.bu-fit{container-type:inline-size;width:min(100%,380px);margin:0 auto}
+.bu-total{display:block;padding:8px 14px 9px;text-align:center;font:400 44px/1 var(--bu-disp);font-size:clamp(18px,calc((100cqi - 40px) / (var(--n,8) * .68)),58px);letter-spacing:.03em;text-shadow:0 0 10px var(--bu-glow)}
+.bu-cap{display:block;margin-top:14px;font:700 12px/1 var(--bu-ui);letter-spacing:.3em;text-transform:uppercase;color:var(--bu-ink2)}
+/* вход в бонус и итог (владелец 2026-10-11): плашка «10 FREE SPINS» / «3 RESPINS» и стекло с суммой — тёплый коричневый плиты окон F (dialogs-f.css, схема 2: #22120b → #1b0e09) вместо чёрного стекла, буквы остаются кремово-золотыми (--bu-amber на коричневом ≈ 11:1);
+   кнопка CONTINUE — цвет тех же букв (--bu-amber #FFC861, светлее сверху, чуть темнее снизу; было оранжевое #ffd07a → #c27a1c), текст тёмный (≈ 10:1), рамка, форма и состояния прежние. BUY в подтверждении покупки не меняется. */
+.bu-panel.bu-gate .bu-hero,.bu-panel.bu-end .bu-total{background:linear-gradient(180deg,#22120b,#1b0e09);
+ box-shadow:inset 0 0 10px rgba(24,8,3,.55),inset 0 0 0 1px #000,0 0 0 1px #000,0 0 0 2px var(--bu-trim),0 0 0 3px rgba(0,0,0,.55)}
+.bu-panel.bu-gate .bu-hero::after,.bu-panel.bu-end .bu-total::after{background:repeating-linear-gradient(0deg,rgba(0,0,0,.085) 0 1px,transparent 1px 3px)} /* развёртка как на плите F (.face::after), мягче прежней .17 */
+.bu-panel.bu-gate .bu-lens,.bu-panel.bu-end .bu-lens{color:#2a1405;background:linear-gradient(180deg,#ffdc97 0%,var(--bu-amber) 48%,#f1b552 100%)}
+
+/* ---- телефон: две колонки карточек, рама тоньше ---- */
+@media (max-width:760px){
+ .bu-panel{--bu-bw:12px}
+ .bu-in{padding:10px 10px 16px}
+ .bu-h{font-size:28px}
+ .bu-bet{margin:8px 0 14px;gap:10px}
+ .bu-bet .bu-scr{min-width:120px;font-size:26px}
+ .bu-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 10px}
+ .bu-mon{padding:6px}
+ .bu-glass .bu-cn{left:7px;top:5px;font-size:13px}
+ .bu-glass .bu-on{right:7px;top:5px;font-size:13px}
+ .bu-d{font-size:13px}
+ .bu-pr{--bu-prs:21px}
+ .bu-go{height:44px;font-size:15px;letter-spacing:.04em;padding:0 6px;gap:.4em}
+ .bu-gate .bu-in,.bu-end .bu-in{padding:8px 10px 18px}
+ .bu-gate .bu-h,.bu-end .bu-h{font-size:32px;margin-bottom:10px}
+ .bu-list li{font-size:15px}
+ .bu-panel .bu-lens{min-width:190px;font-size:21px}
+ .bu-x{right:2px;top:2px;width:44px;height:44px}
+}
+/* низкий экран (телефон на боку): заголовок и ставка в одну строку, четыре карточки в ряд, стекло ниже */
+@media (max-height:520px){
+ .bu-panel{--bu-bw:12px}
+ .bu-in{padding:6px 12px 14px}
+ #fmenu .bu-buy .bu-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-right:46px}
+ #fmenu .bu-buy .bu-h{font-size:26px;text-align:left}
+ #fmenu .bu-buy .bu-bet{margin:0}
+ #fmenu .bu-buy .bu-cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px}
+ #fmenu .bu-buy .bu-glass{aspect-ratio:3/2}
+ #fmenu .bu-buy .bu-glass img{top:12%;height:60%}
+ #fmenu .bu-buy .bu-card{gap:6px}
+ #fmenu .bu-buy .bu-d{font-size:12px;min-height:2.5em}
+ #fmenu .bu-buy .bu-pr{--bu-prs:20px}
+ #fmenu .bu-buy .bu-go{height:44px;font-size:15px}
+ #fmenu .bu-panel.bu-sm{width:min(640px,96%)}
+ #fmenu .bu-conf{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"mon h" "mon d" "mon pr" "mon b";column-gap:22px;row-gap:8px;align-items:center;max-width:none;margin:0;text-align:left}
+ #fmenu .bu-conf{padding-top:8px}
+ #fmenu .bu-conf .bu-h{grid-area:h;text-align:left;font-size:26px}
+ #fmenu .bu-conf .bu-mon{grid-area:mon;width:178px}
+ #fmenu .bu-conf .bu-glass{aspect-ratio:1/1}
+ #fmenu .bu-conf .bu-glass img{top:9%;height:82%}
+ #fmenu .bu-conf .bu-d{grid-area:d;font-size:15px}
+ #fmenu .bu-conf .bu-pr{grid-area:pr;--bu-prs:28px}
+ #fmenu .bu-conf .bu-btns{grid-area:b;margin-top:2px;padding:0 6px;align-items:stretch}
+ #fmenu .bu-conf .bu-btns .bu-lens{min-width:0}
+ .bu-gate .bu-in,.bu-end .bu-in{padding:4px 18px 14px}
+ .bu-gate .bu-h,.bu-end .bu-h{font-size:30px;margin:2px 0 8px}
+ .bu-list{margin-top:10px}
+ .bu-list li{margin:5px 0;font-size:15px}
+ .bu-gate .bu-btns,.bu-end .bu-btns{margin-top:14px}
+ .bu-auto{margin-top:6px;font-size:14px}
+ .bu-auto+.bu-btns{margin-top:8px}
+ .bu-x{right:2px;top:2px}
+}
+/* Вырез есть (<html data-sa>, index.html readSafe): окна стоят в безопасной области, высоты ей не хватает — слегка ужимаем. Без выреза атрибута нет и всё как раньше.
+   Телефон стоя: стекла карточек Buy bonus квадратные (было 4:5), иначе нижний ряд кнопок BUY уходит под прокрутку. Боком: вход в «Камеры» — списку и кнопке чуть теснее. */
+@media (max-width:760px) and (min-height:521px){ :root[data-sa] .bu-buy .bu-glass{aspect-ratio:1/1} }
+@media (max-height:520px){ :root[data-sa] .bu-gate .bu-list li{margin:3px 0} :root[data-sa] .bu-gate .bu-btns{margin-top:9px} :root[data-sa] .bu-gate .bu-auto+.bu-btns{margin-top:6px} }
+@media (prefers-reduced-motion:reduce){.bu-key:active,.bu-panel .bu-lens:active{transform:none}.bu-x .bu-screw,.bu-x .bu-screw .cross{transition:none}.bu-x:active .bu-screw{transform:none}}
+
+/* ===== Правка плашек 2026-10-12 («нейрослоп»): ворота бонуса и итог (.bu-gate, .bu-end). Buy bonus (.bu-buy) не трогаем — его делает другая ветка =====
+   Что было: рама из картинки panel-frame.png сжималась в 16 px — бока скручивались «верёвкой», угловые винты были вшиты в картинку и торчали за рамку;
+   текст с тенью и свечением, радиусы 6 / 9 / 12, лампочки-маркеры с ореолом. Что стало: рама — та же ржавая сталь и тот же винт, что у плашек М1 (ui.css, #hud .m1):
+   винты 6 px целиком внутри рамы шириной 10 px, одна толщина кромки, радиусы 3–4 px, заголовок без тени, маркеры — квадратики. */
+.bu-panel:is(.bu-gate,.bu-end){--bu-bw:10px;border:var(--bu-bw) solid transparent;border-image:none;
+ background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.26)) padding-box,url(assets/uikit/steel-red.webp?bpv=e884f8e5) 0 0/640px padding-box,
+  linear-gradient(rgba(18,5,3,.18),rgba(18,5,3,.18)) border-box,url(assets/uikit/hud-m1-rust.webp?bpv=7da0f75f) 0 0/160px auto border-box,#8a2017;
+ box-shadow:0 0 0 1px #0a0302,0 22px 46px rgba(0,0,0,.7)}
+.bu-panel:is(.bu-gate,.bu-end)::before{inset:0;box-shadow:inset 0 0 0 1px #0a0302,inset 0 0 0 2px rgba(150,113,48,.5),inset 0 0 70px rgba(0,0,0,.38)}
+.bu-panel:is(.bu-gate,.bu-end)::after{content:"";position:absolute;inset:calc(var(--bu-bw)*-1);pointer-events:none;z-index:2;
+ --sh:radial-gradient(circle at 36% 30%,#b9a884,#8f7f62 38%,#5a4c3a 62%,#2a1a0f 68%,transparent 72%);
+ background:linear-gradient(45deg,transparent 40%,#120a06 40% 60%,transparent 60%) left 2px top 2px/6px 6px no-repeat,var(--sh) left 2px top 2px/6px 6px no-repeat,
+  linear-gradient(0deg,transparent 40%,#120a06 40% 60%,transparent 60%) right 2px top 2px/6px 6px no-repeat,var(--sh) right 2px top 2px/6px 6px no-repeat,
+  linear-gradient(60deg,transparent 40%,#120a06 40% 60%,transparent 60%) left 2px bottom 2px/6px 6px no-repeat,var(--sh) left 2px bottom 2px/6px 6px no-repeat,
+  linear-gradient(15deg,transparent 40%,#120a06 40% 60%,transparent 60%) right 2px bottom 2px/6px 6px no-repeat,var(--sh) right 2px bottom 2px/6px 6px no-repeat}
+/* слои: шлиц выше шляпки — порядок в списке background (первый — сверху), поэтому шлиц стоит перед своей шляпкой */
+.bu-panel:is(.bu-gate,.bu-end) .bu-h{text-shadow:none;letter-spacing:.04em}
+.bu-panel:is(.bu-gate,.bu-end) .bu-scr{border-radius:3px;text-shadow:none}
+.bu-panel.bu-gate .bu-hero,.bu-panel.bu-end .bu-total{border-radius:3px;text-shadow:none;box-shadow:inset 0 0 0 1px #000,0 0 0 1px #000,0 0 0 2px var(--bu-trim-d)}
+.bu-panel:is(.bu-gate,.bu-end) .bu-lens{border-radius:4px;letter-spacing:.04em;box-shadow:inset 0 0 0 2px #5d3a0b,0 0 0 2px #0a0706,0 0 0 3px var(--bu-trim-d),0 4px 0 #000}
+.bu-panel:is(.bu-gate,.bu-end) .bu-lens:active{box-shadow:inset 0 0 0 2px #5d3a0b,0 0 0 2px #0a0706,0 0 0 3px var(--bu-trim-d),0 1px 0 #000}
+.bu-panel:is(.bu-gate,.bu-end) .bu-list li{text-shadow:none;padding-left:20px}
+.bu-panel:is(.bu-gate,.bu-end) .bu-list li::before{left:2px;top:.5em;width:6px;height:6px;border-radius:0;box-shadow:0 0 0 1px #0a0302;background:var(--bu-amber)}
+.bu-panel:is(.bu-gate,.bu-end) .bu-tag{letter-spacing:.3em}
+@media (max-width:760px){.bu-panel:is(.bu-gate,.bu-end){--bu-bw:10px}}
+@media (max-height:520px){.bu-panel:is(.bu-gate,.bu-end){--bu-bw:10px}}
