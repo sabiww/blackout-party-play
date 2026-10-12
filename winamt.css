@@ -1,0 +1,46 @@
+/* Шесть стилей самих цифр суммы на поле (winamt.js, 2026-10-12, fb/field-amount). Без подложек, свечений, ореолов, глянца; тень только жёсткая и в одну сторону. */
+@font-face{font-family:"WA Stencil";src:url(../fonts/StardosStencil-Bold.ttf) format("truetype");font-display:block}
+#wlx .wl[data-wp=bulbs],#wlx .wl[data-wp=neon],#wlx .wl[data-wp=stencil],#wlx .wl[data-wp=tin],#wlx .wl[data-wp=reg],#wlx .wl[data-wp=icing]{overflow:visible}
+#wlx .wl .wf svg.wa{display:block;overflow:visible}
+
+/* 8 · лампочки шатра: каждая цифра — точечная матрица 5×7 из ламп; потухшие — тёмные цоколи, загораются столбцами слева направо */
+#wlx .wl[data-wp=bulbs]{--fs:calc(var(--amt,30px)*.82)}
+#wlx .wl[data-wp=bulbs] .wf{filter:drop-shadow(.05em .07em 0 rgba(0,0,0,.8))}
+#wlx .wl[data-wp=bulbs] .bo{fill:#3b2a20}
+
+/* 9 · неоновая трубка: тонкая стеклянная линия одним штрихом, тёмные скобы на стене, погасшая часть серая; светлая жила внутри, ореола нет */
+#wlx .wl[data-wp=neon]{--fs:calc(var(--amt,30px)*1)}
+#wlx .wl[data-wp=neon] svg path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+#wlx .wl[data-wp=neon] .sh{stroke:rgba(0,0,0,.7);stroke-width:2.1}
+#wlx .wl[data-wp=neon] .off{stroke:#5b4d48;stroke-width:1.7}
+#wlx .wl[data-wp=neon] .tb{stroke:#ff5b3d;stroke-width:1.7}
+#wlx .wl[data-wp=neon] .cr{stroke:#ffe2b8;stroke-width:.6}
+#wlx .wl[data-wp=neon] .cl{stroke:#1a120f;stroke-width:.5;stroke-linecap:butt}
+#wlx .wl[data-wp=neon] .gl>path.p{stroke:#ff5b3d;stroke-width:2}
+
+/* 10 · трафарет: краска через вырезанную форму — рваные края, пропуски, подтёки вниз у части цифр */
+#wlx .wl[data-wp=stencil]{--fs:calc(var(--amt,30px)*1)}
+#wlx .wl[data-wp=stencil] .amt{font:700 var(--fs)/1 "WA Stencil","Stardos Stencil",Impact,sans-serif;letter-spacing:.04em}
+#wlx .wl[data-wp=stencil] .sx{display:inline-block;color:#e8b545;filter:url(#wa-spray)}
+#wlx .wl[data-wp=stencil] .ch{position:relative;display:inline-block}
+#wlx .wl[data-wp=stencil] .dr{position:absolute;top:66%;width:.13em;height:var(--dl,.3em);margin-left:-.065em;background:#e8b545;border-radius:0 0 .05em .05em;transform-origin:50% 0;transform:scaleY(1)}
+
+/* 11 · жесть: красная окрашенная цифра, сбоку толщина серого металла (ступени вниз-вправо), краска сколота до стали, тень падает на поле */
+#wlx .wl[data-wp=tin]{--fs:calc(var(--amt,30px)*1.04)}
+#wlx .wl[data-wp=tin] .amt{font:400 var(--fs)/1 "Black Ops One",Impact,sans-serif;display:flex;filter:url(#wa-chip)}
+#wlx .wl[data-wp=tin] .ch{display:block;color:#c9442b;transform:translateY(var(--ty,0)) rotate(var(--tr,0deg));
+ text-shadow:.012em .014em 0 #7e786d,.024em .03em 0 #6f695f,.036em .046em 0 #5f594f,.048em .06em 0 #4f4a42,.1em .15em 0 rgba(0,0,0,.55),.13em .19em 0 rgba(0,0,0,.28)}
+
+/* 12 · кассовые цифры: тёплый кремовый, сбитая по высоте на волос каждая цифра; тень двумя смещениями (красная и чёрная) — как плохая приводка печати */
+#wlx .wl[data-wp=reg]{--fs:calc(var(--amt,30px)*1.04)}
+#wlx .wl[data-wp=reg] .amt{font:400 var(--fs)/1 "WF Staat",Impact,sans-serif;display:flex;overflow:hidden;padding-bottom:.12em;letter-spacing:.02em}
+#wlx .wl[data-wp=reg] .ch{display:block;transform:translateY(var(--ty,0))}
+#wlx .wl[data-wp=reg] .ch i{display:block;font-style:normal;color:#f1e4bf;text-shadow:.04em .05em 0 #9a3426,.085em .11em 0 rgba(0,0,0,.85)}
+
+/* 13 · глазурь: крем выдавлен из кондитерского мешка по линии, под ним тёмно-розовая тень вниз-вправо */
+#wlx .wl[data-wp=icing]{--fs:calc(var(--amt,30px)*1)}
+#wlx .wl[data-wp=icing] .wf{filter:drop-shadow(.05em .07em 0 rgba(0,0,0,.75))}
+#wlx .wl[data-wp=icing] svg path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+#wlx .wl[data-wp=icing] .s1{stroke:#f6d6c8;stroke-width:2.1}
+#wlx .wl[data-wp=icing] .s2{stroke:#a8433a;stroke-width:2.1}
+#wlx .wl[data-wp=icing] .gl>path.p{stroke:#f6d6c8;stroke-width:2.6}

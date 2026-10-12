@@ -14,7 +14,7 @@
 const FPS=24, FR=1000/FPS, SKIP_MARGIN=.3, SKIP_MIN=.25, SOFT_D=4, SOFT_F=1.2, CUT_D=3; // SOFT_F — и только пока доля пикселей силуэта с резким отличием от покоя (f, %: рот/зубы, глаза, шляпа — мелкие, но яркие детали, d их почти не видит) не больше 1,2 (2026-10-12: зубы жующего рта на d 4 давали двоение лица); SOFT_D — в «мягком» хвосте меняем ролик, только пока показанный кадр не дальше 4 от покоя (замер: на d 5–6 наплыв 2–3 кадра виден как двоение руки/челюсти; ждём кадр с d≤4, это 0,2–0,5 с); CUT_D — кадры ближе 3 к покою (зерно кодирования) меняем жёстко, без наплыва
 const KIND={swallow:'swallow',swallow2:'swallow',throw:'trick',punch:'trick',lever:'trick',sackpull:'trick',handoff:'trick',grab:'react',cheer:'react',wave:'amb',mic:'amb',hat:'amb',look:'amb'};
 Object.assign(KIND,{lean:'amb',shrug:'amb',nod:'amb',sniff:'amb',lick:'amb',rub:'amb'}); // ролики оживления (rocco-alive.js): как взмах и микрофон — не ждут нейтрального окна, уступают любому идущему ролику
-Object.assign(KIND,{sway:'amb'}); // мелкие жесты оживления (fb/rocco-gestures): так же, как lean и rub
+Object.assign(KIND,{sway:'amb',rock:'amb',belly:'amb'}); // мелкие жесты оживления (fb/rocco-gestures): так же, как lean и rub
 const PRIO={trick:3,swallow:2,react:1,amb:0}, MAXW={trick:5000,swallow:2600,react:1200,amb:0}; // сколько мс запрос ждёт нейтрального окна прежнего ролика
 const data=f=>{ const D=window.RoccoNeutral; return (D&&D.clips&&D.clips[f])||null; };
 const fileOf=v=>{ const m=/([^\/]+?)(?:\.hevc)?\.(?:webm|mp4)(?:\?.*)?$/.exec((v&&(v.dataset.src||v.currentSrc||v.src))||''); return m?m[1]:''; };

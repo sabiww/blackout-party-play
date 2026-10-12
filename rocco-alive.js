@@ -31,8 +31,9 @@ const BORED={hat:2.2,shrug:2.2,look:1.4,lean:1.6}, WAVY={wave:3.2}; // во ск
 // H-sway «покачивается под музыку» (зал и кухня; нет файла — режиссёр пропускает). Те же правила, что у остальных: вне спина, fits() в цепочках, вид 'amb' в rocco-flow.js.
 // H-bowtie «поправляет бабочку» и H-scratch «чешет за ухом» сняты, но отклонены (кисть на крупном плане — тёмная сегментная, «перчаточная»: правило владельца — кисть мохнатая), в игре их нет.
 // KS-rub «потирает живот» (fb/rocco-alive) отклонён по тому же правилу (тёмная металлическая кисть): режиссёр его не просит; перегенерировать не вышло — бюджет $7 кончился.
-const GEST={ amb:{hall:{sway:1.2},kitchen:{sway:1.0}},        // тихий покой: набор сцены
- smallwin:{hall:{sway:1.0},kitchen:{sway:.9}},               // малый выигрыш: «доволен» — покачивание под музыку
+// fb/gestures2 2026-10-12: H-rock «качается из стороны в сторону» (заметнее H-sway) и H-belly «гладит живот и злится — голодный» (режим HUNGRY ROCCO — в 6 раз чаще в покое). H-bowtie (бант) снят снова и отклонён: кисть тёмная глянцевая.
+const GEST={ amb:{hall:{sway:.7,rock:1.1,belly:.5},kitchen:{sway:.6,rock:.9,belly:.5}},        // тихий покой: набор сцены
+ smallwin:{hall:{sway:.6,rock:.8},kitchen:{sway:.5,rock:.7,belly:.4}},               // малый выигрыш: «доволен» — покачивание под музыку
  bored:{sway:1.6} };                                         // игрок давно ничего не нажимал: чаще
 for(const sc of ['hall','kitchen']){ Object.assign(AMB[sc],GEST.amb[sc]); Object.assign(SMALLWIN[sc],GEST.smallwin[sc]); }
 Object.assign(BORED,GEST.bored);
@@ -66,7 +67,7 @@ function make(c){
  // Выбор без повторов: «мешок» на каждый набор (каждый ролик по разу за круг), недавние — реже, у скуки свои веса; не загруженные ролики греем (по одному) и берём другие
  function choose(cfg,key,okFn){
   let list=poolOf(cfg); if(okFn) list=list.filter(([n])=>okFn(n)); if(!list.length) return null;
-  const idle=idleFor(), boost=n=>(idle>25000&&BORED[n]||1)*(idle>60000&&WAVY[n]||1);
+  const idle=idleFor(), hg=c.hungry&&c.hungry(), boost=n=>(idle>25000&&BORED[n]||1)*(idle>60000&&WAVY[n]||1)*(hg&&n==='belly'?6:1);
   list=list.map(([n,w])=>[n,w*boost(n)*(n===lastName?0:recent.includes(n)?.35:1)]);
   const un=list.find(([n])=>!ready(n)&&!c.act[n].error); if(un) c.warm(un[0]);
   const have=list.filter(([n])=>ready(n)); if(!have.length) return null;
@@ -79,7 +80,10 @@ function make(c){
   const R_=c.run(n); if(!R_||R_.dead){ log('refused',n,why); return false; }
   const t=now(); lastClip=t; lastBusy=t; inflight=R_; lastName=n; recent.push(n); if(recent.length>3) recent.shift(); if(k==='tell') lastTell=t; if(k==='amb'){ try{ window.bpAudio&&window.bpAudio.play('rocco.idle'); }catch(e){} } log(k,n,why); // звук 'rocco.idle' — как у прежнего таймера (AU в ui.js)
   R_.started.then(ok=>{ if(inflight===R_) inflight=null; if(!ok) log('dropped',n,why); }); return true; }
- function ambient(){ const n=choose(ambCfg,'amb',fits); if(!n) return false; return fire(n,'amb','quiet '+Math.round((now()-lastBusy)/1000)+'s'); }
+ let lastBelly=0;
+ function ambient(){ const hg=c.hungry&&c.hungry(); // HUNGRY ROCCO: «голодный живот» — отдельный бросок кубика поверх мешка (мешок даёт каждый ролик раз за круг), не чаще раза в ≈18 с
+  if(hg&&c.act.belly&&ready('belly')&&fits('belly')&&now()-lastBelly>18000&&Math.random()<.55&&!HID.has('belly')){ if(fire('belly','amb','hungry')){ lastBelly=now(); return true; } }
+  const n=choose(ambCfg,'amb',fits); if(n==='belly') lastBelly=now(); if(!n) return false; return fire(n,'amb','quiet '+Math.round((now()-lastBusy)/1000)+'s'); }
  // ---- ход раунда
  function roundEnd(){ R.sp=false; R.hot=false; R.stopAt=now();
   // кухня: в мешке 3 из 4 краж — Рокко «выглядывает»: следующая высыпет

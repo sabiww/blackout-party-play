@@ -7,7 +7,7 @@
 (()=>{
 'use strict';
 const GROUPS={
- p:{title:'Сумма на поле',def:'old',list:[['old','0 · прежний (золото с тёмной тенью)'],['tag','1 · Ценник на верёвочке'],['stamp','2 · Штамп чернилами'],['flip','3 · Перекидные цифры'],['receipt','4 · Чековая лента'],['chalk','5 · Мел на грифельной доске'],['tape','6 · Лента этикет-принтера'],['drift','7 · Просто цифра, тень и всплытие']]},
+ p:{title:'Сумма на поле',def:'old',list:[['old','0 · прежний (золото с тёмной тенью)'],['tag','1 · Ценник на верёвочке'],['stamp','2 · Штамп чернилами'],['flip','3 · Перекидные цифры'],['receipt','4 · Чековая лента'],['chalk','5 · Мел на грифельной доске'],['tape','6 · Лента этикет-принтера'],['drift','7 · Просто цифра, тень и всплытие'],['bulbs','8 · Лампочки шатра'],['neon','9 · Неоновая трубка на скобах'],['stencil','10 · Трафаретная краска с подтёками'],['tin','11 · Жестяные цифры, штамп'],['reg','12 · Кассовые цифры-флажки'],['icing','13 · Глазурь, выдавлена кремом']]},
  r:{title:'Строка WIN',def:'odo',list:[['old','0 · прежний'],['odo','1 · Барабаны-одометр (выбор владельца)'],['steps','2 · Ступенями с толчком'],['blink','3 · Сразу итог, цифры мигнут']]},
  c:{title:'Цепочка',def:'old',list:[['old','0 · прежний (без акцента)'],['tag','1 · Табличка CHAIN N у счёта'],['grow','2 · Сумма крупнее с каждым шагом'],['lamps','3 · Ряд ламп под счётом'],['nudge','4 · Толчок поля растёт с шагом']]},
  t:{title:'Малый и средний выигрыш',def:'nudge',list:[['old','0 · Без акцента'],['nudge','1 · Короткий толчок поля (выбор владельца)'],['thump','2 · Поле «садится»: сжатие и возврат'],['dust','3 · Пыль сыплется с верхней рамки'],['tally','4 · Чёрточки счёта у строки WIN']]}};
@@ -33,13 +33,14 @@ function dress(e,o){
  let v=opt('p'); if(v==='old') return; try{ if(v==='flip'&&typeof scene!=='undefined'&&scene==='cameras') v='tape'; }catch(e){} // «Камеры»: REC-метки переписывают текст суммы, ячейки перекидных цифр не выживают — там лента
  ensureSvg();
  const a=e.querySelector('.amt'); if(!a) return; const t=a.textContent; e._wf=v; e.dataset.wp=v;
- const rot={tag:0,stamp:rnd(-4.5,-1.5),flip:0,receipt:rnd(-1.6,1.6),chalk:rnd(-1.4,1.4),tape:rnd(-1.4,1.4),drift:0}[v]; e.style.setProperty('--rot',rot.toFixed(2)+'deg');
+ const rot={tag:0,stamp:rnd(-4.5,-1.5),flip:0,receipt:rnd(-1.6,1.6),chalk:rnd(-1.4,1.4),tape:rnd(-1.4,1.4),drift:0,bulbs:rnd(-1,1),neon:rnd(-2.5,-.5),stencil:rnd(-2,2),tin:0,reg:0,icing:rnd(-1.5,1.5)}[v]||0; e.style.setProperty('--rot',rot.toFixed(2)+'deg');
  let inner='';
  if(v==='tag') inner=`<i class="wf-s"></i><div class="amt">${t}</div>`;
  else if(v==='receipt'){ inner=`<i class="rc-h">WIN</i><div class="amt">${t}</div>`; }
  else if(v==='flip') inner=`<div class="amt">${[...t].map(ch=>/\d/.test(ch)?`<span class="c"><i>${ch}</i></span>`:`<span class="c p"><i>${ch}</i></span>`).join('')}</div>`;
  else inner=`<div class="amt">${t}</div>`;
  e.innerHTML=`<div class="wf">${inner}</div>`;
+ if(window.WinAmt&&WinAmt.has(v)){ WinAmt.wrap(e,v,t); WinAmt.wire(e,v); } // winamt.js: цифры из ламп, трубки, краски, жести, кассовых флажков, глазури
  if(v==='receipt') e.querySelector('.wf').style.clipPath=rcPoly(100); }
 const wfOf=e=>e.querySelector('.wf');
 function place(e,i){ const w=wfOf(e), v=e._wf, d=(i||0)*150; if(!w) return false; const base={fill:'backwards',delay:d};
@@ -50,6 +51,7 @@ function place(e,i){ const w=wfOf(e), v=e._wf, d=(i||0)*150; if(!w) return false
  else if(v==='receipt'){ A(w,[{clipPath:rcPoly(0),opacity:1},{clipPath:rcPoly(100),opacity:1}],{...base,duration:300,easing:'steps(9,end)'}); }
  else if(v==='chalk'){ A(w,[{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0 0 0)'}],{...base,duration:300,easing:'cubic-bezier(.3,.1,.5,1)'}); }
  else if(v==='tape'){ A(w,[{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0 0 0)'}],{...base,duration:260,easing:'steps(11,end)'}); }
+ else if(window.WinAmt&&WinAmt.has(v)) return WinAmt.place(e,w,v,d,chn);
  else if(v==='drift'){ A(w,[{opacity:0,transform:'translateY(.28em) scale(.96)'},{opacity:1,transform:'translateY(0) scale(1)'}],{...base,duration:210,easing:'cubic-bezier(.2,.8,.3,1)'}); }
  return true; }
 function flipIn(e,d){ // каждая цифра перекидывается несколько раз и садится на своё значение; при Turbo и «меньше движения» — сразу итог
@@ -63,12 +65,15 @@ function fade(e,rise){ const w=wfOf(e), v=e._wf; if(!w) return false; let a=null
  else if(v==='chalk') a=A(w,[{opacity:1,transform:'translateX(0)'},{opacity:0,transform:'translateX(.2em) skewX(-6deg)'}],{duration:260,easing:'ease-in',fill:'forwards'});
  else if(v==='tape') a=A(w,[{clipPath:'inset(0 0 0 0)'},{clipPath:'inset(0 100% 0 0)'}],{duration:200,easing:'steps(8,end)',fill:'forwards'});
  else if(v==='drift') a=A(w,[{opacity:1,transform:'translateY(0)'},{opacity:0,transform:`translateY(${-r*1.6}px)`}],{duration:380,easing:'cubic-bezier(.3,.6,.4,1)',fill:'forwards'});
+ else if(window.WinAmt&&WinAmt.has(v)) a=WinAmt.fade(e,w,v,r);
  if(a) a.finished.catch(()=>{}).then(()=>e.remove()); else e.remove(); return true; }
 
 // ---------------- строка WIN ----------------
 const bOf=()=>{ const r=$('result'); return r&&r.querySelector('b'); };
 const ease=k=>1-Math.pow(1-k,3);
-function count(from,to,ms,H){ const v=opt('r'); if(v==='old') return null; const d=ms*H.K(), b=bOf();
+// 2026-10-12 (fb/win-drum, владелец: «сделать подсчёт быстрее»): счёт вдвое короче прежнего (300 мс → 150 мс), крупная прибавка читается чуть дольше (+60 мс на порядок суммы), потолок 1,6 × 150 = 240 мс
+const countMs=(ms,delta)=>ms*.5*(1+Math.min(.6,Math.log10(1+Math.max(0,delta))*.3));
+function count(from,to,ms,H){ const v=opt('r'); if(v==='old') return null; const d=countMs(ms,to-from)*H.K(), b=bOf();
  if(!b||d<=0||!(to>from)||(H.fast&&H.fast())){ H.setResult(to); return Promise.resolve(); }
  if(v==='odo') return odo(b,from,to,d,H);
  if(v==='steps') return steps(b,from,to,d,H);

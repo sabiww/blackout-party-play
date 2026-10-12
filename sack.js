@@ -152,7 +152,7 @@ const FX=(()=>{
      if(n<2){ vy+=o.g*.8*d; vy*=Math.exp(-.8*d); x+=vx*d; y+=vy*d; rot+=vr*d; fl+=vf*d; if(y>=o.floor&&vy>0){ y=o.floor; n++; vy=-vy*.22; vx*=.6; if(n>=2||Math.abs(vy)<o.g*.05){ n=2; vy=0; } } }
      else { x+=vx*d; vx*=Math.exp(-4.5*d); rest+=d; if(rest>.7) this.dead=true; } } a=n>=2?clamp(1-(rest-.25)/.45,0,1):1; },
    draw(c){ c.save(); c.globalAlpha=a; c.translate(x,y); c.rotate(rot); c.scale(1,Math.max(.25,Math.abs(Math.cos(fl)))); if(tkOK) c.drawImage(ticket,-w/2,-h/2,w,h); else { c.fillStyle='#e9dcc0'; c.fillRect(-w/2,-h/2,w,h); c.fillStyle='#b02a1f'; c.fillRect(-w/2,-h*.1,w,h*.2); } c.restore(); }}); }
- return {add,clear,flyCoin,spark,sackCoin,sackScrap,pour,time:()=>FXT,ts};
+ return {add,clear,flyCoin,spark,sackCoin,sackScrap,pour,time:()=>FXT,ts,drawCoin,warm:()=>{ try{ tsheet(); }catch(e){} }};
 })();
 
 // ---------- каждая кража: сумма → монетки → окошко SACK ----------
@@ -392,5 +392,6 @@ async function intro(force){
  } finally{ clean(); }
 }
 
+window.bpCoin={draw:FX.drawCoin,warm:FX.warm}; // жетон «вечеринки» для монет у плашки WIN (wincel.js, fb/win-drum)
 window.bpSack={hold,gain,dump,intro,introDue,idle:()=>queue,sync:()=>{ if(!pending&&!busy&&SKV.on) release(); },clip:CL,clips:CLIPS,mode:fxMode,hooks,pawTimes:()=>{ const P=CLIPS[pawKey()]; return {mode:fxMode(),file:P.file,enter:P.in/1000,leave:P.hold,out:P.out/1000,gone:P.hold+P.out/1000}; }}; // clips/mode/hooks — для проверок и замены хуков лапы
 })();

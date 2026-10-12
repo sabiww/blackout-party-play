@@ -632,7 +632,7 @@ function hudBuild(){
  document.getElementById('hud')?.remove();
  const fe=document.getElementById('field'), app=document.getElementById('app'); if(!fe||!app||document.getElementById('wel')) return;
  const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0, u=hudU(f.width);
- const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=0b88879c readSafe): окошки не уходят под него слева
+ const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=6c80e99c readSafe): окошки не уходят под него слева
  let edge=f.left-12*u, avail=Math.max(60,edge-Math.max(8,sa.l)), right=false;
  const pr=document.getElementById('pod')?.getBoundingClientRect(); // телефон боком (844×390): слева от поля всего ~80 px (логотип и «Функции»), а между полем и пультом справа пусто — столбик встаёт туда
  if(land&&H<=500&&scene!=='cameras'&&pr&&pr.left>f.right-10&&pr.left-f.right-16>=100){ right=true; avail=pr.left-f.right-16; }
@@ -993,16 +993,34 @@ function clipHold(sel,ms){ const v=sel&&(typeof sel==='string'?document.querySel
 function fxMark(l,g,r,c,i){ // «тень-цель» на клетке: куда упадёт билет (янтарные уголки и тень под клеткой)
  const R=fxCellRect(g,r,c), n=fxBox(l,g,'pmark',R.x+R.w/2,R.y+R.h/2,R.w,R.h,'div','<i class="sh"></i><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M5 26V5H26M74 5H95V26M95 74V95H74M26 95H5V74"/></svg>');
  animA(n,[{opacity:0,transform:'scale(1.14)'},{opacity:1,transform:'scale(1)'}],{duration:210,delay:i*100,easing:'ease-out',fill:'backwards'}); return n; }
-async function fxTicket(g,l,hx,hy,r,c,i,mark){ // один билет: вылетает из руки (hx,hy) в кадр броска ролика и летит по баллистической дуге в клетку (r,c). Физика считается по времени каждый кадр (rAF, 60 к/с): гравитация, лёгкое сопротивление воздуха по горизонтали, кувырок вокруг оси + 3D-трепет листа, затухающий к земле; растяжение по скорости вместо размытия; тень-цель на клетке растёт с приближением
- const o=BOARD[r][c]; if(!o) return; const R=fxCellRect(g,r,c), cx=R.x+R.w/2, cy=R.y+R.h/2, w=R.w*.96, h=R.h*.96, dx=cx-hx, dy=cy-hy, dist=Math.hypot(dx,dy);
- await sleep(i*80); if(!o.sp.isConnected) return; AU('toss.ticket',{pan:c/(COLS-1)*1.4-.7}); // билет вылетел из руки Рокко
+// Билет в лапе (владелец 2026-10-12: «золотые билетики WILD он изначально некорректно держит в руке»). Ролик H-toss2 снят с пустой рукой (кадры 0–36 рука висит, 37–43 взмах, 44–48 кулак, 49–51 пальцы раскрываются, выпуск 2,1 с = кадр 50,4);
+// билет кладёт игра: он лежит ЗА слоем руки Рокко (#krocco, z 6), поэтому кулак и пальцы закрывают его нижнюю часть — как зажатый в пальцах; вылезает из-за кисти на взмахе (кадры 37–43), едет с лапой по следу кисти из ролика (THROW_TRACK: кадр, x и y центра кисти в px ролика, наклон, доля размера, сдвиг билета от центра кисти) и в кадр выпуска уходит в полёт с тем же положением, наклоном и размером.
+// След снят по кадрам очищенного ролика (маска альфы, 55 px у правого края руки); ролик без отражения → x зеркалится через window.roccoClipPt, наклон меняет знак.
+const THROW_TRACK=[[37,1070,390,-30,0,0,0],[38,1097,388,-30,.3,3,-8],[39,1114,373,-25,.55,6,-15],[40,1121,352,-20,.75,8,-20],[41,1120,330,-15,.9,9,-24],[42,1111,309,-10,1,10,-26],[43,1101,295,-8,1,10,-26],[44,1089,285,-6,1,10,-26],[45,1081,280,-6,1,10,-26],[46,1080,276,-6,1,10,-26],[47,1086,275,-6,1,10,-26],[48,1095,284,-8,1,10,-26],[49,1109,284,-10,1,10,-26],[50,1127,280,-12,1,12,-26],[51,1145,282,-14,1,14,-26]];
+window.bpThrowTrack=THROW_TRACK; // читает блок «Рокко в полный рост» (отдельная область видимости)
+const HELD_W=60; // ширина билета в руке, px ролика (кулак ≈55 px): билет чуть крупнее кисти, как карточка в пальцах
+function heldPose(v,i){ // положение i-го билета в руке по часам ролика: [x,y экрана, наклон°, масштаб к размеру в клетке-коробке] или null (ещё не взят / нет ролика)
+ const T=window.roccoThrowTrack, P=window.roccoClipPt; if(!T||!P||!v||v.readyState<2) return null; const f=v.currentTime*24; if(f<T[0][0]) return null;
+ let a=T[T.length-1],b=a; for(let j=0;j<T.length-1;j++) if(f<=T[j+1][0]){ a=T[j]; b=T[j+1]; break; }
+ const q=a===b?0:(f-a[0])/(b[0]-a[0]), m=k=>a[k]+(b[k]-a[k])*q, fan=i*5; // веер: второй и третий билеты чуть смещены и довёрнуты
+ const [x,y]=P(m(1)+m(5)+fan*.6,m(2)+m(6)+fan*.4); return [x,y,-(m(3)+fan),m(4)]; }
+function heldTickets(g,picks,v){ // билеты в лапе до выпуска: возвращает по одному объекту на билет {d,pose,stop()}; без следа/ролика — null (тогда билет вылетает из точки руки, как раньше)
+ if(!window.roccoThrowTrack||!v) return null; const R=fxCellRect(g,0,0), w=R.w*.96, h=R.h*.96, vis=Math.min(w,h*512/463), s=window.roccoClipScale?window.roccoClipScale():1;
+ return picks.map(([r,c],i)=>{ const d=el('div','flyc ptk'); d.innerHTML=`<img src="${SYM('sym-wild')}" alt="">`; Object.assign(d.style,{left:'0',top:'0',width:w+'px',height:h+'px',zIndex:5,transformOrigin:'50% 50%',visibility:'hidden'}); document.body.append(d);
+  const H={d,w,h,last:null,live:true,stop(){ H.live=false; },pose(){ return H.last; }}, loop=()=>{ if(!H.live||!d.isConnected) return; const p=heldPose(v,i); if(p){ const hs=(HELD_W*s)/vis*p[3]; H.last=[p[0],p[1],p[2],hs/Math.max(.001,p[3])||0]; d.style.visibility=p[3]>0?'':'hidden'; d.style.transform=`translate3d(${(p[0]-w/2).toFixed(1)}px,${(p[1]-h/2).toFixed(1)}px,0) rotate(${p[2].toFixed(1)}deg) scale(${Math.max(.001,hs).toFixed(3)})`; } requestAnimationFrame(loop); };
+  loop(); return H; }); }
+async function fxTicket(g,l,hx,hy,r,c,i,mark,H){ // один билет: вылетает из руки (hx,hy) в кадр броска ролика и летит по баллистической дуге в клетку (r,c). Физика считается по времени каждый кадр (rAF, 60 к/с): гравитация, лёгкое сопротивление воздуха по горизонтали, кувырок вокруг оси + 3D-трепет листа, затухающий к земле; растяжение по скорости вместо размытия; тень-цель на клетке растёт с приближением
+ const o=BOARD[r][c]; if(!o){ H&&H.d.remove(); return; } const R=fxCellRect(g,r,c), cx=R.x+R.w/2, cy=R.y+R.h/2, w=R.w*.96, h=R.h*.96; let hrot=0, hs0=.4;
+ await sleep(i*80); if(!o.sp.isConnected){ H&&H.d.remove(); return; } AU('toss.ticket',{pan:c/(COLS-1)*1.4-.7}); // билет вылетел из руки Рокко
+ if(H){ H.stop(); if(H.last){ [hx,hy]=H.last; hrot=H.last[2]; hs0=Math.max(.2,H.last[3]||.4); } }
+ const dx=cx-hx, dy=cy-hy, dist=Math.hypot(dx,dy);
  const T=Math.min(.74,.45+dist*.00023)*(.96+((i*37)%5)*.02), G=g.cw*27, vy0=dy/T-.5*G*T, kd=.55, ed=1-Math.exp(-kd*T), sg=i%2?-1:1, // T — полёт, с; G — гравитация (px/с², от размера клетки: на телефоне то же движение в масштабе); kd — сопротивление воздуха по x
-  A0=(600+i*150)*sg, AY=64+(i*23)%28, AX=34+(i*17)%20, f1=1.5+((i*13)%4)*.18, f2=2.3+((i*11)%3)*.2, ph1=(i*1.9)%6.28, ph2=(i*2.7)%6.28, S0=.4, z0=i%2?3:-3;
- const d=el('div','flyc ptk'); d.innerHTML=`<img src="${SYM('sym-wild')}" alt="">`; Object.assign(d.style,{left:'0',top:'0',width:w+'px',height:h+'px',zIndex:5,transformOrigin:'50% 50%'}); document.body.append(d); // z 5: на старте билет ЗА рукой Рокко (#krocco, z 6) — он выходит из ладони, а не возникает в воздухе; выйдя из-за руки, переключается на 70 (.flyc)
+  A0=(600+i*150)*sg, AY=64+(i*23)%28, AX=34+(i*17)%20, f1=1.5+((i*13)%4)*.18, f2=2.3+((i*11)%3)*.2, ph1=(i*1.9)%6.28, ph2=(i*2.7)%6.28, S0=hs0, z0=i%2?3:-3;
+ let d=H?H.d:null; if(!d){ d=el('div','flyc ptk'); d.innerHTML=`<img src="${SYM('sym-wild')}" alt="">`; Object.assign(d.style,{left:'0',top:'0',width:w+'px',height:h+'px',zIndex:5,transformOrigin:'50% 50%'}); document.body.append(d); } d.style.visibility=''; // z 5: на старте билет ЗА рукой Рокко (#krocco, z 6) — он выходит из ладони, а не возникает в воздухе; выйдя из-за руки, переключается на 70 (.flyc)
  const sh=mark&&mark.querySelector('.sh'), hu=g.cw/100, ss=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
  const put=(p,t)=>{ // p — доля полёта 0…1, t — время полёта, с
   const e=ed?(1-Math.exp(-kd*t))/ed:t/T, x=hx+dx*e, y=hy+vy0*t+.5*G*t*t, vx=dx*(kd*Math.exp(-kd*t)/(ed||1)), vy=vy0+G*t, sp=Math.hypot(vx,vy), a=Math.atan2(vy,vx)*180/Math.PI, b=Math.min(.2,sp/(g.cw*55)), q=1-p, // растяжение вдоль скорости: сильнее в начале и в конце падения
-   sc=S0+(1-S0)*ss(Math.min(1,p/.62))+.07*Math.sin(Math.PI*p), flt=Math.pow(q,1.15), rz=A0*Math.pow(q,1.5)+z0*Math.sin(Math.PI*p), ry=AY*Math.sin(6.283*f1*p+ph1)*flt, rx=AX*Math.sin(6.283*f2*p+ph2)*flt;
+   sc=S0+(1-S0)*ss(Math.min(1,p/.62))+.07*Math.sin(Math.PI*p), flt=Math.pow(q,1.15), rz=hrot*q+A0*Math.pow(q,1.5)+z0*Math.sin(Math.PI*p), ry=AY*Math.sin(6.283*f1*p+ph1)*flt, rx=AX*Math.sin(6.283*f2*p+ph2)*flt;
   d.style.transform=`translate3d(${(x-w/2).toFixed(2)}px,${(y-h/2).toFixed(2)}px,0) rotate(${a.toFixed(1)}deg) scale(${(1+b).toFixed(3)},${(1-b*.45).toFixed(3)}) rotate(${(-a).toFixed(1)}deg) perspective(${(g.cw*7.5).toFixed(0)}px) rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) rotateZ(${rz.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
   if(sh){ sh.style.transform=`scale(${(.6+.55*p*p).toFixed(3)})`; sh.style.opacity=(.28+.62*p*p).toFixed(3); } }; // тень-цель: растёт и темнеет, пока билет падает
  put(0,0); let raised=false; const ready=(()=>{ const im=new Image(); im.src=SYM('sym-wild'); return im.decode?im.decode().catch(()=>{}):Promise.resolve(); })();
@@ -1011,11 +1029,11 @@ async function fxTicket(g,l,hx,hy,r,c,i,mark){ // один билет: выле�
  // приземление: билет ровно в позе клетки (все повороты и растяжение = 0, scale 1) — подмена спрайта в тот же кадр, старый символ исчезает именно в миг касания
  d.style.transform=`translate3d(${(cx-w/2).toFixed(2)}px,${(cy-h/2).toFixed(2)}px,0)`; d.style.zIndex='';
  setSprite(o,'sym-wild'); const img=o.sp.querySelector('img'); img.style.transformOrigin='50% 94%'; await Promise.race([img.decode?img.decode().catch(()=>{}):null,new Promise(rs=>setTimeout(rs,60))]); d.remove(); await ready;
- const H1=9*hu, H2=3.2*hu, kf=[], N=26; // отскок: два подскока (9 и 3 px при клетке 100 px) со сплющиванием в касаниях, затухающим покачиванием; на последнем кадре — ровно поза клетки
+ const H1=5*hu, H2=1.8*hu, kf=[], N=26; // мягкая посадка (владелец 2026-10-12: «мягко шлёпнуться»): отскок меньше, без вспышки; два подскока (5 и 1,8 px при клетке 100 px) со сплющиванием в касаниях, затухающим покачиванием; на последнем кадре — ровно поза клетки
  const hop=(s,H)=>H*(1-(2*s-1)*(2*s-1)), sq=s=>{ const m=Math.min(s,1-s); return m<.14?(1-m/.14):0; }; // s 0…1 внутри одного подскока; sq — сплющивание в касании
  for(let n=0;n<=N;n++){ const q=n/N, first=q<.58, s=first?q/.58:(q-.58)/.42, hy_=hop(s,first?H1:H2), sk=sq(s)*(first?1:.55); kf.push({offset:q,transform:`translateY(${(-hy_).toFixed(2)}px) scale(${(1+.09*sk-.012*(hy_/(H1||1))).toFixed(3)},${(1-.14*sk+.02*(hy_/(H1||1))).toFixed(3)}) rotate(${((first?1:-1)*(1-q)*(2.4*Math.sin(Math.PI*s))).toFixed(2)}deg)`}); } kf[N].transform='none';
  if(sh) animA(sh,[{transform:'scale(1.15)',opacity:.9},{transform:'scale(1.05)',opacity:.6,offset:.3},{transform:'scale(1.12)',opacity:.7,offset:.6},{transform:'scale(1.1)',opacity:.35}],{duration:330,easing:'linear',fill:'forwards'});
- fxDust(l,g,cx,R.y+R.h*.9,4,{dx:rnd(-14,14),dy:-10,s:.8}); fxFlare(l,g,cx,cy,.8,false); fxJolt(g.f,.3);
+ fxDust(l,g,cx,R.y+R.h*.9,3,{dx:rnd(-14,14),dy:-8,s:.7}); fxJolt(g.f,.2);
  const A=animA(img,kf,{duration:330,easing:'linear'}); if(A) A.finished.catch(()=>{}).then(()=>{ img.style.transform=''; }); // отскок идёт сам, цепочка спина дальше не ждёт
  if(mark) fxGone(mark,animA(mark,[{opacity:1},{opacity:0}],{duration:140,fill:'forwards'})); }
 // Бросок: пока Рокко замахивается — подсказка и тени-цели; в момент броска билеты летят из его руки
@@ -1035,12 +1053,16 @@ async function toss0(rng,n){ const cand=[]; BOARD.forEach((row,r)=>row.forEach((
  if(scene==='cameras') return camToss(picks); // «Камеры»: Рокко не стоит у поля — билеты «прилетают» как сигнал камеры (CamRec.toss)
  const sel='#krocco video.ak[data-n="throw"],video[data-hall="H-throw"]', tT=window.roccoThrowAt||1.92, ms=(window.roccoKey&&window.roccoKey('R-throw'))||1050;
  document.querySelectorAll(sel).forEach(v=>{ v.style.clipPath=''; }); if(TRICK_EARLY==='toss') TRICK_EARLY=null; else react('R-throw'); const on=fxOn(), g=on?fxGeo():null, l=on?fxLayer():null;
+ const vEl=on?document.querySelector(sel):null, HT_=on?heldTickets(g,picks,vEl):null; // билеты в лапе: лежат за рукой Рокко и едут с ней с кадра 37 ролика до выпуска
+ try{
  await clipCue(sel,tT-.7,ms-700); special('TOSS',`${n} WILD${n>1?'S':''}`); const marks=on?picks.map(([r,c],i)=>fxMark(l,g,r,c,i)):[]; // подсказка ~1 с и цели
  await clipCue(sel,tT,700);
  const tv=on?document.querySelector(sel):null, mk=tv&&(tv.dataset.hall?{l:775,dt:.22}:window.roccoThrowMask); if(tv&&mk){ const W=tv.offsetWidth, cp=mk.l?`inset(0 0 0 ${(W*mk.l/1280).toFixed(0)}px)`:`inset(0 ${(W*(1-mk.r/1280)).toFixed(0)}px 0 0)`; clipCue(sel,tT+mk.dt,200).then(()=>{ tv.style.clipPath=cp; }); tv.addEventListener('ended',()=>{ tv.style.clipPath=''; },{once:true}); } // в самом ролике билет улетает смазанной полосой через поле — после выхода из руки прячем её, летят только настоящие билеты
  const [hx,hy]=roccoPoint('hand');
- await Promise.all(picks.map(([r,c],i)=>on?fxTicket(g,l,hx,hy,r,c,i,marks[i]):(AU('toss.ticket'),setSprite(BOARD[r][c],'sym-wild'),null)));
- if(tv) tv.style.clipPath=''; if(l) setTimeout(()=>{ if(l.isConnected&&!l.querySelector('.pmark,svg,.pcore')) l.remove(); },900); }
+ await Promise.all(picks.map(([r,c],i)=>on?fxTicket(g,l,hx,hy,r,c,i,marks[i],HT_&&HT_[i]):(AU('toss.ticket'),setSprite(BOARD[r][c],'sym-wild'),null)));
+ if(tv) tv.style.clipPath='';
+ } finally { if(HT_) HT_.forEach(h=>{ h.stop(); h.d.remove(); }); }
+ if(l) setTimeout(()=>{ if(l.isConnected&&!l.querySelector('.pmark,svg,.pcore')) l.remove(); },900); }
 // Удар в зале: кулак Рокко доходит до рамки поля. Ролик R-punch снят 16:9, Рокко справа; сдвигаем его по X так, чтобы кулак в момент удара лёг на правую рамку поля.
 // Ролики удара и броска 2026-10-11 (Kling, asset-source/openrouter/video/hall-punch2, hall-toss2, kitchen-punch2): H-punch2, H-toss2 (KS-punch2 и KS-punch удалены 2026-10-11: кухня бьёт роликом зала). Прежние R-punch, H-throw остались в assets/rocco: ?rclip=old[,punch,toss] включает их (сравнение, откат)
 const RCOLD=new Set((q.get('rclip')||'').split(',').filter(Boolean)), rcOld=n=>RCOLD.has('old')||RCOLD.has(n);
@@ -1074,10 +1096,10 @@ window.hallReact=n=>{ const m=HALLMAP[n]; return m&&(window.__hallClips||HALLSET
 const hallHP=()=>hallAct(PC.file,true,PUNCH.segs);
 // Удар: Рокко бьёт кулаком по правой рамке поля → удар (вмятина, волна, пыль, стоп-кадр, дрожь) → «замыкание» бежит по рамке к столбцу → символы столбца по очереди перещёлкиваются в билеты WILD.
 // Одинаково в зале и в «Кухне» (владелец 2026-10-11): столбец остаётся WILD, пока не будет ближайшего выигрыша, и уходит вместе с ним (в evalIds все WILD поля участвуют в выигрыше). mult — множитель ступени для подсказки («PUNCH ×8»).
-const PFXM=['old','shake','blackout','glass','ribbon']; // варианты последствия удара; файлы punchfx-<имя>.js грузятся по требованию
+const PFXM=['old','shake','blackout','glass','ribbon','scatter']; // варианты последствия удара; файлы punchfx-<имя>.js грузятся по требованию
 const PHM=['old','dent','wave','arc','stop']; // варианты самого момента удара (все в punchhit.js); без выбора: при новом последствии — dent, при старом — old
 function phMode(){ let m=q.get('punchhit'); if(!m){ try{ m=sessionStorage.getItem('bp-punchhit'); }catch(e){} } return PHM.includes(m)?m:'wave'; } // по умолчанию — «Волна + вмятина» (выбор владельца 2026-10-11)
-function pfxMode(){ let m=q.get('punchfx'); if(!m){ try{ m=sessionStorage.getItem('bp-punchfx'); }catch(e){} } return PFXM.includes(m)?m:'ribbon'; } // по умолчанию — «Лента» (понравилась владельцу; блэкаут — для особых моментов)
+function pfxMode(){ let m=q.get('punchfx'); if(!m){ try{ m=sessionStorage.getItem('bp-punchfx'); }catch(e){} } return PFXM.includes(m)?m:'scatter'; } // по умолчанию — «Лента» (понравилась владельцу; блэкаут — для особых моментов)
 if(phMode()!=='old'&&!window.bpPunchHit){ const sc=document.createElement('script'); sc.src='punchhit.js'; sc.charset='utf-8'; document.head.append(sc); }
 { const m=pfxMode(); if(m!=='old'&&!(window.bpPunchFx&&window.bpPunchFx[m])){ const sc=document.createElement('script'); sc.src=`punchfx-${m}.js`; sc.charset='utf-8'; document.head.append(sc); } }
 async function punchColumn(rng,mult){ try{ return await punchColumn0(rng,mult); }finally{ if(BOARD) GRIDIDS=idsOf(BOARD); } } // WILD от удара/броска запоминаем в GRIDIDS: следующий спин роняет именно это поле, а не поле до шалости Рокко
@@ -1531,7 +1553,7 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
  const HALL_ESSENTIAL=['swallow','cheer','throw','punch','lever']; // нужны сразу: глотание (любой выигрыш), радость, бросок билета, удар, рычаг (ворота первого спина, loadgate.js)
  CFG.kitchen={...CFG.hall,acts:[...CFG.hall.acts,'sackpull','handoff','sniff','rub'],warm:['swallow','swallow2','punch','cheer','throw','lever','wave','look','paw'],file:{...CFG.hall.file,sackpull:SACKCLIP.file,handoff:HANDOFF.file,sniff:'KS-sniff',rub:'KS-rub'},unm:[...CFG.hall.unm,'sackpull','handoff'],map:{...MAPC,'K-dump':'sackpull','K-handoff':'handoff'},opt:{...CFG.hall.opt,sackpull:{segs:[[99,1]]},handoff:{segs:[[99,1]]}}}; // sackpull — ролик KS-sackroc (?sackfx=rocco); в общий прогрев не входит (1,3 МБ): sack.js просит его сам первой кражей четвёрки (window.roccoWarm)
  // Мелкие жесты оживления (fb/rocco-gestures 2026-10-12, rocco-alive.js «GESTURES»): H-sway «покачивается под музыку» — зал и кухня (файлы H-<имя>, как у H-lean); просит их только режиссёр, нет файла — пропускается.
- for(const s of [CFG.hall,CFG.kitchen]) s.acts=[...s.acts,'sway'];
+ for(const s of [CFG.hall,CFG.kitchen]) s.acts=[...s.acts,'sway','rock','belly']; // rock (H-rock) — «качается из стороны в сторону», belly (H-belly) — «гладит живот и злится: голодный» (fb/gestures2 2026-10-12)
 
  // ---- размер и место Рокко (владелец 2026-10-11: «мелкий, прижат к правому нижнему углу») ----
  // Варианты (?rocco=a|b|c, основной a — владелец 2026-10-11: «то что стало, но чуть крупнее»; прежний a — a0): h — рост от высоты окна, ov — на сколько кулак при ударе может зайти за рамку поля (в клетках), m — отступ справа (доля ширины), fl — ноги выше нижнего края (доля высоты).
@@ -1641,12 +1663,12 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
   window.roccoPunchImpact=()=>window.roccoKey('R-slam'); // мс при нормальной скорости (sleep умножает на K сам)
   window.roccoPunchAt=P.t0*P.dur/1000; window.roccoThrowAt=cf.throwAt; window.roccoLeverAt=cf.leverAt; // момент контакта кулака с рамкой и момент броска билета — секунды ролика; трюки в ui.js ждут их по currentTime ролика (не по таймеру)
   window.roccoPunchBack=P.t1*P.dur/1000; window.roccoPunchHome=P.t2*P.dur/1000; window.roccoPunchFree=P.tf?P.tf*P.dur/1000:0; // рука уходит от рамки / вернулась / кулак ушёл с рамки (если известно) — секунды ролика удара
-  { const A0=window.roccoAnchor; window.roccoAnchor=kind=>kind==='fist'?pt(TX-P.reach,P.fy,true):A0(kind); window.roccoThrowMask=HT?{r:1195,dt:.05}:{l:775,dt:.22}; } // кулак при ударе: кончик кулака в кадре ролика (x = ось торса − reach, y = P.fy); roccoThrowMask — часть кадра ролика (px), которую прячем после броска: {l:775} — левее (старый H-throw: билет летит смазанной полосой), {r:1195} — правее (H-toss2: клочки белой бумаги за кистью, летят в сторону поля)
+  { const A0=window.roccoAnchor; window.roccoAnchor=kind=>kind==='fist'?pt(TX-P.reach,P.fy,true):A0(kind); window.roccoThrowMask=HT?{r:1195,dt:.05}:{l:775,dt:.22}; window.roccoThrowTrack=HT?window.bpThrowTrack:null; window.roccoClipPt=(x,y)=>pt(x,y,false); window.roccoClipScale=()=>s; } // кулак при ударе: кончик кулака в кадре ролика (x = ось торса − reach, y = P.fy); roccoThrowMask — часть кадра ролика (px), которую прячем после броска: {l:775} — левее (старый H-throw: билет летит смазанной полосой), {r:1195} — правее (H-toss2: клочки белой бумаги за кистью, летят в сторону поля)
   // Ролик не доигран — не обрываем скачком: «пропуск» (второй Play/Space) и новый спин в Turbo/Quick уводят его в покой плавным наплывом XC мс
   // ...теперь (владелец 2026-10-11, «все переходы плавные») ролик не обрывается вообще: он доигрывает движение в обычном темпе до нейтрального хвоста и сам уходит в покой (rocco-flow.js), новые ролики в это время не запускаются; watchT и XC убраны
   const loop=()=>{ timer=setTimeout(()=>{ if(!document.hidden&&!GS.spinning) window.roccoKitchenWake(); loop(); },15000+Math.random()*9000); }; // прежнее оживление (?alive=0 или нет rocco-alive.js): раз в 15–25 с случайный ролик из cf.rand
   // «Живой» Рокко (rocco-alive.js, владелец 2026-10-12: «как вкопанный»): режиссёр сам решает, когда и что сыграть (оживление раз в ≈6–12 с тишины, малые реакции на спин, предвкушение, промах, малые выигрыши); ролики просит у контроллера rocco-flow.js
-  if(!RM()&&!(window.RoccoAlive&&RoccoAlive.attach({scene,GS,K,RM,fast,flow,act,cf,run:n=>run(n,cf.opt[n]),warm:n=>{ const v=act[n]; if(v) wake(v); },isOn:()=>k.isConnected,dialogOpen:window.bpTime.ex?window.bpTime.ex.dialogOpen:()=>false}))) loop();
+  if(!RM()&&!(window.RoccoAlive&&RoccoAlive.attach({scene,GS,K,RM,fast,flow,act,cf,hungry:()=>modeOn==='hungry',run:n=>run(n,cf.opt[n]),warm:n=>{ const v=act[n]; if(v) wake(v); },isOn:()=>k.isConnected,dialogOpen:window.bpTime.ex?window.bpTime.ex.dialogOpen:()=>false}))) loop();
  }
  window.kitchenRocco=mount;
  const _r=render; render=function(){ _r(); mount(); }; mount();
