@@ -8,7 +8,7 @@
 (()=>{
 'use strict';
 const SS={get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} },del(k){ try{ sessionStorage.removeItem(k); }catch(e){} }};
-const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=ad37e15b)
+const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=0b88879c)
 const NAVS=['top','side'], DEF_NAV='top';
 const pick=(name,list,def)=>{ const v=QQ().get(name)||SS.get('bp-'+name); return list.includes(v)?v:def; };
 const cfg=()=>({old:(QQ().get('dlg')||SS.get('bp-dlg'))==='old',nav:pick('dlgnav',NAVS,DEF_NAV)});

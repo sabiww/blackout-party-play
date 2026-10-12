@@ -632,7 +632,7 @@ function hudBuild(){
  document.getElementById('hud')?.remove();
  const fe=document.getElementById('field'), app=document.getElementById('app'); if(!fe||!app||document.getElementById('wel')) return;
  const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0, u=hudU(f.width);
- const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=ad37e15b readSafe): окошки не уходят под него слева
+ const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=0b88879c readSafe): окошки не уходят под него слева
  let edge=f.left-12*u, avail=Math.max(60,edge-Math.max(8,sa.l)), right=false;
  const pr=document.getElementById('pod')?.getBoundingClientRect(); // телефон боком (844×390): слева от поля всего ~80 px (логотип и «Функции»), а между полем и пультом справа пусто — столбик встаёт туда
  if(land&&H<=500&&scene!=='cameras'&&pr&&pr.left>f.right-10&&pr.left-f.right-16>=100){ right=true; avail=pr.left-f.right-16; }
@@ -695,9 +695,9 @@ function react(name,from,force){ // реакция Рокко: ролик в з�
  if(scene==='hall'&&typeof playRocco==='function') playRocco(name,null,from||0); }
 // Каждый ролик скачивается ОДИН раз на страницу (QA m6): прежде <video preload=auto> браузер сам обрывал (net::ERR_ABORTED — «отложенная загрузка» после набора буфера), а при каждой перестройке (render → новые <video>) тот же файл просился заново (swallow и swallow2 — один файл дважды, лапа — на каждый render). Теперь файл берёт fetch (кэш по адресу), ролик получает blob:-адрес готового файла: ни обрывов, ни повторных запросов; fetch не удался — прежний путь, прямой src.
 const clipBlobs=new Map();
-function clipBlob(url){ let p=clipBlobs.get(url); if(!p){ p=fetch(url).then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>URL.createObjectURL(b.type.startsWith('video/')?b:b.slice(0,b.size,/\.mp4(\?|$)/.test(url)?'video/mp4':'video/webm'))).catch(()=>url); /* тип не пришёл с сервера (Safari по blob: без типа не играет) — ставим по расширению */ clipBlobs.set(url,p); } return p; }
+function clipBlob(url,hi){ let p=clipBlobs.get(url); if(!p){ p=fetch(url,hi?{priority:'high'}:undefined).then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>URL.createObjectURL(b.type.startsWith('video/')?b:b.slice(0,b.size,/\.mp4(\?|$)/.test(url)?'video/mp4':'video/webm'))).catch(()=>url); /* тип не пришёл с сервера (Safari по blob: без типа не играет) — ставим по расширению */ clipBlobs.set(url,p); } return p; }
 function loadClip(v){ if(!v||v.src||v._ld||!v.dataset.src) return v; v._ld=1; v.preload='auto'; v.addEventListener('error',()=>{ if(v.src.startsWith('blob:')&&!v._fb){ v._fb=1; v.src=v.dataset.src; } }); clipBlob(v.dataset.src).then(u=>{ if(!v.src) v.src=u; }); return v; } // blob: не принят (политика страницы) — один раз пробуем прямой адрес // ролик с data-src: src появляется, когда файл готов (события canplay/error приходят как обычно)
-window.bpTime.loadClip=loadClip;
+window.bpTime.loadClip=loadClip; window.bpTime.clipBlob=clipBlob;
 // Прогрев роликов — по одному, после первого кадра Рокко и в простое браузера: страница сначала показывает себя, а не качает десятки МБ.
 // Замер 2026-10-10: 17 роликов зала разом = 17 МБ WebM (Safari: 33 МБ HEVC) в первые секунды; больше всех ломали открытие артефакта.
 function warmQ(root,idle,items,wake){ // items — что греть по очереди; wake(item) запускает загрузку и возвращает <video> (или null); root пропал — очередь снимается
@@ -1253,6 +1253,7 @@ const spinTimer=()=>{ if(!GS.spinning) spin(); }; // автоигра: след�
 function spin(){
  if(GS.spinning){ AU('spin.skip'); GS.skip&&GS.skip(); return; } // второй Play / Space = Skip: домотать ФАЗУ, которая играет сейчас (skipPhase), а не весь спин
  if(dialogOpen()) return;
+ if(window.BPLoad&&BPLoad.hold(spin)) return; // fb/perf: ролики Рокко и звуки первого спина ещё докачиваются — спин ждёт (не больше 10 с), внизу плашка с ходом загрузки; иначе глотание/бросок/радость шли бы запасным путём без ролика
  const field=document.getElementById('field'); if(!field) return;
  const replay=GS.replay, free=!replay&&bonusScene()&&GS.fs>0, cost=free?0:spinCost();
  if(!replay&&!free){ if(GS.bal<cost){ GS.auto=0; syncHUD(); flash('NOT ENOUGH BALANCE'); return; } GS.bal-=cost; }
@@ -1527,6 +1528,7 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
  // cue — рука вышла за край кадра (кисть за краем экрана на всех раскладках), можно поднимать лапу; out — рука у края кадра; back — рука начинает возвращаться (лапа в это время начинает уходить: «держит» 4,2 с); rest — микрофон снова в правой руке, поза покоя (нейтральный хвост, rocco-neutral.js: es); length — длина ролика.
  const HANDOFF={file:q.get('hoclip')||'KS-handoff',cue:2.642,out:2.542,back:6.75,rest:9.04,length:9.208,ready:q.get('handoff')!=='0'}; window.bpHandoffClip=HANDOFF; // ?handoff=0 — без ролика Рокко (лапа одна), ?hoclip=имя — другой ролик для проверок
  // Ролики оживления (rocco-alive.js, fb/rocco-alive 2026-10-12): H-lean (подаётся к полю: предвкушение, «выглядывает») — в зале и на кухне; KS-sniff (нюхает воздух), KS-rub (потирает живот) — только кухня. Пожатие плеч (H-shrug), кивок (H-nod) и «облизывает палец» (KS-lick) не получились у Kling (глаза чернеют, рука тает) — режиссёр их пропускает, пока нет файлов. Их не запускает игра: просит режиссёр, и только если файл успел загрузиться.
+ const HALL_ESSENTIAL=['swallow','cheer','throw','punch','lever']; // нужны сразу: глотание (любой выигрыш), радость, бросок билета, удар, рычаг (ворота первого спина, loadgate.js)
  CFG.kitchen={...CFG.hall,acts:[...CFG.hall.acts,'sackpull','handoff','sniff','rub'],warm:['swallow','swallow2','punch','cheer','throw','lever','wave','look','paw'],file:{...CFG.hall.file,sackpull:SACKCLIP.file,handoff:HANDOFF.file,sniff:'KS-sniff',rub:'KS-rub'},unm:[...CFG.hall.unm,'sackpull','handoff'],map:{...MAPC,'K-dump':'sackpull','K-handoff':'handoff'},opt:{...CFG.hall.opt,sackpull:{segs:[[99,1]]},handoff:{segs:[[99,1]]}}}; // sackpull — ролик KS-sackroc (?sackfx=rocco); в общий прогрев не входит (1,3 МБ): sack.js просит его сам первой кражей четвёрки (window.roccoWarm)
  // Мелкие жесты оживления (fb/rocco-gestures 2026-10-12, rocco-alive.js «GESTURES»): H-sway «покачивается под музыку» — зал и кухня (файлы H-<имя>, как у H-lean); просит их только режиссёр, нет файла — пропускается.
  for(const s of [CFG.hall,CFG.kitchen]) s.acts=[...s.acts,'sway'];
@@ -1567,7 +1569,10 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
   clearTimeout(timer); clearInterval(watchT); if(window.__roccoFlow){ window.__roccoFlow.destroy(); window.__roccoFlow=null; } // render() стирает весь #app, прежний контроллер останавливаем
   document.getElementById('krocco')?.remove(); const old=document.getElementById('rocco'); if(old) old.style.display='';
   window.roccoPlay=null; window.roccoRun=null; window.roccoHandoff=null; window.roccoWarm=null; window.roccoSwallow=null; window.roccoAnchor=null; window.roccoKey=null; window.roccoLag=null; window.roccoLagMs=null; window.roccoReady=null; window.roccoRestIn=null; window.roccoHush=null;
-  const cf0=CFG[scene]; if(!cf0||q.get('screen')) return;
+  const cf0=CFG[scene];
+  if(cf0&&q.get('screen')==='welcome'&&window.BPLoad&&!RM()&&!window.__wprefetch){ window.__wprefetch=1; // fb/perf: пока игрок читает приветствие, ролики зала докачиваются в кэш браузера (по одному, с низким приоритетом): после PLAY они на месте
+   try{ const nm=['idle',...HALL_ESSENTIAL]; BPLoad.prefetch(nm.map(n=>{ const u=clip(cf0.file[n]||(cf0.pre+n.replace(/2$/,''))); return window.bpvFix?window.bpvFix(u):u; }),200); }catch(e){} }
+  if(!cf0||q.get('screen')){ if(window.BPLoad) BPLoad.seal('rocco'); return; }
   const cf={...cf0,opt:Object.fromEntries(cf0.acts.map(n=>[n,{...cf0.opt[n],segs:RoccoFlow.segsOf(cf0.file[n]||(cf0.pre+n.replace(/2$/,'')))}]))}; // скорость роликов всегда ×1 (rocco-flow.js): заданные в CFG участки ×1,5…×3 сняты; segsOf даёт только «пропуск» неподвижной головы (скорость ∞ на невидимом начале), wallAt(cf.opt.*.segs) считает ожидание по нему
   const field=document.getElementById('field'), app=document.getElementById('app'); if(!field) return;
   const f=field.getBoundingClientRect(), W=innerWidth, H=innerHeight, land=W>H, P=cf.P;
@@ -1585,6 +1590,8 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
   window.roccoBox=()=>({l:Sb-P.lExt*s,r:Sb+P.rExt*s,t:feetY-P.bodyH*s,b:feetY,s,bh,Sb}); // для проверки раскладки (тело в покое, без роликов действий)
   const idle=k.querySelector('.idle'), idle2=k.querySelector('.idle2'), act={}; k.querySelectorAll('.ak').forEach(v=>act[v.dataset.n]=v); const all=[idle,...Object.values(act)];
   const wake=v=>window.bpTime.loadClip(v); if(idle2){ const go=()=>wake(idle2); if(idle.readyState>=3&&idle.currentTime>0) go(); else { idle.addEventListener('playing',go,{once:true}); setTimeout(go,4000); } } // второй покой грузим после того, как заиграл первый: первый кадр Рокко (его ждёт шторка) не должен делить канал с ним
+  // fb/perf: ролики, нужные в первых спинах (глотание, радость, бросок, удар, рычаг), качаем сразу и с высоким приоритетом, до звуков и роликов Big Win; первый Play ждёт их (loadgate.js)
+  if(window.BPLoad){ if(!RM()){ [...new Set(HALL_ESSENTIAL.map(n=>file(n)))].forEach(f=>{ const url=clip(f); BPLoad.need('rocco',window.bpTime.clipBlob(window.bpvFix?window.bpvFix(url):url,true)); }); } BPLoad.seal('rocco'); } // адрес — как у data-src ролика (в сборке артефакта к нему дописан ?bpv=…): один файл — один запрос
   warmQ(k,idle,[...cf.warm],n=>n==='paw'?(window.pawWake&&window.pawWake()):wake(act[n]));
   // точки на экране: x зеркального ролика = left+(кадр-x)*s, прямого = left+umx+x*s
   let kRc=null; const pt=(x,y,um)=>{ if(!kRc){ kRc=k.getBoundingClientRect(); requestAnimationFrame(()=>{ kRc=null; }); } const b=kRc; return [b.left+(um?umx+x*s:(SW_-x)*s),b.top+y*s]; }; // рамка ролика читается один раз за кадр: коллект спрашивает рот по разу на каждый символ, и каждый раз браузер пересчитывал раскладку (29 раз за кражу)

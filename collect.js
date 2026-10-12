@@ -227,7 +227,7 @@ const loadPaw=()=>pawReady||(pawReady=(async()=>{ try{
   PW={...meta,ax:meta.bowl[0],ay:meta.bowl[1],armOv:60*meta.sc}; window.bpCollect&&window.bpCollect.paw&&(window.bpCollect.paw.PW=PW);
   await loadImg(PAWF+'-arm.webp').catch(()=>{}); // полоса предплечья — фон CSS, но расшифровываем заранее
   return true; }catch(e){ pawReady=null; return false; } })());
-(window.requestIdleCallback?requestIdleCallback:f=>setTimeout(f,1500))(()=>loadPaw(),{timeout:4000}); // грузим и расшифровываем заранее, в простое страницы
+{ const idle=()=>(window.requestIdleCallback?requestIdleCallback:f=>setTimeout(f,1500))(()=>loadPaw(),{timeout:4000}); if(window.BPLoad) BPLoad.whenOpen('audio',idle,2500); else idle(); } // грузим и расшифровываем заранее, в простое страницы — после роликов и звуков первого спина (fb/perf, loadgate.js); лапе нужен спрайт 8400×470 (≈16 МБ после расшифровки)
 function pawHost(){ const G=document.getElementById('cellgrid'); if(!G||!G.isConnected) return null; const gr=G.getBoundingClientRect(); let h=document.getElementById('cpawclip');
  if(!h){ h=node('div'); h.id='cpawclip'; document.body.append(h); } pawKill(h); const gen=++pawGen; Object.assign(h.style,{left:gr.left+'px',top:gr.top+'px',width:gr.width+'px',height:gr.height+'px',display:'block'}); return {h,gr,gen}; }
 function pawKill(host){ try{ host.getAnimations({subtree:true}).forEach(a=>{ try{ a.cancel(); }catch(_){} }); }catch(_){} host.innerHTML=''; }

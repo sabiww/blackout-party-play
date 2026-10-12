@@ -1,7 +1,7 @@
 /* Blackout Party — экран приветствия W2 (владелец 2026-10-10: «пульт охраны с янтарной линзой PLAY»).
    Источник эскиза: mockup/welcome-v2.html?v=2 (там же старые W1/W3 — в игру не переносились). Стили — ui.css, раздел «экран приветствия W2».
 
-   Подключение (index.html?bpv=ad37e15b, до ui.js):   <script src="welcome.js"></script>
+   Подключение (index.html?bpv=0b88879c, до ui.js):   <script src="welcome.js"></script>
    API:  Welcome.open(root, onPlay) — заполняет #wel (разметка, размеры по окну, три демонстрации) и ждёт PLAY; onPlay вызывается один раз
                                       по кнопке PLAY, по клику мимо пульта и (через Welcome.play()) по пробелу
          Welcome.play()            — то же, что нажать PLAY (пробел в ui.js)
@@ -306,7 +306,7 @@ function html(){
 
 /* ---------- размер: одна единица --u на всё окно; режимы wide / short / tall (ширина W2: 1130 — wide, 905 — short) ---------- */
 function fit(wel){
- const S=typeof readSafe==='function'?readSafe({t:0,r:0,b:0,l:0}):{t:0,r:0,b:0,l:0}, W=innerWidth-S.l-S.r, H=innerHeight-S.t-S.b; let mode,u; // без выреза/углов/«домой» (index.html?bpv=ad37e15b readSafe; без выреза 0 — как было)
+ const S=typeof readSafe==='function'?readSafe({t:0,r:0,b:0,l:0}):{t:0,r:0,b:0,l:0}, W=innerWidth-S.l-S.r, H=innerHeight-S.t-S.b; let mode,u; // без выреза/углов/«домой» (index.html?bpv=0b88879c readSafe; без выреза 0 — как было)
  if(W<H*.9){ mode='tall'; u=Math.min(W/390,H/885,1.25); } // высота: 850 → 885 (2026-10-12: подпись окошка 3 стала в две строки — «Кухня» и «Камеры»)
  else if(H<=520){ mode='short'; u=Math.min(H/465,W/905,1.1); } // 345 → 465: раньше высота почти не ограничивала (ширина была уже), теперь окошко 3 выше на 2–3 строки подписи
  else { mode='wide'; u=Math.min(H/820,W/1130,1.15); }

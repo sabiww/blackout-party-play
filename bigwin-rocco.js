@@ -200,6 +200,6 @@ function create(o){
 
 /* прогрев: ролики лежат в кэше игры к моменту шоу (что не успело — пропускается, Рокко стоит в покое) */
 let warmed=false;
-function warm(a,ext){ if(warmed) return; warmed=true; try{ for(const n of Object.keys(CLIPS)){ if(CLIPS[n].of) continue; const v=document.createElement('video'); v.muted=true; v.preload='auto'; wake(v,urlOf(a,ext,n)); } }catch(e){} }
+function warm(a,ext){ if(warmed) return; warmed=true; try{ Object.keys(CLIPS).filter(n=>!CLIPS[n].of).forEach((n,i)=>setTimeout(()=>{ try{ const v=document.createElement('video'); v.muted=true; v.preload='auto'; wake(v,urlOf(a,ext,n)); }catch(e){} },n==='max'?12000:i*1500)); }catch(e){} } // fb/perf: по одному (покой, радость, потом MAX через 12 с), а не три файла разом
 window.BigWinRocco={create,warm,CLIPS};
 })();

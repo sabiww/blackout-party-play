@@ -420,11 +420,17 @@ function preload(){
  if((!MS&&!MM)||window.__bpBoard) return; const v=vol(); if(v.mute||hidden||!decoder()) return; const sc=scn||'hall', key=sc+curFl()+JSON.stringify(pref.fe||{}).length; if(key===preKey) return; preKey=key;
  const files=[];
  if(v.sfx>0){ [...PRE_ALL,...(PRE[sc]||[])].forEach(ev=>{ const id=resolve(ev); if(!id) return; const e=MS.sfx[id], l=e[flFor(id)]||e[defFl()]||firstOf(e)||[]; l.forEach(f=>{ if(!files.includes(f)) files.push(f); }); }); }
- let k=0, run=0; const pump=()=>{ while(run<3&&k<files.length&&!muted()){ run++; getBuf(files[k++]).then(()=>{ run--; setTimeout(pump,15); }); } };
- (window.requestIdleCallback?requestIdleCallback(pump,{timeout:300}):setTimeout(pump,60));
- if(v.music>0){ const it=trackFor(scn); if(it) getBuf(it.file,true); if(scn==='cameras'){ const l=trackFor('camlayer'); if(l) getBuf(l.file,true); } } // музыка сцены (в Камерах и слой): сразу после эффектов (игра их ждёт раньше)
- if(v.sfx>0){ const af=ambFile(sc); if(af) setTimeout(()=>getBuf(af),400); }
- setTimeout(()=>{ const st=trackFor('bigwin'); if(st&&!muted()&&vol().music>0) getBuf(st.file,true); },6000); }
+ // fb/perf 2026-10-12: звуки качаются ПОСЛЕ роликов Рокко первого спина (loadgate.js: BPLoad.whenOpen('rocco')) и входят в ворота первого спина (need('audio')): раньше 3 потока звука делили канал
+ // с роликами, и ролики первых спинов не успевали. Нет BPLoad (страница без loadgate.js) — как раньше.
+ const L=window.BPLoad, later=(kind,f,ms)=>L?L.whenOpen(kind,f,ms):setTimeout(f,ms||0);
+ let k=0, run=0, fin=null; const allDone=new Promise(r=>{ fin=r; });
+ const pump=()=>{ while(run<3&&k<files.length&&!muted()){ run++; getBuf(files[k++]).then(()=>{ run--; setTimeout(pump,15); }); } if(k>=files.length&&run===0) fin(); };
+ if(L&&!window.__audNeed){ window.__audNeed=1; if(files.length){ L.need('audio',allDone); L.seal('audio'); } else { L.need('audio',Promise.resolve()); L.seal('audio'); } }
+ later('rocco',()=>(window.requestIdleCallback?requestIdleCallback(pump,{timeout:300}):setTimeout(pump,60)));
+ if(!files.length) fin();
+ later('rocco',()=>{ const v2=vol(); if(v2.music>0){ const it=trackFor(scn); if(it) getBuf(it.file,true); if(scn==='cameras'){ const l=trackFor('camlayer'); if(l) getBuf(l.file,true); } } // музыка сцены (в Камерах и слой): сразу после эффектов (игра их ждёт раньше)
+  if(v2.sfx>0){ const af=ambFile(sc); if(af) setTimeout(()=>getBuf(af),400); } },200);
+ later('audio',()=>{ const st=trackFor('bigwin'); if(st&&!muted()&&vol().music>0) getBuf(st.file,true); },3000); }
 
 // ---------- выбор владельца ----------
 // x — сцена (welcome, hall, kitchen, cameras) или категория (hall, bonus, camlayer, bigwin, maxwin). Дорожка играет сразу; слой Камер — поверх выбранной дорожки бонуса (pickLayer)

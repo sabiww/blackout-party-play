@@ -26,6 +26,6 @@ function toast(text,ms){
 }
 window.bpPlates={mode,on:()=>mode()==='note',dark:()=>mode()==='dark',apply,toast,
  set(v){ if(!OK.includes(v)) return; ss.set(KEY,v); let u=null; try{ u=new URL(location.href); u.searchParams.delete('plates'); }catch(e){} if(u) location.replace(u.toString()); else location.reload(); }};
-// страница могла открыться без запроса, а q (index.html?bpv=ad37e15b) прочитать адрес позже — подстрахуемся после загрузки
+// страница могла открыться без запроса, а q (index.html?bpv=0b88879c) прочитать адрес позже — подстрахуемся после загрузки
 document.addEventListener('DOMContentLoaded',apply);
 })();

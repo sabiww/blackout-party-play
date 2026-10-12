@@ -15,7 +15,7 @@
      на MAX WIN — BW-max (подробнее в шапке bigwin-rocco.js; ролики не ускоряются, в Turbo/Quick, при пропуске и «меньше движения» он стоит в покое); eyes — глаза в темноте; monitor — Рокко на мониторе;
    · безопасное мерцание: сбои света на 50× и 100× — по расписанию, не чаще трёх вспышек в секунду; «меньше движения» — сразу итоговый кадр.
 
-   Подключение (index.html?bpv=ad37e15b, до ui.js):   <script src="bigwin-show.js"></script>
+   Подключение (index.html?bpv=0b88879c, до ui.js):   <script src="bigwin-show.js"></script>
    API:  BigWinShow.play({amount, bet, isMax, moneyFmt, onDone, rocco}) → Promise (выполняется после закрытия)
          amount   — выигрыш в валюте (как money()), bet — ставка в валюте (пороги считаются от неё), isMax — раунд закончился максимальным выигрышем
          moneyFmt — money() игры: строка вида «$25,000.00», «25,000.00 SC» или «1,000,000.00 ARS»; префикс и код валюты разбираются сами
@@ -902,5 +902,7 @@ function sumState(on){   // шоу доиграно (или перемотано
  return promise;
 }
 window.BigWinShow={play,warm,MAXX};
-if(document.readyState==='complete') (window.requestIdleCallback||setTimeout)(warm); else addEventListener('load',()=>(window.requestIdleCallback||setTimeout)(warm));
+// fb/perf 2026-10-12: прогрев шоу (CSS, текстуры, спрайты лучей, 3 ролика Рокко ≈3 МБ) — после роликов и звуков первого спина (loadgate.js), а не на старте: раньше он делил канал с глотанием/броском и давал длинные задачи (≈0,4 с при 4× замедлении процессора)
+const warmLater=()=>{ const go=()=>(window.requestIdleCallback||setTimeout)(warm); if(window.BPLoad) BPLoad.whenOpen('audio',go,1500); else go(); };
+if(document.readyState==='complete') warmLater(); else addEventListener('load',warmLater);
 })();

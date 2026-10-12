@@ -9,7 +9,7 @@
      3) спин 3 (8): поле падает целиком, на тех же мониторах 8 пицц; showMath: «×32» ($0.50 → $16.00); кража; рамки растут до ×8 — янтарные с двойным кольцом; последняя пауза, затемнение в конец круга.
    Каждое повышение идёт на пустых мониторах (символы уже украдены, шум экрана кончился): видно только прежний цвет рамки и новый, с паузой на новом цвете до следующего спина.
 
-   Подключение (index.html?bpv=ad37e15b, после welcome.js; cams-rec.js — раньше):   <script src="welcome-cams.js"></script>
+   Подключение (index.html?bpv=0b88879c, после welcome.js; cams-rec.js — раньше):   <script src="welcome-cams.js"></script>
    welcome.js в D3 зовёт  WelcomeCams.d3(root, stage, KIT)  — KIT это помощники демонстраций (Board, Bracket, brState, frameStage, Amount, amtSet, Fsw, el, seg, lerp, eo, eob…).
    Возвращает {T, still, frame(t,fz), dispose()}: T — длина части B (сек); still — момент части B для статичного кадра «меньше движения» (последняя пауза: ×8); frame(t) получает время от начала части B (t<0 — идёт часть A: B прячется и гасит подсветку строки); frame(t≥0) возвращает true,
    welcome.js тогда гасит слои части A. dispose() — при закрытии приветствия (снять мониторы CamRec). Нет window.CamRec в момент показа — мониторы не ставятся (cams-rec.js подключён в index.html после этого файла, поэтому модуль ищется при вызове, а не при сборке окошка).
@@ -51,7 +51,7 @@ const REFILL=['bctgmopk','tmcgbpoh','gcbmtkho'], RF0=.28, RF_DUR=.3, REF_S=.72, 
 const OUT=.26, OUTY=5.6, IN_D=.06, IN_DUR=.36, IN_Y=5;           // старые символы уходят вниз за 0,26 с; новые падают с высоты 5 рядов (0,38 с)
 
 function d3(root,st,K){
- const {el,seg,clamp,lerp,eo,ei,eio,eob,A,SYMU,RM,Board,Bracket,brState,frameStage,Amount,amtSet,Fsw}=K, CR=()=>window.CamRec; // CamRec грузится после этого файла (index.html?bpv=ad37e15b), а приветствие строится при первой отрисовке — ищем модуль в момент вызова
+ const {el,seg,clamp,lerp,eo,ei,eio,eob,A,SYMU,RM,Board,Bracket,brState,frameStage,Amount,amtSet,Fsw}=K, CR=()=>window.CamRec; // CamRec грузится после этого файла (index.html?bpv=0b88879c), а приветствие строится при первой отрисовке — ищем модуль в момент вызова
  if(!Board||!Amount||!Fsw) return null;
  const bay=root.closest('.bay'), cap=bay&&bay.querySelector('.cap'), hd=root.querySelector('.camhd>span');
  const k=(root.clientWidth/240)||1;                                  // во сколько раз экран растянут (меняется только перерисовкой приветствия)
