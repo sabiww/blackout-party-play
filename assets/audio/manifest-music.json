@@ -1,0 +1,778 @@
+{
+ "version": 1,
+ "default": {
+  "hall": "hall-carousel-1",
+  "bonus": "bonus-swing-1",
+  "camlayer": "camlayer-drone-1",
+  "bigwin": "bigwin-organ-a",
+  "maxwin": "maxwin-organ-a"
+ },
+ "music": {
+  "hall": [
+   {
+    "id": "hall-musicbox-1",
+    "title": "Music box, swing (1)",
+    "style": "musicbox",
+    "file": "music/hall-musicbox-1",
+    "loop": {
+     "start": 0.0,
+     "end": 66.977
+    },
+    "lufs": -23.1,
+    "dur": 66.977
+   },
+   {
+    "id": "hall-musicbox-2",
+    "title": "Music box, swing (2)",
+    "style": "musicbox",
+    "file": "music/hall-musicbox-2",
+    "loop": {
+     "start": 0.0,
+     "end": 62.857
+    },
+    "lufs": -22.9,
+    "dur": 62.857
+   },
+   {
+    "id": "hall-lounge-1",
+    "title": "Lounge jazz, detuned (1)",
+    "style": "lounge",
+    "file": "music/hall-lounge-1",
+    "loop": {
+     "start": 0.0,
+     "end": 60.0
+    },
+    "lufs": -23.0,
+    "dur": 60.0
+   },
+   {
+    "id": "hall-lounge-2",
+    "title": "Lounge jazz, detuned (2)",
+    "style": "lounge",
+    "file": "music/hall-lounge-2",
+    "loop": {
+     "start": 0.0,
+     "end": 70.244
+    },
+    "lufs": -23.0,
+    "dur": 70.244
+   },
+   {
+    "id": "hall-arcade-1",
+    "title": "Arcade synth, warm (1)",
+    "style": "arcade",
+    "file": "music/hall-arcade-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "hall-arcade-2",
+    "title": "Arcade synth, warm (2)",
+    "style": "arcade",
+    "file": "music/hall-arcade-2",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "hall-carnival-1",
+    "title": "Carnival organ, wonky (1)",
+    "style": "carnival",
+    "file": "music/hall-carnival-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.62
+    },
+    "lufs": -23.0,
+    "dur": 64.62
+   },
+   {
+    "id": "hall-carnival-2",
+    "title": "Carnival organ, wonky (2)",
+    "style": "carnival",
+    "file": "music/hall-carnival-2",
+    "loop": {
+     "start": 0.0,
+     "end": 86.373
+    },
+    "lufs": -23.0,
+    "dur": 86.373
+   },
+   {
+    "id": "hall-ambient-1",
+    "title": "Ambient pad, soft pulse (1)",
+    "style": "ambient",
+    "file": "music/hall-ambient-1",
+    "loop": {
+     "start": 0.0,
+     "end": 60.0
+    },
+    "lufs": -23.0,
+    "dur": 60.0
+   },
+   {
+    "id": "hall-ambient-2",
+    "title": "Ambient pad, soft pulse (2)",
+    "style": "ambient",
+    "file": "music/hall-ambient-2",
+    "loop": {
+     "start": 0.0,
+     "end": 66.0
+    },
+    "lufs": -23.1,
+    "dur": 66.0
+   },
+   {
+    "id": "hall-trattoria-1",
+    "title": "Trattoria waltz, warped (1)",
+    "style": "trattoria",
+    "file": "music/hall-trattoria-1",
+    "loop": {
+     "start": 0.0,
+     "end": 72.0
+    },
+    "lufs": -22.9,
+    "dur": 72.0
+   },
+   {
+    "id": "hall-trattoria-2",
+    "title": "Trattoria waltz, warped (2)",
+    "style": "trattoria",
+    "file": "music/hall-trattoria-2",
+    "loop": {
+     "start": 0.0,
+     "end": 64.025
+    },
+    "lufs": -23.0,
+    "dur": 64.025
+   },
+   {
+    "id": "hall-lullaby-1",
+    "title": "Celesta lullaby, winding down",
+    "style": "lullaby",
+    "file": "music/hall-lullaby-1",
+    "loop": {
+     "start": 0.0,
+     "end": 72.75
+    },
+    "lufs": -23.1,
+    "dur": 72.75
+   },
+   {
+    "id": "hall-vhs-1",
+    "title": "Cassette synth, hazy",
+    "style": "vhs",
+    "file": "music/hall-vhs-1",
+    "loop": {
+     "start": 0.0,
+     "end": 76.8
+    },
+    "lufs": -23.0,
+    "dur": 76.8
+   },
+   {
+    "id": "welcome-hall-1",
+    "title": "Empty hall at night",
+    "style": "hall",
+    "file": "music/welcome-hall-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -22.9,
+    "dur": 64.0
+   },
+   {
+    "id": "welcome-lounge-1",
+    "title": "Dim lounge intro",
+    "style": "lounge",
+    "file": "music/welcome-lounge-1",
+    "loop": {
+     "start": 0.0,
+     "end": 60.0
+    },
+    "lufs": -23.0,
+    "dur": 60.0
+   },
+   {
+    "id": "hall-bossa-1",
+    "title": "Wobbly bossa nova",
+    "style": "bossa",
+    "file": "music/hall-bossa-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "hall-padbells-1",
+    "title": "Warm pads, sparse bells (1)",
+    "style": "padbells",
+    "file": "music/hall-padbells-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.008
+    },
+    "lufs": -23.0,
+    "dur": 64.008
+   },
+   {
+    "id": "hall-padbells-2",
+    "title": "Warm pads, sparse bells (2)",
+    "style": "padbells",
+    "file": "music/hall-padbells-2",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "hall-drift-1",
+    "title": "Music box drifting in reverb (1)",
+    "style": "drift",
+    "file": "music/hall-drift-1",
+    "loop": {
+     "start": 0.0,
+     "end": 63.154
+    },
+    "lufs": -22.9,
+    "dur": 63.154
+   },
+   {
+    "id": "hall-tape-2",
+    "title": "Dusty tape synth bed (2)",
+    "style": "tape",
+    "file": "music/hall-tape-2",
+    "loop": {
+     "start": 0.0,
+     "end": 72.727
+    },
+    "lufs": -23.0,
+    "dur": 72.727
+   },
+   {
+    "id": "hall-wall-1",
+    "title": "Party heard through a wall (1)",
+    "style": "wall",
+    "file": "music/hall-wall-1",
+    "loop": {
+     "start": 0.0,
+     "end": 59.988
+    },
+    "lufs": -22.9,
+    "dur": 59.988
+   },
+   {
+    "id": "hall-brushes-1",
+    "title": "Brush groove, no lead (1)",
+    "style": "brushes",
+    "file": "music/hall-brushes-1",
+    "loop": {
+     "start": 0.0,
+     "end": 59.988
+    },
+    "lufs": -23.0,
+    "dur": 59.988
+   },
+   {
+    "id": "hall-hum-2",
+    "title": "Arcade hum, soft pads (2)",
+    "style": "hum",
+    "file": "music/hall-hum-2",
+    "loop": {
+     "start": 0.0,
+     "end": 65.454
+    },
+    "lufs": -23.0,
+    "dur": 65.454
+   },
+   {
+    "id": "hall-kalimba-1",
+    "title": "Celesta and kalimba drone (1)",
+    "style": "kalimba",
+    "file": "music/hall-kalimba-1",
+    "loop": {
+     "start": 0.0,
+     "end": 60.004
+    },
+    "lufs": -23.1,
+    "dur": 60.004
+   },
+   {
+    "id": "hall-carousel-1",
+    "title": "Far-away broken carousel (1)",
+    "style": "carousel",
+    "file": "music/hall-carousel-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "hall-carousel-2",
+    "title": "Far-away broken carousel (2)",
+    "style": "carousel",
+    "file": "music/hall-carousel-2",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -22.9,
+    "dur": 64.0
+   }
+  ],
+  "bonus": [
+   {
+    "id": "kitchen-groove-1",
+    "title": "Kitchen groove, warm (1)",
+    "style": "groove",
+    "file": "music/kitchen-groove-1",
+    "loop": {
+     "start": 0.0,
+     "end": 72.453
+    },
+    "lufs": -22.9,
+    "dur": 72.453
+   },
+   {
+    "id": "kitchen-groove-2",
+    "title": "Kitchen groove, warm (2)",
+    "style": "groove",
+    "file": "music/kitchen-groove-2",
+    "loop": {
+     "start": 0.0,
+     "end": 82.286
+    },
+    "lufs": -23.0,
+    "dur": 82.286
+   },
+   {
+    "id": "kitchen-arcade-1",
+    "title": "Oven-glow synth (1)",
+    "style": "arcade",
+    "file": "music/kitchen-arcade-1",
+    "loop": {
+     "start": 0.0,
+     "end": 79.513
+    },
+    "lufs": -23.0,
+    "dur": 79.513
+   },
+   {
+    "id": "kitchen-arcade-2",
+    "title": "Oven-glow synth (2)",
+    "style": "arcade",
+    "file": "music/kitchen-arcade-2",
+    "loop": {
+     "start": 0.0,
+     "end": 87.273
+    },
+    "lufs": -22.9,
+    "dur": 87.273
+   },
+   {
+    "id": "kitchen-trattoria-1",
+    "title": "Pizza-kitchen tarantella (1)",
+    "style": "trattoria",
+    "file": "music/kitchen-trattoria-1",
+    "loop": {
+     "start": 0.0,
+     "end": 69.818
+    },
+    "lufs": -22.9,
+    "dur": 69.818
+   },
+   {
+    "id": "kitchen-trattoria-2",
+    "title": "Pizza-kitchen tarantella (2)",
+    "style": "trattoria",
+    "file": "music/kitchen-trattoria-2",
+    "loop": {
+     "start": 0.0,
+     "end": 61.091
+    },
+    "lufs": -23.0,
+    "dur": 61.091
+   },
+   {
+    "id": "kitchen-pizzicato-1",
+    "title": "Pizzicato kitchen",
+    "style": "pizzicato",
+    "file": "music/kitchen-pizzicato-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -22.9,
+    "dur": 64.0
+   },
+   {
+    "id": "kitchen-funk-1",
+    "title": "Slow-cook funk",
+    "style": "funk",
+    "file": "music/kitchen-funk-1",
+    "loop": {
+     "start": 0.0,
+     "end": 73.846
+    },
+    "lufs": -23.0,
+    "dur": 73.846
+   },
+   {
+    "id": "cameras-hum-1",
+    "title": "CRT hum and ticks (1)",
+    "style": "hum",
+    "file": "music/cameras-hum-1",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "cameras-hum-2",
+    "title": "CRT hum and ticks (2)",
+    "style": "hum",
+    "file": "music/cameras-hum-2",
+    "loop": {
+     "start": 0.0,
+     "end": 64.0
+    },
+    "lufs": -23.0,
+    "dur": 64.0
+   },
+   {
+    "id": "cameras-noir-1",
+    "title": "Security-room noir (1)",
+    "style": "noir",
+    "file": "music/cameras-noir-1",
+    "loop": {
+     "start": 0.0,
+     "end": 92.308
+    },
+    "lufs": -22.9,
+    "dur": 92.308
+   },
+   {
+    "id": "cameras-noir-2",
+    "title": "Security-room noir (2)",
+    "style": "noir",
+    "file": "music/cameras-noir-2",
+    "loop": {
+     "start": 0.0,
+     "end": 72.0
+    },
+    "lufs": -23.0,
+    "dur": 72.0
+   },
+   {
+    "id": "cameras-pulse-1",
+    "title": "Monitor wall pulse (1)",
+    "style": "pulse",
+    "file": "music/cameras-pulse-1",
+    "loop": {
+     "start": 0.0,
+     "end": 77.838
+    },
+    "lufs": -22.9,
+    "dur": 77.838
+   },
+   {
+    "id": "cameras-pulse-2",
+    "title": "Monitor wall pulse (2)",
+    "style": "pulse",
+    "file": "music/cameras-pulse-2",
+    "loop": {
+     "start": 0.0,
+     "end": 63.261
+    },
+    "lufs": -22.9,
+    "dur": 63.261
+   },
+   {
+    "id": "cameras-piano-1",
+    "title": "Lone piano and hum",
+    "style": "piano",
+    "file": "music/cameras-piano-1",
+    "loop": {
+     "start": 0.0,
+     "end": 71.988
+    },
+    "lufs": -23.1,
+    "dur": 71.988
+   },
+   {
+    "id": "cameras-sonar-1",
+    "title": "Sonar drone",
+    "style": "sonar",
+    "file": "music/cameras-sonar-1",
+    "loop": {
+     "start": 0.0,
+     "end": 94.601
+    },
+    "lufs": -22.9,
+    "dur": 94.601
+   },
+   {
+    "id": "bonus-swing-1",
+    "title": "Brushed swing, distant muted trumpet",
+    "style": "swing",
+    "file": "music/bonus-swing-1",
+    "loop": {
+     "start": 0.0,
+     "end": 63.972
+    },
+    "lufs": -23.0,
+    "dur": 63.972
+   },
+   {
+    "id": "bonus-organ-1",
+    "title": "Organ lounge groove",
+    "style": "organ",
+    "file": "music/bonus-organ-1",
+    "loop": {
+     "start": 0.0,
+     "end": 75.294
+    },
+    "lufs": -23.1,
+    "dur": 75.294
+   },
+   {
+    "id": "bonus-funk-1",
+    "title": "Night-shift funk, clavinet and bass",
+    "style": "funk",
+    "file": "music/bonus-funk-1",
+    "loop": {
+     "start": 0.0,
+     "end": 63.079
+    },
+    "lufs": -23.0,
+    "dur": 63.079
+   },
+   {
+    "id": "bonus-disco-1",
+    "title": "Dusty tape disco",
+    "style": "disco",
+    "file": "music/bonus-disco-1",
+    "loop": {
+     "start": 0.0,
+     "end": 61.098
+    },
+    "lufs": -23.0,
+    "dur": 61.098
+   },
+   {
+    "id": "bonus-arcade-1",
+    "title": "Soft arcade arpeggios",
+    "style": "arcade",
+    "file": "music/bonus-arcade-1",
+    "loop": {
+     "start": 0.0,
+     "end": 69.806
+    },
+    "lufs": -22.9,
+    "dur": 69.806
+   },
+   {
+    "id": "bonus-drum-1",
+    "title": "Mellow drum machine, electric piano",
+    "style": "drum",
+    "file": "music/bonus-drum-1",
+    "loop": {
+     "start": 0.0,
+     "end": 73.846
+    },
+    "lufs": -23.1,
+    "dur": 73.846
+   },
+   {
+    "id": "bonus-surf-1",
+    "title": "Low surf-guitar tremolo",
+    "style": "surf",
+    "file": "music/bonus-surf-1",
+    "loop": {
+     "start": 0.0,
+     "end": 59.963
+    },
+    "lufs": -23.0,
+    "dur": 59.963
+   },
+   {
+    "id": "bonus-march-1",
+    "title": "Pizzicato and toy-piano march",
+    "style": "march",
+    "file": "music/bonus-march-1",
+    "loop": {
+     "start": 0.0,
+     "end": 69.818
+    },
+    "lufs": -22.9,
+    "dur": 69.818
+   }
+  ],
+  "bigwin": [
+   {
+    "id": "bigwin-musicbox-a",
+    "title": "Big win, music box rise",
+    "style": "musicbox",
+    "file": "music/bigwin-musicbox-a",
+    "lufs": -18.0,
+    "dur": 7.0
+   },
+   {
+    "id": "bigwin-musicbox-b",
+    "title": "Big win, music box lift",
+    "style": "musicbox",
+    "file": "music/bigwin-musicbox-b",
+    "lufs": -18.0,
+    "dur": 8.0
+   },
+   {
+    "id": "bigwin-organ-a",
+    "title": "Big win, organ fanfare",
+    "style": "organ",
+    "file": "music/bigwin-organ-a",
+    "lufs": -18.0,
+    "dur": 6.4
+   },
+   {
+    "id": "bigwin-synth-a",
+    "title": "Big win, synth riser",
+    "style": "synth",
+    "file": "music/bigwin-synth-a",
+    "lufs": -18.0,
+    "dur": 6.9
+   },
+   {
+    "id": "bigwin-lounge-a",
+    "title": "Big win, lounge organ hit",
+    "style": "lounge",
+    "file": "music/bigwin-lounge-a",
+    "lufs": -18.0,
+    "dur": 7.5
+   },
+   {
+    "id": "bigwin-nightfunk-b",
+    "title": "Big win, night-shift funk lift",
+    "style": "nightfunk",
+    "file": "music/bigwin-nightfunk-b",
+    "lufs": -18.1,
+    "dur": 10.0
+   }
+  ],
+  "maxwin": [
+   {
+    "id": "maxwin-musicbox-a",
+    "title": "Max win, music box finale",
+    "style": "musicbox",
+    "file": "music/maxwin-musicbox-a",
+    "lufs": -18.0,
+    "dur": 10.299
+   },
+   {
+    "id": "maxwin-organ-a",
+    "title": "Max win, organ fanfare",
+    "style": "organ",
+    "file": "music/maxwin-organ-a",
+    "lufs": -18.0,
+    "dur": 10.4
+   },
+   {
+    "id": "maxwin-organ-b",
+    "title": "Max win, organ finale",
+    "style": "organ",
+    "file": "music/maxwin-organ-b",
+    "lufs": -18.0,
+    "dur": 10.9
+   },
+   {
+    "id": "maxwin-synth-a",
+    "title": "Max win, synth finale",
+    "style": "synth",
+    "file": "music/maxwin-synth-a",
+    "lufs": -18.0,
+    "dur": 11.0
+   },
+   {
+    "id": "maxwin-lounge-a",
+    "title": "Max win, lounge organ finale",
+    "style": "lounge",
+    "file": "music/maxwin-lounge-a",
+    "lufs": -18.0,
+    "dur": 11.3
+   },
+   {
+    "id": "maxwin-nightfunk-b",
+    "title": "Max win, night-shift funk finale",
+    "style": "nightfunk",
+    "file": "music/maxwin-nightfunk-b",
+    "lufs": -18.0,
+    "dur": 11.3
+   }
+  ],
+  "camlayer": [
+   {
+    "id": "camlayer-drone-1",
+    "title": "Layer: low drone, distant beeps",
+    "style": "drone",
+    "file": "music/camlayer-drone-1",
+    "loop": {
+     "start": 0.0,
+     "end": 79.0
+    },
+    "lufs": -30.0,
+    "dur": 79.0
+   },
+   {
+    "id": "camlayer-pulse-1",
+    "title": "Layer: sparse sub heartbeat",
+    "style": "pulse",
+    "file": "music/camlayer-pulse-1",
+    "loop": {
+     "start": 0.0,
+     "end": 71.0
+    },
+    "lufs": -30.9,
+    "dur": 71.0
+   },
+   {
+    "id": "camlayer-crt-1",
+    "title": "Layer: CRT and monitor hum",
+    "style": "crt",
+    "file": "music/camlayer-crt-1",
+    "loop": {
+     "start": 0.0,
+     "end": 67.0
+    },
+    "lufs": -29.9,
+    "dur": 67.0
+   },
+   {
+    "id": "camlayer-tape-1",
+    "title": "Layer: tape hiss, rare relay clicks",
+    "style": "tape",
+    "file": "music/camlayer-tape-1",
+    "loop": {
+     "start": 0.0,
+     "end": 73.0
+    },
+    "lufs": -30.0,
+    "dur": 73.0
+   }
+  ]
+ }
+}

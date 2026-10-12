@@ -1,0 +1,4299 @@
+{
+ "version": 1,
+ "flavours": {
+  "A": "Механика",
+  "B": "Игрушечные",
+  "C": "Тёплый аналог",
+  "D": "Вечеринка",
+  "E": "Аниматроник",
+  "F": "Ламповое радио"
+ },
+ "defaultFlavour": "E",
+ "defaultFlavours": {
+  "ui.click": "A",
+  "ui.open": "A",
+  "ui.close": "A",
+  "ui.bet_up": "C",
+  "ui.bet_down": "C",
+  "ui.toggle": "A",
+  "ui.buy": "A",
+  "ui.error": "B",
+  "spin.start": "B",
+  "spin.drop": "B",
+  "spin.land": "B",
+  "spin.stop": "A",
+  "scatter.land.2": "D",
+  "scatter.land.3": "D",
+  "scatter.anticipation": "D",
+  "win.small": "A",
+  "win.medium": "A",
+  "win.big": "A",
+  "win.count_tick": "B",
+  "win.end": "B",
+  "rocco.grab": "D",
+  "rocco.steal_whoosh": "D",
+  "counter.step": "D",
+  "counter.reset": "D",
+  "wild.frame_on": "D",
+  "punch.hit": "A",
+  "punch.wave": "F",
+  "punch.dent_pop": "C",
+  "lever.pull": "B",
+  "lever.blackout": "B",
+  "freespins.add": "D",
+  "sack.coin_in": "C",
+  "sack.lamp_on": "B",
+  "sack.dump": "D",
+  "sack.coins_pour": "C",
+  "sack.paid_again": "C",
+  "cams.rocco_step": "F",
+  "bigwin.drum_tick": "F",
+  "bigwin.tier_up": "B",
+  "bigwin.lamp": "C",
+  "bigwin.lamp.2": "C",
+  "bigwin.lamp.3": "C",
+  "bigwin.lamp.4": "B",
+  "bigwin.land": "C"
+ },
+ "sfx": {
+  "ui.click": {
+   "A": [
+    "sfx/ui-click-A1",
+    "sfx/ui-click-A2",
+    "sfx/ui-click-A3",
+    "sfx/ui-click-A4"
+   ],
+   "B": [
+    "sfx/ui-click-B1",
+    "sfx/ui-click-B2",
+    "sfx/ui-click-B3",
+    "sfx/ui-click-B4"
+   ],
+   "C": [
+    "sfx/ui-click-C1",
+    "sfx/ui-click-C2",
+    "sfx/ui-click-C3",
+    "sfx/ui-click-C4"
+   ],
+   "D": [
+    "sfx/ui-click-D1",
+    "sfx/ui-click-D2",
+    "sfx/ui-click-D3",
+    "sfx/ui-click-D4"
+   ],
+   "E": [
+    "sfx/ui-click-E1",
+    "sfx/ui-click-E2",
+    "sfx/ui-click-E3",
+    "sfx/ui-click-E4"
+   ],
+   "F": [
+    "sfx/ui-click-F1",
+    "sfx/ui-click-F2",
+    "sfx/ui-click-F3",
+    "sfx/ui-click-F4"
+   ]
+  },
+  "ui.open": {
+   "A": [
+    "sfx/ui-open-A1",
+    "sfx/ui-open-A2"
+   ],
+   "B": [
+    "sfx/ui-open-B1",
+    "sfx/ui-open-B2"
+   ],
+   "C": [
+    "sfx/ui-open-C1",
+    "sfx/ui-open-C2"
+   ],
+   "D": [
+    "sfx/ui-open-D1",
+    "sfx/ui-open-D2"
+   ],
+   "E": [
+    "sfx/ui-open-E1",
+    "sfx/ui-open-E2"
+   ],
+   "F": [
+    "sfx/ui-open-F1",
+    "sfx/ui-open-F2"
+   ]
+  },
+  "ui.close": {
+   "A": [
+    "sfx/ui-close-A1",
+    "sfx/ui-close-A2"
+   ],
+   "B": [
+    "sfx/ui-close-B1",
+    "sfx/ui-close-B2"
+   ],
+   "C": [
+    "sfx/ui-close-C1",
+    "sfx/ui-close-C2"
+   ],
+   "D": [
+    "sfx/ui-close-D1",
+    "sfx/ui-close-D2"
+   ],
+   "E": [
+    "sfx/ui-close-E1",
+    "sfx/ui-close-E2"
+   ],
+   "F": [
+    "sfx/ui-close-F1",
+    "sfx/ui-close-F2"
+   ]
+  },
+  "ui.bet_up": {
+   "A": [
+    "sfx/ui-bet-up-A1",
+    "sfx/ui-bet-up-A2"
+   ],
+   "B": [
+    "sfx/ui-bet-up-B1",
+    "sfx/ui-bet-up-B2"
+   ],
+   "C": [
+    "sfx/ui-bet-up-C1",
+    "sfx/ui-bet-up-C2"
+   ],
+   "D": [
+    "sfx/ui-bet-up-D1",
+    "sfx/ui-bet-up-D2"
+   ],
+   "E": [
+    "sfx/ui-bet-up-E1",
+    "sfx/ui-bet-up-E2"
+   ],
+   "F": [
+    "sfx/ui-bet-up-F1",
+    "sfx/ui-bet-up-F2"
+   ]
+  },
+  "ui.bet_down": {
+   "A": [
+    "sfx/ui-bet-down-A1",
+    "sfx/ui-bet-down-A2"
+   ],
+   "B": [
+    "sfx/ui-bet-down-B1",
+    "sfx/ui-bet-down-B2"
+   ],
+   "C": [
+    "sfx/ui-bet-down-C1",
+    "sfx/ui-bet-down-C2"
+   ],
+   "D": [
+    "sfx/ui-bet-down-D1",
+    "sfx/ui-bet-down-D2"
+   ],
+   "E": [
+    "sfx/ui-bet-down-E1",
+    "sfx/ui-bet-down-E2"
+   ],
+   "F": [
+    "sfx/ui-bet-down-F1",
+    "sfx/ui-bet-down-F2"
+   ]
+  },
+  "ui.toggle": {
+   "A": [
+    "sfx/ui-toggle-A1",
+    "sfx/ui-toggle-A2"
+   ],
+   "B": [
+    "sfx/ui-toggle-B1",
+    "sfx/ui-toggle-B2"
+   ],
+   "C": [
+    "sfx/ui-toggle-C1",
+    "sfx/ui-toggle-C2"
+   ],
+   "D": [
+    "sfx/ui-toggle-D1",
+    "sfx/ui-toggle-D2"
+   ],
+   "E": [
+    "sfx/ui-toggle-E1",
+    "sfx/ui-toggle-E2"
+   ],
+   "F": [
+    "sfx/ui-toggle-F1",
+    "sfx/ui-toggle-F2"
+   ]
+  },
+  "ui.buy": {
+   "A": [
+    "sfx/ui-buy-A1"
+   ],
+   "B": [
+    "sfx/ui-buy-B1"
+   ],
+   "C": [
+    "sfx/ui-buy-C1"
+   ],
+   "D": [
+    "sfx/ui-buy-D1"
+   ],
+   "E": [
+    "sfx/ui-buy-E1"
+   ],
+   "F": [
+    "sfx/ui-buy-F1"
+   ]
+  },
+  "ui.error": {
+   "A": [
+    "sfx/ui-error-A1"
+   ],
+   "B": [
+    "sfx/ui-error-B1"
+   ],
+   "C": [
+    "sfx/ui-error-C1"
+   ],
+   "D": [
+    "sfx/ui-error-D1"
+   ],
+   "E": [
+    "sfx/ui-error-E1"
+   ],
+   "F": [
+    "sfx/ui-error-F1"
+   ]
+  },
+  "spin.start": {
+   "A": [
+    "sfx/spin-start-A1",
+    "sfx/spin-start-A2"
+   ],
+   "B": [
+    "sfx/spin-start-B1",
+    "sfx/spin-start-B2"
+   ],
+   "C": [
+    "sfx/spin-start-C1",
+    "sfx/spin-start-C2"
+   ],
+   "D": [
+    "sfx/spin-start-D1",
+    "sfx/spin-start-D2"
+   ],
+   "E": [
+    "sfx/spin-start-E1",
+    "sfx/spin-start-E2"
+   ],
+   "F": [
+    "sfx/spin-start-F1",
+    "sfx/spin-start-F2"
+   ]
+  },
+  "spin.drop": {
+   "A": [
+    "sfx/spin-drop-A1",
+    "sfx/spin-drop-A2",
+    "sfx/spin-drop-A3",
+    "sfx/spin-drop-A4",
+    "sfx/spin-drop-A5"
+   ],
+   "B": [
+    "sfx/spin-drop-B1",
+    "sfx/spin-drop-B2",
+    "sfx/spin-drop-B3",
+    "sfx/spin-drop-B4",
+    "sfx/spin-drop-B5"
+   ],
+   "C": [
+    "sfx/spin-drop-C1",
+    "sfx/spin-drop-C2",
+    "sfx/spin-drop-C3",
+    "sfx/spin-drop-C4",
+    "sfx/spin-drop-C5"
+   ],
+   "D": [
+    "sfx/spin-drop-D1",
+    "sfx/spin-drop-D2",
+    "sfx/spin-drop-D3",
+    "sfx/spin-drop-D4",
+    "sfx/spin-drop-D5"
+   ],
+   "E": [
+    "sfx/spin-drop-E1",
+    "sfx/spin-drop-E2",
+    "sfx/spin-drop-E3",
+    "sfx/spin-drop-E4",
+    "sfx/spin-drop-E5"
+   ],
+   "F": [
+    "sfx/spin-drop-F1",
+    "sfx/spin-drop-F2",
+    "sfx/spin-drop-F3",
+    "sfx/spin-drop-F4",
+    "sfx/spin-drop-F5"
+   ]
+  },
+  "spin.land": {
+   "A": [
+    "sfx/spin-land-A1",
+    "sfx/spin-land-A2",
+    "sfx/spin-land-A3",
+    "sfx/spin-land-A4",
+    "sfx/spin-land-A5",
+    "sfx/spin-land-A6"
+   ],
+   "B": [
+    "sfx/spin-land-B1",
+    "sfx/spin-land-B2",
+    "sfx/spin-land-B3",
+    "sfx/spin-land-B4",
+    "sfx/spin-land-B5",
+    "sfx/spin-land-B6"
+   ],
+   "C": [
+    "sfx/spin-land-C1",
+    "sfx/spin-land-C2",
+    "sfx/spin-land-C3",
+    "sfx/spin-land-C4",
+    "sfx/spin-land-C5",
+    "sfx/spin-land-C6"
+   ],
+   "D": [
+    "sfx/spin-land-D1",
+    "sfx/spin-land-D2",
+    "sfx/spin-land-D3",
+    "sfx/spin-land-D4",
+    "sfx/spin-land-D5",
+    "sfx/spin-land-D6"
+   ],
+   "E": [
+    "sfx/spin-land-E1",
+    "sfx/spin-land-E2",
+    "sfx/spin-land-E3",
+    "sfx/spin-land-E4",
+    "sfx/spin-land-E5",
+    "sfx/spin-land-E6"
+   ],
+   "F": [
+    "sfx/spin-land-F1",
+    "sfx/spin-land-F2",
+    "sfx/spin-land-F3",
+    "sfx/spin-land-F4",
+    "sfx/spin-land-F5",
+    "sfx/spin-land-F6"
+   ]
+  },
+  "spin.stop": {
+   "A": [
+    "sfx/spin-stop-A1",
+    "sfx/spin-stop-A2"
+   ],
+   "B": [
+    "sfx/spin-stop-B1",
+    "sfx/spin-stop-B2"
+   ],
+   "C": [
+    "sfx/spin-stop-C1",
+    "sfx/spin-stop-C2"
+   ],
+   "D": [
+    "sfx/spin-stop-D1",
+    "sfx/spin-stop-D2"
+   ],
+   "E": [
+    "sfx/spin-stop-E1",
+    "sfx/spin-stop-E2"
+   ],
+   "F": [
+    "sfx/spin-stop-F1",
+    "sfx/spin-stop-F2"
+   ]
+  },
+  "win.small": {
+   "A": [
+    "sfx/win-small-A1",
+    "sfx/win-small-A2"
+   ],
+   "B": [
+    "sfx/win-small-B1",
+    "sfx/win-small-B2"
+   ],
+   "C": [
+    "sfx/win-small-C1",
+    "sfx/win-small-C2"
+   ],
+   "D": [
+    "sfx/win-small-D1",
+    "sfx/win-small-D2"
+   ],
+   "E": [
+    "sfx/win-small-E1",
+    "sfx/win-small-E2"
+   ],
+   "F": [
+    "sfx/win-small-F1",
+    "sfx/win-small-F2"
+   ]
+  },
+  "win.medium": {
+   "A": [
+    "sfx/win-medium-A1",
+    "sfx/win-medium-A2"
+   ],
+   "B": [
+    "sfx/win-medium-B1",
+    "sfx/win-medium-B2"
+   ],
+   "C": [
+    "sfx/win-medium-C1",
+    "sfx/win-medium-C2"
+   ],
+   "D": [
+    "sfx/win-medium-D1",
+    "sfx/win-medium-D2"
+   ],
+   "E": [
+    "sfx/win-medium-E1",
+    "sfx/win-medium-E2"
+   ],
+   "F": [
+    "sfx/win-medium-F1",
+    "sfx/win-medium-F2"
+   ]
+  },
+  "win.big": {
+   "A": [
+    "sfx/win-big-A1"
+   ],
+   "B": [
+    "sfx/win-big-B1"
+   ],
+   "C": [
+    "sfx/win-big-C1"
+   ],
+   "D": [
+    "sfx/win-big-D1"
+   ],
+   "E": [
+    "sfx/win-big-E1"
+   ],
+   "F": [
+    "sfx/win-big-F1"
+   ]
+  },
+  "win.count_tick": {
+   "A": [
+    "sfx/win-count-tick-A1",
+    "sfx/win-count-tick-A2",
+    "sfx/win-count-tick-A3",
+    "sfx/win-count-tick-A4",
+    "sfx/win-count-tick-A5",
+    "sfx/win-count-tick-A6"
+   ],
+   "B": [
+    "sfx/win-count-tick-B1",
+    "sfx/win-count-tick-B2",
+    "sfx/win-count-tick-B3",
+    "sfx/win-count-tick-B4",
+    "sfx/win-count-tick-B5",
+    "sfx/win-count-tick-B6"
+   ],
+   "C": [
+    "sfx/win-count-tick-C1",
+    "sfx/win-count-tick-C2",
+    "sfx/win-count-tick-C3",
+    "sfx/win-count-tick-C4",
+    "sfx/win-count-tick-C5",
+    "sfx/win-count-tick-C6"
+   ],
+   "D": [
+    "sfx/win-count-tick-D1",
+    "sfx/win-count-tick-D2",
+    "sfx/win-count-tick-D3",
+    "sfx/win-count-tick-D4",
+    "sfx/win-count-tick-D5",
+    "sfx/win-count-tick-D6"
+   ],
+   "E": [
+    "sfx/win-count-tick-E1",
+    "sfx/win-count-tick-E2",
+    "sfx/win-count-tick-E3",
+    "sfx/win-count-tick-E4",
+    "sfx/win-count-tick-E5",
+    "sfx/win-count-tick-E6"
+   ],
+   "F": [
+    "sfx/win-count-tick-F1",
+    "sfx/win-count-tick-F2",
+    "sfx/win-count-tick-F3",
+    "sfx/win-count-tick-F4",
+    "sfx/win-count-tick-F5",
+    "sfx/win-count-tick-F6"
+   ]
+  },
+  "win.end": {
+   "A": [
+    "sfx/win-end-A1",
+    "sfx/win-end-A2"
+   ],
+   "B": [
+    "sfx/win-end-B1",
+    "sfx/win-end-B2"
+   ],
+   "C": [
+    "sfx/win-end-C1",
+    "sfx/win-end-C2"
+   ],
+   "D": [
+    "sfx/win-end-D1",
+    "sfx/win-end-D2"
+   ],
+   "E": [
+    "sfx/win-end-E1",
+    "sfx/win-end-E2"
+   ],
+   "F": [
+    "sfx/win-end-F1",
+    "sfx/win-end-F2"
+   ]
+  },
+  "rocco.grab": {
+   "A": [
+    "sfx/rocco-grab-A1",
+    "sfx/rocco-grab-A2"
+   ],
+   "B": [
+    "sfx/rocco-grab-B1",
+    "sfx/rocco-grab-B2"
+   ],
+   "C": [
+    "sfx/rocco-grab-C1",
+    "sfx/rocco-grab-C2"
+   ],
+   "D": [
+    "sfx/rocco-grab-D1",
+    "sfx/rocco-grab-D2"
+   ],
+   "E": [
+    "sfx/rocco-grab-E1",
+    "sfx/rocco-grab-E2"
+   ],
+   "F": [
+    "sfx/rocco-grab-F1",
+    "sfx/rocco-grab-F2"
+   ]
+  },
+  "rocco.swallow": {
+   "A": [
+    "sfx/rocco-swallow-A1",
+    "sfx/rocco-swallow-A2",
+    "sfx/rocco-swallow-A3",
+    "sfx/rocco-swallow-A4"
+   ],
+   "B": [
+    "sfx/rocco-swallow-B1",
+    "sfx/rocco-swallow-B2",
+    "sfx/rocco-swallow-B3",
+    "sfx/rocco-swallow-B4"
+   ],
+   "C": [
+    "sfx/rocco-swallow-C1",
+    "sfx/rocco-swallow-C2",
+    "sfx/rocco-swallow-C3",
+    "sfx/rocco-swallow-C4"
+   ],
+   "D": [
+    "sfx/rocco-swallow-D1",
+    "sfx/rocco-swallow-D2",
+    "sfx/rocco-swallow-D3",
+    "sfx/rocco-swallow-D4"
+   ],
+   "E": [
+    "sfx/rocco-swallow-E1",
+    "sfx/rocco-swallow-E2",
+    "sfx/rocco-swallow-E3",
+    "sfx/rocco-swallow-E4"
+   ],
+   "F": [
+    "sfx/rocco-swallow-F1",
+    "sfx/rocco-swallow-F2",
+    "sfx/rocco-swallow-F3",
+    "sfx/rocco-swallow-F4"
+   ]
+  },
+  "rocco.steal_whoosh": {
+   "A": [
+    "sfx/rocco-steal-whoosh-A1",
+    "sfx/rocco-steal-whoosh-A2"
+   ],
+   "B": [
+    "sfx/rocco-steal-whoosh-B1",
+    "sfx/rocco-steal-whoosh-B2"
+   ],
+   "C": [
+    "sfx/rocco-steal-whoosh-C1",
+    "sfx/rocco-steal-whoosh-C2"
+   ],
+   "D": [
+    "sfx/rocco-steal-whoosh-D1",
+    "sfx/rocco-steal-whoosh-D2"
+   ],
+   "E": [
+    "sfx/rocco-steal-whoosh-E1",
+    "sfx/rocco-steal-whoosh-E2"
+   ],
+   "F": [
+    "sfx/rocco-steal-whoosh-F1",
+    "sfx/rocco-steal-whoosh-F2"
+   ]
+  },
+  "counter.step": {
+   "A": [
+    "sfx/counter-step-A1",
+    "sfx/counter-step-A2",
+    "sfx/counter-step-A3"
+   ],
+   "B": [
+    "sfx/counter-step-B1",
+    "sfx/counter-step-B2",
+    "sfx/counter-step-B3"
+   ],
+   "C": [
+    "sfx/counter-step-C1",
+    "sfx/counter-step-C2",
+    "sfx/counter-step-C3"
+   ],
+   "D": [
+    "sfx/counter-step-D1",
+    "sfx/counter-step-D2",
+    "sfx/counter-step-D3"
+   ],
+   "E": [
+    "sfx/counter-step-E1",
+    "sfx/counter-step-E2",
+    "sfx/counter-step-E3"
+   ],
+   "F": [
+    "sfx/counter-step-F1",
+    "sfx/counter-step-F2",
+    "sfx/counter-step-F3"
+   ]
+  },
+  "counter.reset": {
+   "A": [
+    "sfx/counter-reset-A1",
+    "sfx/counter-reset-A2"
+   ],
+   "B": [
+    "sfx/counter-reset-B1",
+    "sfx/counter-reset-B2"
+   ],
+   "C": [
+    "sfx/counter-reset-C1",
+    "sfx/counter-reset-C2"
+   ],
+   "D": [
+    "sfx/counter-reset-D1",
+    "sfx/counter-reset-D2"
+   ],
+   "E": [
+    "sfx/counter-reset-E1",
+    "sfx/counter-reset-E2"
+   ],
+   "F": [
+    "sfx/counter-reset-F1",
+    "sfx/counter-reset-F2"
+   ]
+  },
+  "punch.hit": {
+   "A": [
+    "sfx/punch-hit-A1",
+    "sfx/punch-hit-A2"
+   ],
+   "B": [
+    "sfx/punch-hit-B1",
+    "sfx/punch-hit-B2"
+   ],
+   "C": [
+    "sfx/punch-hit-C1",
+    "sfx/punch-hit-C2"
+   ],
+   "D": [
+    "sfx/punch-hit-D1",
+    "sfx/punch-hit-D2"
+   ],
+   "E": [
+    "sfx/punch-hit-E1",
+    "sfx/punch-hit-E2"
+   ],
+   "F": [
+    "sfx/punch-hit-F1",
+    "sfx/punch-hit-F2"
+   ]
+  },
+  "punch.wave": {
+   "A": [
+    "sfx/punch-wave-A1",
+    "sfx/punch-wave-A2"
+   ],
+   "B": [
+    "sfx/punch-wave-B1",
+    "sfx/punch-wave-B2"
+   ],
+   "C": [
+    "sfx/punch-wave-C1",
+    "sfx/punch-wave-C2"
+   ],
+   "D": [
+    "sfx/punch-wave-D1",
+    "sfx/punch-wave-D2"
+   ],
+   "E": [
+    "sfx/punch-wave-E1",
+    "sfx/punch-wave-E2"
+   ],
+   "F": [
+    "sfx/punch-wave-F1",
+    "sfx/punch-wave-F2"
+   ]
+  },
+  "punch.dent_pop": {
+   "A": [
+    "sfx/punch-dent-pop-A1",
+    "sfx/punch-dent-pop-A2"
+   ],
+   "B": [
+    "sfx/punch-dent-pop-B1",
+    "sfx/punch-dent-pop-B2"
+   ],
+   "C": [
+    "sfx/punch-dent-pop-C1",
+    "sfx/punch-dent-pop-C2"
+   ],
+   "D": [
+    "sfx/punch-dent-pop-D1",
+    "sfx/punch-dent-pop-D2"
+   ],
+   "E": [
+    "sfx/punch-dent-pop-E1",
+    "sfx/punch-dent-pop-E2"
+   ],
+   "F": [
+    "sfx/punch-dent-pop-F1",
+    "sfx/punch-dent-pop-F2"
+   ]
+  },
+  "wild.frame_on": {
+   "A": [
+    "sfx/wild-frame-on-A1"
+   ],
+   "B": [
+    "sfx/wild-frame-on-B1"
+   ],
+   "C": [
+    "sfx/wild-frame-on-C1"
+   ],
+   "D": [
+    "sfx/wild-frame-on-D1"
+   ],
+   "E": [
+    "sfx/wild-frame-on-E1"
+   ],
+   "F": [
+    "sfx/wild-frame-on-F1"
+   ]
+  },
+  "toss.ticket": {
+   "A": [
+    "sfx/toss-ticket-A1",
+    "sfx/toss-ticket-A2"
+   ],
+   "B": [
+    "sfx/toss-ticket-B1",
+    "sfx/toss-ticket-B2"
+   ],
+   "C": [
+    "sfx/toss-ticket-C1",
+    "sfx/toss-ticket-C2"
+   ],
+   "D": [
+    "sfx/toss-ticket-D1",
+    "sfx/toss-ticket-D2"
+   ],
+   "E": [
+    "sfx/toss-ticket-E1",
+    "sfx/toss-ticket-E2"
+   ],
+   "F": [
+    "sfx/toss-ticket-F1",
+    "sfx/toss-ticket-F2"
+   ]
+  },
+  "lever.pull": {
+   "A": [
+    "sfx/lever-pull-A1"
+   ],
+   "B": [
+    "sfx/lever-pull-B1"
+   ],
+   "C": [
+    "sfx/lever-pull-C1"
+   ],
+   "D": [
+    "sfx/lever-pull-D1"
+   ],
+   "E": [
+    "sfx/lever-pull-E1"
+   ],
+   "F": [
+    "sfx/lever-pull-F1"
+   ]
+  },
+  "lever.blackout": {
+   "A": [
+    "sfx/lever-blackout-A1"
+   ],
+   "B": [
+    "sfx/lever-blackout-B1"
+   ],
+   "C": [
+    "sfx/lever-blackout-C1"
+   ],
+   "D": [
+    "sfx/lever-blackout-D1"
+   ],
+   "E": [
+    "sfx/lever-blackout-E1"
+   ],
+   "F": [
+    "sfx/lever-blackout-F1"
+   ]
+  },
+  "kitchen.enter": {
+   "A": [
+    "sfx/kitchen-enter-A1"
+   ],
+   "B": [
+    "sfx/kitchen-enter-B1"
+   ],
+   "C": [
+    "sfx/kitchen-enter-C1"
+   ],
+   "D": [
+    "sfx/kitchen-enter-D1"
+   ],
+   "E": [
+    "sfx/kitchen-enter-E1"
+   ],
+   "F": [
+    "sfx/kitchen-enter-F1"
+   ]
+  },
+  "sack.coin_in": {
+   "A": [
+    "sfx/sack-coin-in-A1",
+    "sfx/sack-coin-in-A2",
+    "sfx/sack-coin-in-A3",
+    "sfx/sack-coin-in-A4",
+    "sfx/sack-coin-in-A5",
+    "sfx/sack-coin-in-A6"
+   ],
+   "B": [
+    "sfx/sack-coin-in-B1",
+    "sfx/sack-coin-in-B2",
+    "sfx/sack-coin-in-B3",
+    "sfx/sack-coin-in-B4",
+    "sfx/sack-coin-in-B5",
+    "sfx/sack-coin-in-B6"
+   ],
+   "C": [
+    "sfx/sack-coin-in-C1",
+    "sfx/sack-coin-in-C2",
+    "sfx/sack-coin-in-C3",
+    "sfx/sack-coin-in-C4",
+    "sfx/sack-coin-in-C5",
+    "sfx/sack-coin-in-C6"
+   ],
+   "D": [
+    "sfx/sack-coin-in-D1",
+    "sfx/sack-coin-in-D2",
+    "sfx/sack-coin-in-D3",
+    "sfx/sack-coin-in-D4",
+    "sfx/sack-coin-in-D5",
+    "sfx/sack-coin-in-D6"
+   ],
+   "E": [
+    "sfx/sack-coin-in-E1",
+    "sfx/sack-coin-in-E2",
+    "sfx/sack-coin-in-E3",
+    "sfx/sack-coin-in-E4",
+    "sfx/sack-coin-in-E5",
+    "sfx/sack-coin-in-E6"
+   ],
+   "F": [
+    "sfx/sack-coin-in-F1",
+    "sfx/sack-coin-in-F2",
+    "sfx/sack-coin-in-F3",
+    "sfx/sack-coin-in-F4",
+    "sfx/sack-coin-in-F5",
+    "sfx/sack-coin-in-F6"
+   ]
+  },
+  "sack.lamp_on": {
+   "A": [
+    "sfx/sack-lamp-on-A1",
+    "sfx/sack-lamp-on-A2"
+   ],
+   "B": [
+    "sfx/sack-lamp-on-B1",
+    "sfx/sack-lamp-on-B2"
+   ],
+   "C": [
+    "sfx/sack-lamp-on-C1",
+    "sfx/sack-lamp-on-C2"
+   ],
+   "D": [
+    "sfx/sack-lamp-on-D1",
+    "sfx/sack-lamp-on-D2"
+   ],
+   "E": [
+    "sfx/sack-lamp-on-E1",
+    "sfx/sack-lamp-on-E2"
+   ],
+   "F": [
+    "sfx/sack-lamp-on-F1",
+    "sfx/sack-lamp-on-F2"
+   ]
+  },
+  "sack.dump": {
+   "A": [
+    "sfx/sack-dump-A1"
+   ],
+   "B": [
+    "sfx/sack-dump-B1"
+   ],
+   "C": [
+    "sfx/sack-dump-C1"
+   ],
+   "D": [
+    "sfx/sack-dump-D1"
+   ],
+   "E": [
+    "sfx/sack-dump-E1"
+   ],
+   "F": [
+    "sfx/sack-dump-F1"
+   ]
+  },
+  "sack.coins_pour": {
+   "A": [
+    "sfx/sack-coins-pour-A1"
+   ],
+   "B": [
+    "sfx/sack-coins-pour-B1"
+   ],
+   "C": [
+    "sfx/sack-coins-pour-C1"
+   ],
+   "D": [
+    "sfx/sack-coins-pour-D1"
+   ],
+   "E": [
+    "sfx/sack-coins-pour-E1"
+   ],
+   "F": [
+    "sfx/sack-coins-pour-F1"
+   ]
+  },
+  "sack.paid_again": {
+   "A": [
+    "sfx/sack-paid-again-A1"
+   ],
+   "B": [
+    "sfx/sack-paid-again-B1"
+   ],
+   "C": [
+    "sfx/sack-paid-again-C1"
+   ],
+   "D": [
+    "sfx/sack-paid-again-D1"
+   ],
+   "E": [
+    "sfx/sack-paid-again-E1"
+   ],
+   "F": [
+    "sfx/sack-paid-again-F1"
+   ]
+  },
+  "freespins.add": {
+   "A": [
+    "sfx/freespins-add-A1"
+   ],
+   "B": [
+    "sfx/freespins-add-B1"
+   ],
+   "C": [
+    "sfx/freespins-add-C1"
+   ],
+   "D": [
+    "sfx/freespins-add-D1"
+   ],
+   "E": [
+    "sfx/freespins-add-E1"
+   ],
+   "F": [
+    "sfx/freespins-add-F1"
+   ]
+  },
+  "scatter.land": {
+   "A": [
+    "sfx/scatter-land-A1",
+    "sfx/scatter-land-A2",
+    "sfx/scatter-land-A3"
+   ],
+   "B": [
+    "sfx/scatter-land-B1",
+    "sfx/scatter-land-B2",
+    "sfx/scatter-land-B3"
+   ],
+   "C": [
+    "sfx/scatter-land-C1",
+    "sfx/scatter-land-C2",
+    "sfx/scatter-land-C3"
+   ],
+   "D": [
+    "sfx/scatter-land-D1",
+    "sfx/scatter-land-D2",
+    "sfx/scatter-land-D3"
+   ],
+   "E": [
+    "sfx/scatter-land-E1",
+    "sfx/scatter-land-E2",
+    "sfx/scatter-land-E3"
+   ],
+   "F": [
+    "sfx/scatter-land-F1",
+    "sfx/scatter-land-F2",
+    "sfx/scatter-land-F3"
+   ]
+  },
+  "scatter.land.1": {
+   "A": [
+    "sfx/scatter-land-A1"
+   ],
+   "B": [
+    "sfx/scatter-land-B1"
+   ],
+   "C": [
+    "sfx/scatter-land-C1"
+   ],
+   "D": [
+    "sfx/scatter-land-D1"
+   ],
+   "E": [
+    "sfx/scatter-land-E1"
+   ],
+   "F": [
+    "sfx/scatter-land-F1"
+   ]
+  },
+  "scatter.land.2": {
+   "A": [
+    "sfx/scatter-land-A2"
+   ],
+   "B": [
+    "sfx/scatter-land-B2"
+   ],
+   "C": [
+    "sfx/scatter-land-C2"
+   ],
+   "D": [
+    "sfx/scatter-land-D2"
+   ],
+   "E": [
+    "sfx/scatter-land-E2"
+   ],
+   "F": [
+    "sfx/scatter-land-F2"
+   ]
+  },
+  "scatter.land.3": {
+   "A": [
+    "sfx/scatter-land-A3"
+   ],
+   "B": [
+    "sfx/scatter-land-B3"
+   ],
+   "C": [
+    "sfx/scatter-land-C3"
+   ],
+   "D": [
+    "sfx/scatter-land-D3"
+   ],
+   "E": [
+    "sfx/scatter-land-E3"
+   ],
+   "F": [
+    "sfx/scatter-land-F3"
+   ]
+  },
+  "scatter.anticipation": {
+   "A": [
+    "sfx/scatter-anticipation-A1"
+   ],
+   "B": [
+    "sfx/scatter-anticipation-B1"
+   ],
+   "C": [
+    "sfx/scatter-anticipation-C1"
+   ],
+   "D": [
+    "sfx/scatter-anticipation-D1"
+   ],
+   "E": [
+    "sfx/scatter-anticipation-E1"
+   ],
+   "F": [
+    "sfx/scatter-anticipation-F1"
+   ]
+  },
+  "cams.enter": {
+   "A": [
+    "sfx/cams-enter-A1"
+   ],
+   "B": [
+    "sfx/cams-enter-B1"
+   ],
+   "C": [
+    "sfx/cams-enter-C1"
+   ],
+   "D": [
+    "sfx/cams-enter-D1"
+   ],
+   "E": [
+    "sfx/cams-enter-E1"
+   ],
+   "F": [
+    "sfx/cams-enter-F1"
+   ]
+  },
+  "cams.monitor_lock": {
+   "A": [
+    "sfx/cams-monitor-lock-A1",
+    "sfx/cams-monitor-lock-A2",
+    "sfx/cams-monitor-lock-A3"
+   ],
+   "B": [
+    "sfx/cams-monitor-lock-B1",
+    "sfx/cams-monitor-lock-B2",
+    "sfx/cams-monitor-lock-B3"
+   ],
+   "C": [
+    "sfx/cams-monitor-lock-C1",
+    "sfx/cams-monitor-lock-C2",
+    "sfx/cams-monitor-lock-C3"
+   ],
+   "D": [
+    "sfx/cams-monitor-lock-D1",
+    "sfx/cams-monitor-lock-D2",
+    "sfx/cams-monitor-lock-D3"
+   ],
+   "E": [
+    "sfx/cams-monitor-lock-E1",
+    "sfx/cams-monitor-lock-E2",
+    "sfx/cams-monitor-lock-E3"
+   ],
+   "F": [
+    "sfx/cams-monitor-lock-F1",
+    "sfx/cams-monitor-lock-F2",
+    "sfx/cams-monitor-lock-F3"
+   ]
+  },
+  "cams.respin_tick": {
+   "A": [
+    "sfx/cams-respin-tick-A1",
+    "sfx/cams-respin-tick-A2",
+    "sfx/cams-respin-tick-A3"
+   ],
+   "B": [
+    "sfx/cams-respin-tick-B1",
+    "sfx/cams-respin-tick-B2",
+    "sfx/cams-respin-tick-B3"
+   ],
+   "C": [
+    "sfx/cams-respin-tick-C1",
+    "sfx/cams-respin-tick-C2",
+    "sfx/cams-respin-tick-C3"
+   ],
+   "D": [
+    "sfx/cams-respin-tick-D1",
+    "sfx/cams-respin-tick-D2",
+    "sfx/cams-respin-tick-D3"
+   ],
+   "E": [
+    "sfx/cams-respin-tick-E1",
+    "sfx/cams-respin-tick-E2",
+    "sfx/cams-respin-tick-E3"
+   ],
+   "F": [
+    "sfx/cams-respin-tick-F1",
+    "sfx/cams-respin-tick-F2",
+    "sfx/cams-respin-tick-F3"
+   ]
+  },
+  "cams.respin_reset": {
+   "A": [
+    "sfx/cams-respin-reset-A1",
+    "sfx/cams-respin-reset-A2"
+   ],
+   "B": [
+    "sfx/cams-respin-reset-B1",
+    "sfx/cams-respin-reset-B2"
+   ],
+   "C": [
+    "sfx/cams-respin-reset-C1",
+    "sfx/cams-respin-reset-C2"
+   ],
+   "D": [
+    "sfx/cams-respin-reset-D1",
+    "sfx/cams-respin-reset-D2"
+   ],
+   "E": [
+    "sfx/cams-respin-reset-E1",
+    "sfx/cams-respin-reset-E2"
+   ],
+   "F": [
+    "sfx/cams-respin-reset-F1",
+    "sfx/cams-respin-reset-F2"
+   ]
+  },
+  "cams.rocco_step": {
+   "A": [
+    "sfx/cams-rocco-step-A1",
+    "sfx/cams-rocco-step-A2"
+   ],
+   "B": [
+    "sfx/cams-rocco-step-B1",
+    "sfx/cams-rocco-step-B2"
+   ],
+   "C": [
+    "sfx/cams-rocco-step-C1",
+    "sfx/cams-rocco-step-C2"
+   ],
+   "D": [
+    "sfx/cams-rocco-step-D1",
+    "sfx/cams-rocco-step-D2"
+   ],
+   "E": [
+    "sfx/cams-rocco-step-E1",
+    "sfx/cams-rocco-step-E2"
+   ],
+   "F": [
+    "sfx/cams-rocco-step-F1",
+    "sfx/cams-rocco-step-F2"
+   ]
+  },
+  "cams.double": {
+   "A": [
+    "sfx/cams-double-A1"
+   ],
+   "B": [
+    "sfx/cams-double-B1"
+   ],
+   "C": [
+    "sfx/cams-double-C1"
+   ],
+   "D": [
+    "sfx/cams-double-D1"
+   ],
+   "E": [
+    "sfx/cams-double-E1"
+   ],
+   "F": [
+    "sfx/cams-double-F1"
+   ]
+  },
+  "cams.full": {
+   "A": [
+    "sfx/cams-full-A1"
+   ],
+   "B": [
+    "sfx/cams-full-B1"
+   ],
+   "C": [
+    "sfx/cams-full-C1"
+   ],
+   "D": [
+    "sfx/cams-full-D1"
+   ],
+   "E": [
+    "sfx/cams-full-E1"
+   ],
+   "F": [
+    "sfx/cams-full-F1"
+   ]
+  },
+  "bigwin.drum_tick": {
+   "A": [
+    "sfx/bigwin-drum-tick-A1",
+    "sfx/bigwin-drum-tick-A2",
+    "sfx/bigwin-drum-tick-A3",
+    "sfx/bigwin-drum-tick-A4",
+    "sfx/bigwin-drum-tick-A5",
+    "sfx/bigwin-drum-tick-A6"
+   ],
+   "B": [
+    "sfx/bigwin-drum-tick-B1",
+    "sfx/bigwin-drum-tick-B2",
+    "sfx/bigwin-drum-tick-B3",
+    "sfx/bigwin-drum-tick-B4",
+    "sfx/bigwin-drum-tick-B5",
+    "sfx/bigwin-drum-tick-B6"
+   ],
+   "C": [
+    "sfx/bigwin-drum-tick-C1",
+    "sfx/bigwin-drum-tick-C2",
+    "sfx/bigwin-drum-tick-C3",
+    "sfx/bigwin-drum-tick-C4",
+    "sfx/bigwin-drum-tick-C5",
+    "sfx/bigwin-drum-tick-C6"
+   ],
+   "D": [
+    "sfx/bigwin-drum-tick-D1",
+    "sfx/bigwin-drum-tick-D2",
+    "sfx/bigwin-drum-tick-D3",
+    "sfx/bigwin-drum-tick-D4",
+    "sfx/bigwin-drum-tick-D5",
+    "sfx/bigwin-drum-tick-D6"
+   ],
+   "E": [
+    "sfx/bigwin-drum-tick-E1",
+    "sfx/bigwin-drum-tick-E2",
+    "sfx/bigwin-drum-tick-E3",
+    "sfx/bigwin-drum-tick-E4",
+    "sfx/bigwin-drum-tick-E5",
+    "sfx/bigwin-drum-tick-E6"
+   ],
+   "F": [
+    "sfx/bigwin-drum-tick-F1",
+    "sfx/bigwin-drum-tick-F2",
+    "sfx/bigwin-drum-tick-F3",
+    "sfx/bigwin-drum-tick-F4",
+    "sfx/bigwin-drum-tick-F5",
+    "sfx/bigwin-drum-tick-F6"
+   ]
+  },
+  "bigwin.tier_up": {
+   "A": [
+    "sfx/bigwin-tier-up-A1",
+    "sfx/bigwin-tier-up-A2"
+   ],
+   "B": [
+    "sfx/bigwin-tier-up-B1",
+    "sfx/bigwin-tier-up-B2"
+   ],
+   "C": [
+    "sfx/bigwin-tier-up-C1",
+    "sfx/bigwin-tier-up-C2"
+   ],
+   "D": [
+    "sfx/bigwin-tier-up-D1",
+    "sfx/bigwin-tier-up-D2"
+   ],
+   "E": [
+    "sfx/bigwin-tier-up-E1",
+    "sfx/bigwin-tier-up-E2"
+   ],
+   "F": [
+    "sfx/bigwin-tier-up-F1",
+    "sfx/bigwin-tier-up-F2"
+   ]
+  },
+  "bigwin.lamp": {
+   "A": [
+    "sfx/bigwin-lamp-A1",
+    "sfx/bigwin-lamp-A2",
+    "sfx/bigwin-lamp-A3",
+    "sfx/bigwin-lamp-A4"
+   ],
+   "B": [
+    "sfx/bigwin-lamp-B1",
+    "sfx/bigwin-lamp-B2",
+    "sfx/bigwin-lamp-B3",
+    "sfx/bigwin-lamp-B4"
+   ],
+   "C": [
+    "sfx/bigwin-lamp-C1",
+    "sfx/bigwin-lamp-C2",
+    "sfx/bigwin-lamp-C3",
+    "sfx/bigwin-lamp-C4"
+   ],
+   "D": [
+    "sfx/bigwin-lamp-D1",
+    "sfx/bigwin-lamp-D2",
+    "sfx/bigwin-lamp-D3",
+    "sfx/bigwin-lamp-D4"
+   ],
+   "E": [
+    "sfx/bigwin-lamp-E1",
+    "sfx/bigwin-lamp-E2",
+    "sfx/bigwin-lamp-E3",
+    "sfx/bigwin-lamp-E4"
+   ],
+   "F": [
+    "sfx/bigwin-lamp-F1",
+    "sfx/bigwin-lamp-F2",
+    "sfx/bigwin-lamp-F3",
+    "sfx/bigwin-lamp-F4"
+   ]
+  },
+  "bigwin.lamp.1": {
+   "A": [
+    "sfx/bigwin-lamp-A1"
+   ],
+   "B": [
+    "sfx/bigwin-lamp-B1"
+   ],
+   "C": [
+    "sfx/bigwin-lamp-C1"
+   ],
+   "D": [
+    "sfx/bigwin-lamp-D1"
+   ],
+   "E": [
+    "sfx/bigwin-lamp-E1"
+   ],
+   "F": [
+    "sfx/bigwin-lamp-F1"
+   ]
+  },
+  "bigwin.lamp.2": {
+   "A": [
+    "sfx/bigwin-lamp-A2"
+   ],
+   "B": [
+    "sfx/bigwin-lamp-B2"
+   ],
+   "C": [
+    "sfx/bigwin-lamp-C2"
+   ],
+   "D": [
+    "sfx/bigwin-lamp-D2"
+   ],
+   "E": [
+    "sfx/bigwin-lamp-E2"
+   ],
+   "F": [
+    "sfx/bigwin-lamp-F2"
+   ]
+  },
+  "bigwin.lamp.3": {
+   "A": [
+    "sfx/bigwin-lamp-A3"
+   ],
+   "B": [
+    "sfx/bigwin-lamp-B3"
+   ],
+   "C": [
+    "sfx/bigwin-lamp-C3"
+   ],
+   "D": [
+    "sfx/bigwin-lamp-D3"
+   ],
+   "E": [
+    "sfx/bigwin-lamp-E3"
+   ],
+   "F": [
+    "sfx/bigwin-lamp-F3"
+   ]
+  },
+  "bigwin.lamp.4": {
+   "A": [
+    "sfx/bigwin-lamp-A4"
+   ],
+   "B": [
+    "sfx/bigwin-lamp-B4"
+   ],
+   "C": [
+    "sfx/bigwin-lamp-C4"
+   ],
+   "D": [
+    "sfx/bigwin-lamp-D4"
+   ],
+   "E": [
+    "sfx/bigwin-lamp-E4"
+   ],
+   "F": [
+    "sfx/bigwin-lamp-F4"
+   ]
+  },
+  "bigwin.land": {
+   "A": [
+    "sfx/bigwin-land-A1"
+   ],
+   "B": [
+    "sfx/bigwin-land-B1"
+   ],
+   "C": [
+    "sfx/bigwin-land-C1"
+   ],
+   "D": [
+    "sfx/bigwin-land-D1"
+   ],
+   "E": [
+    "sfx/bigwin-land-E1"
+   ],
+   "F": [
+    "sfx/bigwin-land-F1"
+   ]
+  },
+  "maxwin.hit": {
+   "A": [
+    "sfx/maxwin-hit-A1"
+   ],
+   "B": [
+    "sfx/maxwin-hit-B1"
+   ],
+   "C": [
+    "sfx/maxwin-hit-C1"
+   ],
+   "D": [
+    "sfx/maxwin-hit-D1"
+   ],
+   "E": [
+    "sfx/maxwin-hit-E1"
+   ],
+   "F": [
+    "sfx/maxwin-hit-F1"
+   ]
+  }
+ },
+ "amb": {
+  "hall": {
+   "A": "sfx/amb-hall-A1",
+   "B": "sfx/amb-hall-B1",
+   "C": "sfx/amb-hall-C1",
+   "D": "sfx/amb-hall-D1",
+   "E": "sfx/amb-hall-E1",
+   "F": "sfx/amb-hall-F1"
+  },
+  "kitchen": {
+   "A": "sfx/amb-kitchen-A1",
+   "B": "sfx/amb-kitchen-B1",
+   "C": "sfx/amb-kitchen-C1",
+   "D": "sfx/amb-kitchen-D1",
+   "E": "sfx/amb-kitchen-E1",
+   "F": "sfx/amb-kitchen-F1"
+  },
+  "cameras": {
+   "A": "sfx/amb-cameras-A1",
+   "B": "sfx/amb-cameras-B1",
+   "C": "sfx/amb-cameras-C1",
+   "D": "sfx/amb-cameras-D1",
+   "E": "sfx/amb-cameras-E1",
+   "F": "sfx/amb-cameras-F1"
+  }
+ },
+ "gain": {
+  "spin.drop": -3,
+  "spin.land": -2,
+  "sack.coins_pour": -2
+ },
+ "packs": {
+  "A": {
+   "file": "sfxpack-A",
+   "clips": {
+    "sfx/ui-click-A1": [
+     0.12,
+     0.0421
+    ],
+    "sfx/ui-click-A2": [
+     0.2821,
+     0.0444
+    ],
+    "sfx/ui-click-A3": [
+     0.4465,
+     0.0418
+    ],
+    "sfx/ui-click-A4": [
+     0.6083,
+     0.0443
+    ],
+    "sfx/ui-open-A1": [
+     0.7726,
+     0.2529
+    ],
+    "sfx/ui-open-A2": [
+     1.1455,
+     0.2545
+    ],
+    "sfx/ui-close-A1": [
+     1.52,
+     0.2293
+    ],
+    "sfx/ui-close-A2": [
+     1.8694,
+     0.2338
+    ],
+    "sfx/ui-bet-up-A1": [
+     2.2231,
+     0.0927
+    ],
+    "sfx/ui-bet-up-A2": [
+     2.4359,
+     0.092
+    ],
+    "sfx/ui-bet-down-A1": [
+     2.6478,
+     0.0924
+    ],
+    "sfx/ui-bet-down-A2": [
+     2.8602,
+     0.0926
+    ],
+    "sfx/ui-toggle-A1": [
+     3.0727,
+     0.0916
+    ],
+    "sfx/ui-toggle-A2": [
+     3.2844,
+     0.0907
+    ],
+    "sfx/ui-buy-A1": [
+     3.4951,
+     0.4691
+    ],
+    "sfx/ui-error-A1": [
+     4.0842,
+     0.27
+    ],
+    "sfx/spin-start-A1": [
+     4.4742,
+     0.5275
+    ],
+    "sfx/spin-start-A2": [
+     5.1217,
+     0.5294
+    ],
+    "sfx/spin-drop-A1": [
+     5.771,
+     0.04
+    ],
+    "sfx/spin-drop-A2": [
+     5.931,
+     0.04
+    ],
+    "sfx/spin-drop-A3": [
+     6.091,
+     0.04
+    ],
+    "sfx/spin-drop-A4": [
+     6.251,
+     0.04
+    ],
+    "sfx/spin-drop-A5": [
+     6.411,
+     0.04
+    ],
+    "sfx/spin-land-A1": [
+     6.571,
+     0.1012
+    ],
+    "sfx/spin-land-A2": [
+     6.7922,
+     0.0951
+    ],
+    "sfx/spin-land-A3": [
+     7.0073,
+     0.0987
+    ],
+    "sfx/spin-land-A4": [
+     7.226,
+     0.11
+    ],
+    "sfx/spin-land-A5": [
+     7.456,
+     0.1013
+    ],
+    "sfx/spin-land-A6": [
+     7.6774,
+     0.11
+    ],
+    "sfx/spin-stop-A1": [
+     7.9074,
+     0.5635
+    ],
+    "sfx/spin-stop-A2": [
+     8.5909,
+     0.5539
+    ],
+    "sfx/win-small-A1": [
+     9.2647,
+     0.2706
+    ],
+    "sfx/win-small-A2": [
+     9.6554,
+     0.2799
+    ],
+    "sfx/win-medium-A1": [
+     10.0552,
+     0.5704
+    ],
+    "sfx/win-medium-A2": [
+     10.7456,
+     0.5931
+    ],
+    "sfx/win-big-A1": [
+     11.4587,
+     1.3336
+    ],
+    "sfx/win-count-tick-A1": [
+     12.9123,
+     0.025
+    ],
+    "sfx/win-count-tick-A2": [
+     13.0573,
+     0.025
+    ],
+    "sfx/win-count-tick-A3": [
+     13.2023,
+     0.025
+    ],
+    "sfx/win-count-tick-A4": [
+     13.3473,
+     0.025
+    ],
+    "sfx/win-count-tick-A5": [
+     13.4923,
+     0.025
+    ],
+    "sfx/win-count-tick-A6": [
+     13.6373,
+     0.025
+    ],
+    "sfx/win-end-A1": [
+     13.7823,
+     0.3668
+    ],
+    "sfx/win-end-A2": [
+     14.2691,
+     0.3767
+    ],
+    "sfx/rocco-grab-A1": [
+     14.7659,
+     0.3154
+    ],
+    "sfx/rocco-grab-A2": [
+     15.2012,
+     0.3369
+    ],
+    "sfx/rocco-swallow-A1": [
+     15.6581,
+     0.5325
+    ],
+    "sfx/rocco-swallow-A2": [
+     16.3106,
+     0.5331
+    ],
+    "sfx/rocco-swallow-A3": [
+     16.9637,
+     0.5316
+    ],
+    "sfx/rocco-swallow-A4": [
+     17.6153,
+     0.5351
+    ],
+    "sfx/rocco-steal-whoosh-A1": [
+     18.2705,
+     0.4403
+    ],
+    "sfx/rocco-steal-whoosh-A2": [
+     18.8307,
+     0.4517
+    ],
+    "sfx/counter-step-A1": [
+     19.4025,
+     0.2284
+    ],
+    "sfx/counter-step-A2": [
+     19.7508,
+     0.2085
+    ],
+    "sfx/counter-step-A3": [
+     20.0794,
+     0.2288
+    ],
+    "sfx/counter-reset-A1": [
+     20.4281,
+     0.3931
+    ],
+    "sfx/counter-reset-A2": [
+     20.9412,
+     0.4043
+    ],
+    "sfx/punch-hit-A1": [
+     21.4655,
+     0.3821
+    ],
+    "sfx/punch-hit-A2": [
+     21.9676,
+     0.4095
+    ],
+    "sfx/punch-wave-A1": [
+     22.4972,
+     0.7466
+    ],
+    "sfx/punch-wave-A2": [
+     23.3638,
+     0.7827
+    ],
+    "sfx/punch-dent-pop-A1": [
+     24.2665,
+     0.2582
+    ],
+    "sfx/punch-dent-pop-A2": [
+     24.6447,
+     0.2565
+    ],
+    "sfx/wild-frame-on-A1": [
+     25.0213,
+     0.7924
+    ],
+    "sfx/toss-ticket-A1": [
+     25.9337,
+     0.5811
+    ],
+    "sfx/toss-ticket-A2": [
+     26.6348,
+     0.5761
+    ],
+    "sfx/lever-pull-A1": [
+     27.3309,
+     0.8056
+    ],
+    "sfx/lever-blackout-A1": [
+     28.2565,
+     1.6995
+    ],
+    "sfx/kitchen-enter-A1": [
+     30.0761,
+     1.2273
+    ],
+    "sfx/sack-coin-in-A1": [
+     31.4234,
+     0.0795
+    ],
+    "sfx/sack-coin-in-A2": [
+     31.6229,
+     0.0785
+    ],
+    "sfx/sack-coin-in-A3": [
+     31.8214,
+     0.0793
+    ],
+    "sfx/sack-coin-in-A4": [
+     32.0207,
+     0.0799
+    ],
+    "sfx/sack-coin-in-A5": [
+     32.2206,
+     0.0778
+    ],
+    "sfx/sack-coin-in-A6": [
+     32.4184,
+     0.0805
+    ],
+    "sfx/sack-lamp-on-A1": [
+     32.6189,
+     0.1992
+    ],
+    "sfx/sack-lamp-on-A2": [
+     32.9381,
+     0.2053
+    ],
+    "sfx/sack-dump-A1": [
+     33.2634,
+     1.0107
+    ],
+    "sfx/sack-coins-pour-A1": [
+     34.3941,
+     2.9852
+    ],
+    "sfx/sack-paid-again-A1": [
+     37.4993,
+     0.6886
+    ],
+    "sfx/freespins-add-A1": [
+     38.3079,
+     0.59
+    ],
+    "sfx/scatter-land-A1": [
+     39.0179,
+     0.4193
+    ],
+    "sfx/scatter-land-A2": [
+     39.5573,
+     0.5928
+    ],
+    "sfx/scatter-land-A3": [
+     40.27,
+     0.8059
+    ],
+    "sfx/cams-enter-A1": [
+     41.1959,
+     1.1654
+    ],
+    "sfx/cams-monitor-lock-A1": [
+     42.4814,
+     0.2036
+    ],
+    "sfx/cams-monitor-lock-A2": [
+     42.805,
+     0.21
+    ],
+    "sfx/cams-monitor-lock-A3": [
+     43.135,
+     0.2061
+    ],
+    "sfx/cams-respin-tick-A1": [
+     43.4611,
+     0.054
+    ],
+    "sfx/cams-respin-tick-A2": [
+     43.6352,
+     0.0534
+    ],
+    "sfx/cams-respin-tick-A3": [
+     43.8085,
+     0.0549
+    ],
+    "sfx/cams-respin-reset-A1": [
+     43.9834,
+     0.3886
+    ],
+    "sfx/cams-respin-reset-A2": [
+     44.492,
+     0.3809
+    ],
+    "sfx/cams-rocco-step-A1": [
+     44.993,
+     0.4031
+    ],
+    "sfx/cams-rocco-step-A2": [
+     45.5161,
+     0.4088
+    ],
+    "sfx/cams-double-A1": [
+     46.0448,
+     0.4101
+    ],
+    "sfx/cams-full-A1": [
+     46.575,
+     2.4411
+    ],
+    "sfx/bigwin-drum-tick-A1": [
+     49.1361,
+     0.0394
+    ],
+    "sfx/bigwin-drum-tick-A2": [
+     49.2955,
+     0.04
+    ],
+    "sfx/bigwin-drum-tick-A3": [
+     49.4555,
+     0.0401
+    ],
+    "sfx/bigwin-drum-tick-A4": [
+     49.6156,
+     0.0391
+    ],
+    "sfx/bigwin-drum-tick-A5": [
+     49.7747,
+     0.0411
+    ],
+    "sfx/bigwin-drum-tick-A6": [
+     49.9357,
+     0.0391
+    ],
+    "sfx/bigwin-tier-up-A1": [
+     50.0949,
+     1.2203
+    ],
+    "sfx/bigwin-tier-up-A2": [
+     51.4352,
+     1.119
+    ],
+    "sfx/bigwin-lamp-A1": [
+     52.6742,
+     0.3257
+    ],
+    "sfx/bigwin-lamp-A2": [
+     53.1199,
+     0.3314
+    ],
+    "sfx/bigwin-lamp-A3": [
+     53.5713,
+     0.4264
+    ],
+    "sfx/bigwin-lamp-A4": [
+     54.1177,
+     0.468
+    ],
+    "sfx/bigwin-land-A1": [
+     54.7057,
+     0.6393
+    ],
+    "sfx/maxwin-hit-A1": [
+     55.465,
+     2.5576
+    ]
+   }
+  },
+  "B": {
+   "file": "sfxpack-B",
+   "clips": {
+    "sfx/ui-click-B1": [
+     0.12,
+     0.0547
+    ],
+    "sfx/ui-click-B2": [
+     0.2947,
+     0.0536
+    ],
+    "sfx/ui-click-B3": [
+     0.4684,
+     0.0549
+    ],
+    "sfx/ui-click-B4": [
+     0.6432,
+     0.0535
+    ],
+    "sfx/ui-open-B1": [
+     0.8167,
+     0.3045
+    ],
+    "sfx/ui-open-B2": [
+     1.2412,
+     0.3
+    ],
+    "sfx/ui-close-B1": [
+     1.6612,
+     0.2896
+    ],
+    "sfx/ui-close-B2": [
+     2.0708,
+     0.2801
+    ],
+    "sfx/ui-bet-up-B1": [
+     2.471,
+     0.1855
+    ],
+    "sfx/ui-bet-up-B2": [
+     2.7764,
+     0.1836
+    ],
+    "sfx/ui-bet-down-B1": [
+     3.08,
+     0.1858
+    ],
+    "sfx/ui-bet-down-B2": [
+     3.3858,
+     0.183
+    ],
+    "sfx/ui-toggle-B1": [
+     3.6888,
+     0.085
+    ],
+    "sfx/ui-toggle-B2": [
+     3.8938,
+     0.085
+    ],
+    "sfx/ui-buy-B1": [
+     4.0988,
+     0.7097
+    ],
+    "sfx/ui-error-B1": [
+     4.9285,
+     0.3596
+    ],
+    "sfx/spin-start-B1": [
+     5.408,
+     0.6472
+    ],
+    "sfx/spin-start-B2": [
+     6.1752,
+     0.6441
+    ],
+    "sfx/spin-drop-B1": [
+     6.9393,
+     0.0402
+    ],
+    "sfx/spin-drop-B2": [
+     7.0995,
+     0.0391
+    ],
+    "sfx/spin-drop-B3": [
+     7.2586,
+     0.0399
+    ],
+    "sfx/spin-drop-B4": [
+     7.4185,
+     0.0399
+    ],
+    "sfx/spin-drop-B5": [
+     7.5784,
+     0.0392
+    ],
+    "sfx/spin-land-B1": [
+     7.7376,
+     0.0827
+    ],
+    "sfx/spin-land-B2": [
+     7.9403,
+     0.0816
+    ],
+    "sfx/spin-land-B3": [
+     8.1419,
+     0.0821
+    ],
+    "sfx/spin-land-B4": [
+     8.344,
+     0.0837
+    ],
+    "sfx/spin-land-B5": [
+     8.5476,
+     0.0815
+    ],
+    "sfx/spin-land-B6": [
+     8.7492,
+     0.0834
+    ],
+    "sfx/spin-stop-B1": [
+     8.9525,
+     0.4728
+    ],
+    "sfx/spin-stop-B2": [
+     9.5453,
+     0.3807
+    ],
+    "sfx/win-small-B1": [
+     10.046,
+     0.6189
+    ],
+    "sfx/win-small-B2": [
+     10.7848,
+     0.5873
+    ],
+    "sfx/win-medium-B1": [
+     11.4921,
+     1.0015
+    ],
+    "sfx/win-medium-B2": [
+     12.6136,
+     0.9151
+    ],
+    "sfx/win-big-B1": [
+     13.6486,
+     1.8159
+    ],
+    "sfx/win-count-tick-B1": [
+     15.5845,
+     0.0367
+    ],
+    "sfx/win-count-tick-B2": [
+     15.7412,
+     0.0366
+    ],
+    "sfx/win-count-tick-B3": [
+     15.8978,
+     0.0365
+    ],
+    "sfx/win-count-tick-B4": [
+     16.0543,
+     0.0364
+    ],
+    "sfx/win-count-tick-B5": [
+     16.2106,
+     0.0361
+    ],
+    "sfx/win-count-tick-B6": [
+     16.3668,
+     0.0359
+    ],
+    "sfx/win-end-B1": [
+     16.5227,
+     0.8695
+    ],
+    "sfx/win-end-B2": [
+     17.5121,
+     0.8589
+    ],
+    "sfx/rocco-grab-B1": [
+     18.491,
+     0.3756
+    ],
+    "sfx/rocco-grab-B2": [
+     18.9866,
+     0.3775
+    ],
+    "sfx/rocco-swallow-B1": [
+     19.484,
+     0.6467
+    ],
+    "sfx/rocco-swallow-B2": [
+     20.2508,
+     0.6414
+    ],
+    "sfx/rocco-swallow-B3": [
+     21.0122,
+     0.6449
+    ],
+    "sfx/rocco-swallow-B4": [
+     21.7771,
+     0.6401
+    ],
+    "sfx/rocco-steal-whoosh-B1": [
+     22.5371,
+     0.5618
+    ],
+    "sfx/rocco-steal-whoosh-B2": [
+     23.2189,
+     0.5775
+    ],
+    "sfx/counter-step-B1": [
+     23.9164,
+     0.3006
+    ],
+    "sfx/counter-step-B2": [
+     24.337,
+     0.2928
+    ],
+    "sfx/counter-step-B3": [
+     24.7498,
+     0.2793
+    ],
+    "sfx/counter-reset-B1": [
+     25.1491,
+     0.4821
+    ],
+    "sfx/counter-reset-B2": [
+     25.7512,
+     0.4506
+    ],
+    "sfx/punch-hit-B1": [
+     26.3218,
+     0.45
+    ],
+    "sfx/punch-hit-B2": [
+     26.8918,
+     0.4494
+    ],
+    "sfx/punch-wave-B1": [
+     27.4612,
+     0.6503
+    ],
+    "sfx/punch-wave-B2": [
+     28.2315,
+     0.6463
+    ],
+    "sfx/punch-dent-pop-B1": [
+     28.9978,
+     0.3826
+    ],
+    "sfx/punch-dent-pop-B2": [
+     29.5004,
+     0.3791
+    ],
+    "sfx/wild-frame-on-B1": [
+     29.9995,
+     0.5905
+    ],
+    "sfx/toss-ticket-B1": [
+     30.71,
+     0.6921
+    ],
+    "sfx/toss-ticket-B2": [
+     31.5221,
+     0.6785
+    ],
+    "sfx/lever-pull-B1": [
+     32.3206,
+     0.8883
+    ],
+    "sfx/lever-blackout-B1": [
+     33.3289,
+     1.6385
+    ],
+    "sfx/kitchen-enter-B1": [
+     35.0873,
+     0.9282
+    ],
+    "sfx/sack-coin-in-B1": [
+     36.1355,
+     0.089
+    ],
+    "sfx/sack-coin-in-B2": [
+     36.3445,
+     0.0869
+    ],
+    "sfx/sack-coin-in-B3": [
+     36.5514,
+     0.0889
+    ],
+    "sfx/sack-coin-in-B4": [
+     36.7603,
+     0.089
+    ],
+    "sfx/sack-coin-in-B5": [
+     36.9693,
+     0.0899
+    ],
+    "sfx/sack-coin-in-B6": [
+     37.1793,
+     0.088
+    ],
+    "sfx/sack-lamp-on-B1": [
+     37.3872,
+     0.3197
+    ],
+    "sfx/sack-lamp-on-B2": [
+     37.8269,
+     0.3204
+    ],
+    "sfx/sack-dump-B1": [
+     38.2673,
+     0.9968
+    ],
+    "sfx/sack-coins-pour-B1": [
+     39.3841,
+     3.0785
+    ],
+    "sfx/sack-paid-again-B1": [
+     42.5825,
+     1.2259
+    ],
+    "sfx/freespins-add-B1": [
+     43.9284,
+     0.6818
+    ],
+    "sfx/scatter-land-B1": [
+     44.7302,
+     0.6029
+    ],
+    "sfx/scatter-land-B2": [
+     45.453,
+     0.7915
+    ],
+    "sfx/scatter-land-B3": [
+     46.3645,
+     1.0684
+    ],
+    "sfx/cams-enter-B1": [
+     47.5529,
+     1.3901
+    ],
+    "sfx/cams-monitor-lock-B1": [
+     49.063,
+     0.2796
+    ],
+    "sfx/cams-monitor-lock-B2": [
+     49.4626,
+     0.2999
+    ],
+    "sfx/cams-monitor-lock-B3": [
+     49.8825,
+     0.3141
+    ],
+    "sfx/cams-respin-tick-B1": [
+     50.3166,
+     0.0554
+    ],
+    "sfx/cams-respin-tick-B2": [
+     50.492,
+     0.0548
+    ],
+    "sfx/cams-respin-tick-B3": [
+     50.6669,
+     0.0551
+    ],
+    "sfx/cams-respin-reset-B1": [
+     50.842,
+     0.7466
+    ],
+    "sfx/cams-respin-reset-B2": [
+     51.7086,
+     0.8296
+    ],
+    "sfx/cams-rocco-step-B1": [
+     52.6582,
+     0.5247
+    ],
+    "sfx/cams-rocco-step-B2": [
+     53.3029,
+     0.5064
+    ],
+    "sfx/cams-double-B1": [
+     53.9293,
+     0.5406
+    ],
+    "sfx/cams-full-B1": [
+     54.59,
+     2.0288
+    ],
+    "sfx/bigwin-drum-tick-B1": [
+     56.7388,
+     0.0344
+    ],
+    "sfx/bigwin-drum-tick-B2": [
+     56.8931,
+     0.0348
+    ],
+    "sfx/bigwin-drum-tick-B3": [
+     57.048,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-B4": [
+     57.203,
+     0.0351
+    ],
+    "sfx/bigwin-drum-tick-B5": [
+     57.3581,
+     0.0347
+    ],
+    "sfx/bigwin-drum-tick-B6": [
+     57.5128,
+     0.0351
+    ],
+    "sfx/bigwin-tier-up-B1": [
+     57.6679,
+     1.4316
+    ],
+    "sfx/bigwin-tier-up-B2": [
+     59.2195,
+     1.4237
+    ],
+    "sfx/bigwin-lamp-B1": [
+     60.7632,
+     0.402
+    ],
+    "sfx/bigwin-lamp-B2": [
+     61.2852,
+     0.5564
+    ],
+    "sfx/bigwin-lamp-B3": [
+     61.9616,
+     0.7765
+    ],
+    "sfx/bigwin-lamp-B4": [
+     62.8581,
+     1.0348
+    ],
+    "sfx/bigwin-land-B1": [
+     64.0129,
+     0.9937
+    ],
+    "sfx/maxwin-hit-B1": [
+     65.1266,
+     2.5641
+    ]
+   }
+  },
+  "C": {
+   "file": "sfxpack-C",
+   "clips": {
+    "sfx/ui-click-C1": [
+     0.12,
+     0.09
+    ],
+    "sfx/ui-click-C2": [
+     0.33,
+     0.09
+    ],
+    "sfx/ui-click-C3": [
+     0.54,
+     0.09
+    ],
+    "sfx/ui-click-C4": [
+     0.75,
+     0.09
+    ],
+    "sfx/ui-open-C1": [
+     0.96,
+     0.6741
+    ],
+    "sfx/ui-open-C2": [
+     1.7541,
+     0.7074
+    ],
+    "sfx/ui-close-C1": [
+     2.5816,
+     0.5204
+    ],
+    "sfx/ui-close-C2": [
+     3.2219,
+     0.5835
+    ],
+    "sfx/ui-bet-up-C1": [
+     3.9255,
+     0.3
+    ],
+    "sfx/ui-bet-up-C2": [
+     4.3455,
+     0.3
+    ],
+    "sfx/ui-bet-down-C1": [
+     4.7655,
+     0.3
+    ],
+    "sfx/ui-bet-down-C2": [
+     5.1855,
+     0.3
+    ],
+    "sfx/ui-toggle-C1": [
+     5.6055,
+     0.12
+    ],
+    "sfx/ui-toggle-C2": [
+     5.8455,
+     0.12
+    ],
+    "sfx/ui-buy-C1": [
+     6.0855,
+     1.2539
+    ],
+    "sfx/ui-error-C1": [
+     7.4594,
+     0.6362
+    ],
+    "sfx/spin-start-C1": [
+     8.2156,
+     0.9309
+    ],
+    "sfx/spin-start-C2": [
+     9.2665,
+     0.9336
+    ],
+    "sfx/spin-drop-C1": [
+     10.3201,
+     0.06
+    ],
+    "sfx/spin-drop-C2": [
+     10.5001,
+     0.06
+    ],
+    "sfx/spin-drop-C3": [
+     10.6801,
+     0.06
+    ],
+    "sfx/spin-drop-C4": [
+     10.8601,
+     0.06
+    ],
+    "sfx/spin-drop-C5": [
+     11.0401,
+     0.06
+    ],
+    "sfx/spin-land-C1": [
+     11.2201,
+     0.14
+    ],
+    "sfx/spin-land-C2": [
+     11.4801,
+     0.14
+    ],
+    "sfx/spin-land-C3": [
+     11.7401,
+     0.14
+    ],
+    "sfx/spin-land-C4": [
+     12.0001,
+     0.14
+    ],
+    "sfx/spin-land-C5": [
+     12.2601,
+     0.14
+    ],
+    "sfx/spin-land-C6": [
+     12.5201,
+     0.14
+    ],
+    "sfx/spin-stop-C1": [
+     12.7801,
+     0.8027
+    ],
+    "sfx/spin-stop-C2": [
+     13.7028,
+     0.7485
+    ],
+    "sfx/win-small-C1": [
+     14.5714,
+     1.0447
+    ],
+    "sfx/win-small-C2": [
+     15.7361,
+     1.0273
+    ],
+    "sfx/win-medium-C1": [
+     16.8834,
+     1.3093
+    ],
+    "sfx/win-medium-C2": [
+     18.3127,
+     1.3073
+    ],
+    "sfx/win-big-C1": [
+     19.74,
+     2.0206
+    ],
+    "sfx/win-count-tick-C1": [
+     21.8806,
+     0.04
+    ],
+    "sfx/win-count-tick-C2": [
+     22.0406,
+     0.04
+    ],
+    "sfx/win-count-tick-C3": [
+     22.2006,
+     0.04
+    ],
+    "sfx/win-count-tick-C4": [
+     22.3606,
+     0.04
+    ],
+    "sfx/win-count-tick-C5": [
+     22.5206,
+     0.04
+    ],
+    "sfx/win-count-tick-C6": [
+     22.6806,
+     0.04
+    ],
+    "sfx/win-end-C1": [
+     22.8406,
+     1.4279
+    ],
+    "sfx/win-end-C2": [
+     24.3885,
+     1.3376
+    ],
+    "sfx/rocco-grab-C1": [
+     25.8461,
+     0.8681
+    ],
+    "sfx/rocco-grab-C2": [
+     26.8343,
+     0.8949
+    ],
+    "sfx/rocco-swallow-C1": [
+     27.8492,
+     0.8097
+    ],
+    "sfx/rocco-swallow-C2": [
+     28.7789,
+     0.7843
+    ],
+    "sfx/rocco-swallow-C3": [
+     29.6831,
+     0.7783
+    ],
+    "sfx/rocco-swallow-C4": [
+     30.5814,
+     0.7895
+    ],
+    "sfx/rocco-steal-whoosh-C1": [
+     31.4909,
+     0.8796
+    ],
+    "sfx/rocco-steal-whoosh-C2": [
+     32.4905,
+     0.8929
+    ],
+    "sfx/counter-step-C1": [
+     33.5034,
+     0.6844
+    ],
+    "sfx/counter-step-C2": [
+     34.3078,
+     0.7252
+    ],
+    "sfx/counter-step-C3": [
+     35.153,
+     0.6932
+    ],
+    "sfx/counter-reset-C1": [
+     35.9662,
+     0.7806
+    ],
+    "sfx/counter-reset-C2": [
+     36.8668,
+     0.7437
+    ],
+    "sfx/punch-hit-C1": [
+     37.7305,
+     0.889
+    ],
+    "sfx/punch-hit-C2": [
+     38.7395,
+     0.806
+    ],
+    "sfx/punch-wave-C1": [
+     39.6656,
+     1.2212
+    ],
+    "sfx/punch-wave-C2": [
+     41.0068,
+     1.2134
+    ],
+    "sfx/punch-dent-pop-C1": [
+     42.3403,
+     0.706
+    ],
+    "sfx/punch-dent-pop-C2": [
+     43.1663,
+     0.6949
+    ],
+    "sfx/wild-frame-on-C1": [
+     43.9812,
+     1.3768
+    ],
+    "sfx/toss-ticket-C1": [
+     45.478,
+     0.9213
+    ],
+    "sfx/toss-ticket-C2": [
+     46.5192,
+     0.9155
+    ],
+    "sfx/lever-pull-C1": [
+     47.5547,
+     1.2141
+    ],
+    "sfx/lever-blackout-C1": [
+     48.8888,
+     1.9842
+    ],
+    "sfx/kitchen-enter-C1": [
+     50.993,
+     1.5767
+    ],
+    "sfx/sack-coin-in-C1": [
+     52.6898,
+     0.13
+    ],
+    "sfx/sack-coin-in-C2": [
+     52.9398,
+     0.13
+    ],
+    "sfx/sack-coin-in-C3": [
+     53.1898,
+     0.13
+    ],
+    "sfx/sack-coin-in-C4": [
+     53.4398,
+     0.13
+    ],
+    "sfx/sack-coin-in-C5": [
+     53.6898,
+     0.13
+    ],
+    "sfx/sack-coin-in-C6": [
+     53.9398,
+     0.13
+    ],
+    "sfx/sack-lamp-on-C1": [
+     54.1898,
+     0.5584
+    ],
+    "sfx/sack-lamp-on-C2": [
+     54.8682,
+     0.4985
+    ],
+    "sfx/sack-dump-C1": [
+     55.4867,
+     1.329
+    ],
+    "sfx/sack-coins-pour-C1": [
+     56.9357,
+     3.1626
+    ],
+    "sfx/sack-paid-again-C1": [
+     60.2183,
+     1.6273
+    ],
+    "sfx/freespins-add-C1": [
+     61.9656,
+     1.3397
+    ],
+    "sfx/scatter-land-C1": [
+     63.4253,
+     1.1264
+    ],
+    "sfx/scatter-land-C2": [
+     64.6717,
+     1.5146
+    ],
+    "sfx/scatter-land-C3": [
+     66.3063,
+     1.9126
+    ],
+    "sfx/cams-enter-C1": [
+     68.3388,
+     2.0124
+    ],
+    "sfx/cams-monitor-lock-C1": [
+     70.4712,
+     0.5282
+    ],
+    "sfx/cams-monitor-lock-C2": [
+     71.1194,
+     0.5875
+    ],
+    "sfx/cams-monitor-lock-C3": [
+     71.8269,
+     0.6125
+    ],
+    "sfx/cams-respin-tick-C1": [
+     72.5593,
+     0.1
+    ],
+    "sfx/cams-respin-tick-C2": [
+     72.7793,
+     0.1
+    ],
+    "sfx/cams-respin-tick-C3": [
+     72.9993,
+     0.1
+    ],
+    "sfx/cams-respin-reset-C1": [
+     73.2193,
+     1.3384
+    ],
+    "sfx/cams-respin-reset-C2": [
+     74.6778,
+     1.3209
+    ],
+    "sfx/cams-rocco-step-C1": [
+     76.1187,
+     0.8494
+    ],
+    "sfx/cams-rocco-step-C2": [
+     77.0881,
+     0.86
+    ],
+    "sfx/cams-double-C1": [
+     78.0681,
+     1.0183
+    ],
+    "sfx/cams-full-C1": [
+     79.2064,
+     2.0913
+    ],
+    "sfx/bigwin-drum-tick-C1": [
+     81.4177,
+     0.045
+    ],
+    "sfx/bigwin-drum-tick-C2": [
+     81.5828,
+     0.045
+    ],
+    "sfx/bigwin-drum-tick-C3": [
+     81.7477,
+     0.045
+    ],
+    "sfx/bigwin-drum-tick-C4": [
+     81.9128,
+     0.045
+    ],
+    "sfx/bigwin-drum-tick-C5": [
+     82.0777,
+     0.045
+    ],
+    "sfx/bigwin-drum-tick-C6": [
+     82.2428,
+     0.045
+    ],
+    "sfx/bigwin-tier-up-C1": [
+     82.4077,
+     2.0687
+    ],
+    "sfx/bigwin-tier-up-C2": [
+     84.5965,
+     1.9827
+    ],
+    "sfx/bigwin-lamp-C1": [
+     86.6991,
+     0.8305
+    ],
+    "sfx/bigwin-lamp-C2": [
+     87.6496,
+     1.0611
+    ],
+    "sfx/bigwin-lamp-C3": [
+     88.8307,
+     1.347
+    ],
+    "sfx/bigwin-lamp-C4": [
+     90.2977,
+     1.6064
+    ],
+    "sfx/bigwin-land-C1": [
+     92.0241,
+     1.2933
+    ],
+    "sfx/maxwin-hit-C1": [
+     93.4373,
+     3.1658
+    ]
+   }
+  },
+  "D": {
+   "file": "sfxpack-D",
+   "clips": {
+    "sfx/ui-click-D1": [
+     0.12,
+     0.05
+    ],
+    "sfx/ui-click-D2": [
+     0.29,
+     0.05
+    ],
+    "sfx/ui-click-D3": [
+     0.46,
+     0.05
+    ],
+    "sfx/ui-click-D4": [
+     0.63,
+     0.05
+    ],
+    "sfx/ui-open-D1": [
+     0.8,
+     0.3359
+    ],
+    "sfx/ui-open-D2": [
+     1.2559,
+     0.3316
+    ],
+    "sfx/ui-close-D1": [
+     1.7075,
+     0.3668
+    ],
+    "sfx/ui-close-D2": [
+     2.1942,
+     0.3688
+    ],
+    "sfx/ui-bet-up-D1": [
+     2.683,
+     0.14
+    ],
+    "sfx/ui-bet-up-D2": [
+     2.943,
+     0.14
+    ],
+    "sfx/ui-bet-down-D1": [
+     3.203,
+     0.14
+    ],
+    "sfx/ui-bet-down-D2": [
+     3.463,
+     0.14
+    ],
+    "sfx/ui-toggle-D1": [
+     3.723,
+     0.1
+    ],
+    "sfx/ui-toggle-D2": [
+     3.943,
+     0.1
+    ],
+    "sfx/ui-buy-D1": [
+     4.163,
+     0.5531
+    ],
+    "sfx/ui-error-D1": [
+     4.8361,
+     0.3726
+    ],
+    "sfx/spin-start-D1": [
+     5.3287,
+     0.649
+    ],
+    "sfx/spin-start-D2": [
+     6.0977,
+     0.6469
+    ],
+    "sfx/spin-drop-D1": [
+     6.8646,
+     0.045
+    ],
+    "sfx/spin-drop-D2": [
+     7.0296,
+     0.045
+    ],
+    "sfx/spin-drop-D3": [
+     7.1946,
+     0.045
+    ],
+    "sfx/spin-drop-D4": [
+     7.3596,
+     0.045
+    ],
+    "sfx/spin-drop-D5": [
+     7.5246,
+     0.045
+    ],
+    "sfx/spin-land-D1": [
+     7.6896,
+     0.09
+    ],
+    "sfx/spin-land-D2": [
+     7.8996,
+     0.09
+    ],
+    "sfx/spin-land-D3": [
+     8.1096,
+     0.09
+    ],
+    "sfx/spin-land-D4": [
+     8.3196,
+     0.09
+    ],
+    "sfx/spin-land-D5": [
+     8.5296,
+     0.09
+    ],
+    "sfx/spin-land-D6": [
+     8.7396,
+     0.09
+    ],
+    "sfx/spin-stop-D1": [
+     8.9496,
+     0.4096
+    ],
+    "sfx/spin-stop-D2": [
+     9.4793,
+     0.3842
+    ],
+    "sfx/win-small-D1": [
+     9.9834,
+     0.4287
+    ],
+    "sfx/win-small-D2": [
+     10.5321,
+     0.429
+    ],
+    "sfx/win-medium-D1": [
+     11.0812,
+     0.8581
+    ],
+    "sfx/win-medium-D2": [
+     12.0592,
+     0.8072
+    ],
+    "sfx/win-big-D1": [
+     12.9864,
+     1.5424
+    ],
+    "sfx/win-count-tick-D1": [
+     14.6488,
+     0.04
+    ],
+    "sfx/win-count-tick-D2": [
+     14.8088,
+     0.04
+    ],
+    "sfx/win-count-tick-D3": [
+     14.9688,
+     0.04
+    ],
+    "sfx/win-count-tick-D4": [
+     15.1288,
+     0.04
+    ],
+    "sfx/win-count-tick-D5": [
+     15.2888,
+     0.04
+    ],
+    "sfx/win-count-tick-D6": [
+     15.4488,
+     0.04
+    ],
+    "sfx/win-end-D1": [
+     15.6088,
+     0.6974
+    ],
+    "sfx/win-end-D2": [
+     16.4262,
+     0.6976
+    ],
+    "sfx/rocco-grab-D1": [
+     17.2438,
+     0.5193
+    ],
+    "sfx/rocco-grab-D2": [
+     17.8831,
+     0.5447
+    ],
+    "sfx/rocco-swallow-D1": [
+     18.5479,
+     0.6629
+    ],
+    "sfx/rocco-swallow-D2": [
+     19.3308,
+     0.6581
+    ],
+    "sfx/rocco-swallow-D3": [
+     20.1089,
+     0.6773
+    ],
+    "sfx/rocco-swallow-D4": [
+     20.9062,
+     0.6808
+    ],
+    "sfx/rocco-steal-whoosh-D1": [
+     21.707,
+     0.621
+    ],
+    "sfx/rocco-steal-whoosh-D2": [
+     22.4481,
+     0.6082
+    ],
+    "sfx/counter-step-D1": [
+     23.1763,
+     0.3026
+    ],
+    "sfx/counter-step-D2": [
+     23.5989,
+     0.3052
+    ],
+    "sfx/counter-step-D3": [
+     24.0241,
+     0.3219
+    ],
+    "sfx/counter-reset-D1": [
+     24.466,
+     0.5365
+    ],
+    "sfx/counter-reset-D2": [
+     25.1225,
+     0.5387
+    ],
+    "sfx/punch-hit-D1": [
+     25.7812,
+     0.378
+    ],
+    "sfx/punch-hit-D2": [
+     26.2792,
+     0.3795
+    ],
+    "sfx/punch-wave-D1": [
+     26.7787,
+     0.7338
+    ],
+    "sfx/punch-wave-D2": [
+     27.6325,
+     0.703
+    ],
+    "sfx/punch-dent-pop-D1": [
+     28.4555,
+     0.3227
+    ],
+    "sfx/punch-dent-pop-D2": [
+     28.8982,
+     0.3169
+    ],
+    "sfx/wild-frame-on-D1": [
+     29.3351,
+     0.7418
+    ],
+    "sfx/toss-ticket-D1": [
+     30.1969,
+     0.7349
+    ],
+    "sfx/toss-ticket-D2": [
+     31.0518,
+     0.8064
+    ],
+    "sfx/lever-pull-D1": [
+     31.9782,
+     0.855
+    ],
+    "sfx/lever-blackout-D1": [
+     32.9532,
+     1.3034
+    ],
+    "sfx/kitchen-enter-D1": [
+     34.3766,
+     1.3701
+    ],
+    "sfx/sack-coin-in-D1": [
+     35.8667,
+     0.0806
+    ],
+    "sfx/sack-coin-in-D2": [
+     36.0674,
+     0.0823
+    ],
+    "sfx/sack-coin-in-D3": [
+     36.2697,
+     0.0803
+    ],
+    "sfx/sack-coin-in-D4": [
+     36.47,
+     0.0802
+    ],
+    "sfx/sack-coin-in-D5": [
+     36.6702,
+     0.0799
+    ],
+    "sfx/sack-coin-in-D6": [
+     36.8701,
+     0.0817
+    ],
+    "sfx/sack-lamp-on-D1": [
+     37.0718,
+     0.3188
+    ],
+    "sfx/sack-lamp-on-D2": [
+     37.5106,
+     0.2934
+    ],
+    "sfx/sack-dump-D1": [
+     37.924,
+     1.036
+    ],
+    "sfx/sack-coins-pour-D1": [
+     39.08,
+     3.0839
+    ],
+    "sfx/sack-paid-again-D1": [
+     42.2839,
+     0.8945
+    ],
+    "sfx/freespins-add-D1": [
+     43.2984,
+     0.7197
+    ],
+    "sfx/scatter-land-D1": [
+     44.1382,
+     0.479
+    ],
+    "sfx/scatter-land-D2": [
+     44.7372,
+     0.8173
+    ],
+    "sfx/scatter-land-D3": [
+     45.6744,
+     1.2184
+    ],
+    "sfx/cams-enter-D1": [
+     47.0128,
+     1.5743
+    ],
+    "sfx/cams-monitor-lock-D1": [
+     48.7071,
+     0.2854
+    ],
+    "sfx/cams-monitor-lock-D2": [
+     49.1125,
+     0.2472
+    ],
+    "sfx/cams-monitor-lock-D3": [
+     49.4797,
+     0.2904
+    ],
+    "sfx/cams-respin-tick-D1": [
+     49.8901,
+     0.05
+    ],
+    "sfx/cams-respin-tick-D2": [
+     50.0601,
+     0.05
+    ],
+    "sfx/cams-respin-tick-D3": [
+     50.2301,
+     0.05
+    ],
+    "sfx/cams-respin-reset-D1": [
+     50.4001,
+     0.5936
+    ],
+    "sfx/cams-respin-reset-D2": [
+     51.1137,
+     0.5782
+    ],
+    "sfx/cams-rocco-step-D1": [
+     51.8119,
+     0.5645
+    ],
+    "sfx/cams-rocco-step-D2": [
+     52.4964,
+     0.5919
+    ],
+    "sfx/cams-double-D1": [
+     53.2083,
+     0.5439
+    ],
+    "sfx/cams-full-D1": [
+     53.8722,
+     1.9255
+    ],
+    "sfx/bigwin-drum-tick-D1": [
+     55.9176,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-D2": [
+     56.0726,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-D3": [
+     56.2276,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-D4": [
+     56.3826,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-D5": [
+     56.5376,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-D6": [
+     56.6926,
+     0.035
+    ],
+    "sfx/bigwin-tier-up-D1": [
+     56.8476,
+     1.2169
+    ],
+    "sfx/bigwin-tier-up-D2": [
+     58.1846,
+     1.2436
+    ],
+    "sfx/bigwin-lamp-D1": [
+     59.5482,
+     0.3549
+    ],
+    "sfx/bigwin-lamp-D2": [
+     60.0231,
+     0.5305
+    ],
+    "sfx/bigwin-lamp-D3": [
+     60.6736,
+     0.8072
+    ],
+    "sfx/bigwin-lamp-D4": [
+     61.6008,
+     0.9873
+    ],
+    "sfx/bigwin-land-D1": [
+     62.7081,
+     0.8629
+    ],
+    "sfx/maxwin-hit-D1": [
+     63.6911,
+     2.8495
+    ]
+   }
+  },
+  "E": {
+   "file": "sfxpack-E",
+   "clips": {
+    "sfx/ui-click-E1": [
+     0.12,
+     0.035
+    ],
+    "sfx/ui-click-E2": [
+     0.275,
+     0.035
+    ],
+    "sfx/ui-click-E3": [
+     0.43,
+     0.035
+    ],
+    "sfx/ui-click-E4": [
+     0.585,
+     0.035
+    ],
+    "sfx/ui-open-E1": [
+     0.74,
+     0.2738
+    ],
+    "sfx/ui-open-E2": [
+     1.1338,
+     0.2599
+    ],
+    "sfx/ui-close-E1": [
+     1.5138,
+     0.2968
+    ],
+    "sfx/ui-close-E2": [
+     1.9305,
+     0.2976
+    ],
+    "sfx/ui-bet-up-E1": [
+     2.3481,
+     0.155
+    ],
+    "sfx/ui-bet-up-E2": [
+     2.6231,
+     0.155
+    ],
+    "sfx/ui-bet-down-E1": [
+     2.8981,
+     0.155
+    ],
+    "sfx/ui-bet-down-E2": [
+     3.1731,
+     0.155
+    ],
+    "sfx/ui-toggle-E1": [
+     3.4481,
+     0.085
+    ],
+    "sfx/ui-toggle-E2": [
+     3.6531,
+     0.085
+    ],
+    "sfx/ui-buy-E1": [
+     3.8581,
+     1.0597
+    ],
+    "sfx/ui-error-E1": [
+     5.0379,
+     0.3543
+    ],
+    "sfx/spin-start-E1": [
+     5.5121,
+     0.54
+    ],
+    "sfx/spin-start-E2": [
+     6.1722,
+     0.5246
+    ],
+    "sfx/spin-drop-E1": [
+     6.8168,
+     0.035
+    ],
+    "sfx/spin-drop-E2": [
+     6.9718,
+     0.035
+    ],
+    "sfx/spin-drop-E3": [
+     7.1268,
+     0.035
+    ],
+    "sfx/spin-drop-E4": [
+     7.2818,
+     0.035
+    ],
+    "sfx/spin-drop-E5": [
+     7.4368,
+     0.035
+    ],
+    "sfx/spin-land-E1": [
+     7.5918,
+     0.1
+    ],
+    "sfx/spin-land-E2": [
+     7.8118,
+     0.1
+    ],
+    "sfx/spin-land-E3": [
+     8.0318,
+     0.1
+    ],
+    "sfx/spin-land-E4": [
+     8.2518,
+     0.1
+    ],
+    "sfx/spin-land-E5": [
+     8.4718,
+     0.1
+    ],
+    "sfx/spin-land-E6": [
+     8.6918,
+     0.1
+    ],
+    "sfx/spin-stop-E1": [
+     8.9118,
+     0.5587
+    ],
+    "sfx/spin-stop-E2": [
+     9.5904,
+     0.5602
+    ],
+    "sfx/win-small-E1": [
+     10.2707,
+     0.4521
+    ],
+    "sfx/win-small-E2": [
+     10.8427,
+     0.452
+    ],
+    "sfx/win-medium-E1": [
+     11.4147,
+     0.8882
+    ],
+    "sfx/win-medium-E2": [
+     12.4229,
+     0.8854
+    ],
+    "sfx/win-big-E1": [
+     13.4283,
+     1.9123
+    ],
+    "sfx/win-count-tick-E1": [
+     15.4606,
+     0.03
+    ],
+    "sfx/win-count-tick-E2": [
+     15.6106,
+     0.03
+    ],
+    "sfx/win-count-tick-E3": [
+     15.7606,
+     0.03
+    ],
+    "sfx/win-count-tick-E4": [
+     15.9106,
+     0.03
+    ],
+    "sfx/win-count-tick-E5": [
+     16.0606,
+     0.03
+    ],
+    "sfx/win-count-tick-E6": [
+     16.2106,
+     0.03
+    ],
+    "sfx/win-end-E1": [
+     16.3606,
+     0.5517
+    ],
+    "sfx/win-end-E2": [
+     17.0323,
+     0.54
+    ],
+    "sfx/rocco-grab-E1": [
+     17.6924,
+     0.3631
+    ],
+    "sfx/rocco-grab-E2": [
+     18.1755,
+     0.3655
+    ],
+    "sfx/rocco-swallow-E1": [
+     18.661,
+     0.4939
+    ],
+    "sfx/rocco-swallow-E2": [
+     19.2749,
+     0.4809
+    ],
+    "sfx/rocco-swallow-E3": [
+     19.8759,
+     0.5022
+    ],
+    "sfx/rocco-swallow-E4": [
+     20.4981,
+     0.4953
+    ],
+    "sfx/rocco-steal-whoosh-E1": [
+     21.1133,
+     0.4441
+    ],
+    "sfx/rocco-steal-whoosh-E2": [
+     21.6774,
+     0.4485
+    ],
+    "sfx/counter-step-E1": [
+     22.2459,
+     0.2849
+    ],
+    "sfx/counter-step-E2": [
+     22.6507,
+     0.2651
+    ],
+    "sfx/counter-step-E3": [
+     23.0358,
+     0.2787
+    ],
+    "sfx/counter-reset-E1": [
+     23.4345,
+     0.4334
+    ],
+    "sfx/counter-reset-E2": [
+     23.9879,
+     0.4255
+    ],
+    "sfx/punch-hit-E1": [
+     24.5334,
+     0.3702
+    ],
+    "sfx/punch-hit-E2": [
+     25.0236,
+     0.3701
+    ],
+    "sfx/punch-wave-E1": [
+     25.5137,
+     0.8416
+    ],
+    "sfx/punch-wave-E2": [
+     26.4753,
+     0.8458
+    ],
+    "sfx/punch-dent-pop-E1": [
+     27.4411,
+     0.2639
+    ],
+    "sfx/punch-dent-pop-E2": [
+     27.825,
+     0.2559
+    ],
+    "sfx/wild-frame-on-E1": [
+     28.2009,
+     0.9582
+    ],
+    "sfx/toss-ticket-E1": [
+     29.279,
+     0.6695
+    ],
+    "sfx/toss-ticket-E2": [
+     30.0685,
+     0.6258
+    ],
+    "sfx/lever-pull-E1": [
+     30.8143,
+     0.84
+    ],
+    "sfx/lever-blackout-E1": [
+     31.7744,
+     1.5307
+    ],
+    "sfx/kitchen-enter-E1": [
+     33.4251,
+     1.52
+    ],
+    "sfx/sack-coin-in-E1": [
+     35.0651,
+     0.0562
+    ],
+    "sfx/sack-coin-in-E2": [
+     35.2413,
+     0.0541
+    ],
+    "sfx/sack-coin-in-E3": [
+     35.4154,
+     0.056
+    ],
+    "sfx/sack-coin-in-E4": [
+     35.5914,
+     0.0547
+    ],
+    "sfx/sack-coin-in-E5": [
+     35.7661,
+     0.0531
+    ],
+    "sfx/sack-coin-in-E6": [
+     35.9392,
+     0.0558
+    ],
+    "sfx/sack-lamp-on-E1": [
+     36.115,
+     0.2498
+    ],
+    "sfx/sack-lamp-on-E2": [
+     36.4848,
+     0.2501
+    ],
+    "sfx/sack-dump-E1": [
+     36.8548,
+     0.9774
+    ],
+    "sfx/sack-coins-pour-E1": [
+     37.9522,
+     2.9916
+    ],
+    "sfx/sack-paid-again-E1": [
+     41.0637,
+     1.2973
+    ],
+    "sfx/freespins-add-E1": [
+     42.481,
+     0.8601
+    ],
+    "sfx/scatter-land-E1": [
+     43.4611,
+     0.5107
+    ],
+    "sfx/scatter-land-E2": [
+     44.0918,
+     0.8377
+    ],
+    "sfx/scatter-land-E3": [
+     45.0495,
+     1.1723
+    ],
+    "sfx/cams-enter-E1": [
+     46.3418,
+     1.571
+    ],
+    "sfx/cams-monitor-lock-E1": [
+     48.0328,
+     0.1947
+    ],
+    "sfx/cams-monitor-lock-E2": [
+     48.3475,
+     0.193
+    ],
+    "sfx/cams-monitor-lock-E3": [
+     48.6606,
+     0.1786
+    ],
+    "sfx/cams-respin-tick-E1": [
+     48.9592,
+     0.04
+    ],
+    "sfx/cams-respin-tick-E2": [
+     49.1192,
+     0.04
+    ],
+    "sfx/cams-respin-tick-E3": [
+     49.2792,
+     0.04
+    ],
+    "sfx/cams-respin-reset-E1": [
+     49.4392,
+     0.6424
+    ],
+    "sfx/cams-respin-reset-E2": [
+     50.2015,
+     0.6485
+    ],
+    "sfx/cams-rocco-step-E1": [
+     50.97,
+     0.4922
+    ],
+    "sfx/cams-rocco-step-E2": [
+     51.5822,
+     0.4792
+    ],
+    "sfx/cams-double-E1": [
+     52.1814,
+     0.4302
+    ],
+    "sfx/cams-full-E1": [
+     52.7316,
+     2.2643
+    ],
+    "sfx/bigwin-drum-tick-E1": [
+     55.1159,
+     0.028
+    ],
+    "sfx/bigwin-drum-tick-E2": [
+     55.2639,
+     0.028
+    ],
+    "sfx/bigwin-drum-tick-E3": [
+     55.4119,
+     0.028
+    ],
+    "sfx/bigwin-drum-tick-E4": [
+     55.5599,
+     0.028
+    ],
+    "sfx/bigwin-drum-tick-E5": [
+     55.7079,
+     0.028
+    ],
+    "sfx/bigwin-drum-tick-E6": [
+     55.8559,
+     0.028
+    ],
+    "sfx/bigwin-tier-up-E1": [
+     56.0039,
+     1.4288
+    ],
+    "sfx/bigwin-tier-up-E2": [
+     57.5528,
+     1.4259
+    ],
+    "sfx/bigwin-lamp-E1": [
+     59.0986,
+     0.4004
+    ],
+    "sfx/bigwin-lamp-E2": [
+     59.619,
+     0.6003
+    ],
+    "sfx/bigwin-lamp-E3": [
+     60.3394,
+     0.8419
+    ],
+    "sfx/bigwin-lamp-E4": [
+     61.3013,
+     1.0604
+    ],
+    "sfx/bigwin-land-E1": [
+     62.4816,
+     1.0155
+    ],
+    "sfx/maxwin-hit-E1": [
+     63.6171,
+     3.174
+    ]
+   }
+  },
+  "F": {
+   "file": "sfxpack-F",
+   "clips": {
+    "sfx/ui-click-F1": [
+     0.12,
+     0.05
+    ],
+    "sfx/ui-click-F2": [
+     0.29,
+     0.05
+    ],
+    "sfx/ui-click-F3": [
+     0.46,
+     0.05
+    ],
+    "sfx/ui-click-F4": [
+     0.63,
+     0.05
+    ],
+    "sfx/ui-open-F1": [
+     0.8,
+     0.4675
+    ],
+    "sfx/ui-open-F2": [
+     1.3875,
+     0.426
+    ],
+    "sfx/ui-close-F1": [
+     1.9335,
+     0.521
+    ],
+    "sfx/ui-close-F2": [
+     2.5746,
+     0.5698
+    ],
+    "sfx/ui-bet-up-F1": [
+     3.2643,
+     0.1731
+    ],
+    "sfx/ui-bet-up-F2": [
+     3.5574,
+     0.1664
+    ],
+    "sfx/ui-bet-down-F1": [
+     3.8439,
+     0.2224
+    ],
+    "sfx/ui-bet-down-F2": [
+     4.1863,
+     0.2152
+    ],
+    "sfx/ui-toggle-F1": [
+     4.5215,
+     0.1
+    ],
+    "sfx/ui-toggle-F2": [
+     4.7415,
+     0.1
+    ],
+    "sfx/ui-buy-F1": [
+     4.9615,
+     1.1713
+    ],
+    "sfx/ui-error-F1": [
+     6.2528,
+     0.543
+    ],
+    "sfx/spin-start-F1": [
+     6.9158,
+     0.8752
+    ],
+    "sfx/spin-start-F2": [
+     7.9111,
+     0.8758
+    ],
+    "sfx/spin-drop-F1": [
+     8.9069,
+     0.04
+    ],
+    "sfx/spin-drop-F2": [
+     9.0669,
+     0.04
+    ],
+    "sfx/spin-drop-F3": [
+     9.2269,
+     0.04
+    ],
+    "sfx/spin-drop-F4": [
+     9.3869,
+     0.04
+    ],
+    "sfx/spin-drop-F5": [
+     9.5469,
+     0.04
+    ],
+    "sfx/spin-land-F1": [
+     9.7069,
+     0.1
+    ],
+    "sfx/spin-land-F2": [
+     9.9269,
+     0.1
+    ],
+    "sfx/spin-land-F3": [
+     10.1469,
+     0.1
+    ],
+    "sfx/spin-land-F4": [
+     10.3669,
+     0.1
+    ],
+    "sfx/spin-land-F5": [
+     10.5869,
+     0.1
+    ],
+    "sfx/spin-land-F6": [
+     10.8069,
+     0.1
+    ],
+    "sfx/spin-stop-F1": [
+     11.0269,
+     0.5218
+    ],
+    "sfx/spin-stop-F2": [
+     11.6686,
+     0.5616
+    ],
+    "sfx/win-small-F1": [
+     12.3503,
+     0.6914
+    ],
+    "sfx/win-small-F2": [
+     13.1616,
+     0.6775
+    ],
+    "sfx/win-medium-F1": [
+     13.9592,
+     1.1372
+    ],
+    "sfx/win-medium-F2": [
+     15.2164,
+     1.1192
+    ],
+    "sfx/win-big-F1": [
+     16.4556,
+     2.1354
+    ],
+    "sfx/win-count-tick-F1": [
+     18.711,
+     0.04
+    ],
+    "sfx/win-count-tick-F2": [
+     18.871,
+     0.04
+    ],
+    "sfx/win-count-tick-F3": [
+     19.031,
+     0.04
+    ],
+    "sfx/win-count-tick-F4": [
+     19.191,
+     0.04
+    ],
+    "sfx/win-count-tick-F5": [
+     19.351,
+     0.04
+    ],
+    "sfx/win-count-tick-F6": [
+     19.511,
+     0.04
+    ],
+    "sfx/win-end-F1": [
+     19.671,
+     0.7779
+    ],
+    "sfx/win-end-F2": [
+     20.5689,
+     0.7777
+    ],
+    "sfx/rocco-grab-F1": [
+     21.4666,
+     0.6571
+    ],
+    "sfx/rocco-grab-F2": [
+     22.2437,
+     0.6596
+    ],
+    "sfx/rocco-swallow-F1": [
+     23.0233,
+     0.8354
+    ],
+    "sfx/rocco-swallow-F2": [
+     23.9787,
+     0.8123
+    ],
+    "sfx/rocco-swallow-F3": [
+     24.911,
+     0.802
+    ],
+    "sfx/rocco-swallow-F4": [
+     25.8329,
+     0.8188
+    ],
+    "sfx/rocco-steal-whoosh-F1": [
+     26.7718,
+     0.6993
+    ],
+    "sfx/rocco-steal-whoosh-F2": [
+     27.591,
+     0.6895
+    ],
+    "sfx/counter-step-F1": [
+     28.4005,
+     0.3791
+    ],
+    "sfx/counter-step-F2": [
+     28.8996,
+     0.3611
+    ],
+    "sfx/counter-step-F3": [
+     29.3806,
+     0.3956
+    ],
+    "sfx/counter-reset-F1": [
+     29.8962,
+     0.7309
+    ],
+    "sfx/counter-reset-F2": [
+     30.7471,
+     0.7342
+    ],
+    "sfx/punch-hit-F1": [
+     31.6013,
+     0.5455
+    ],
+    "sfx/punch-hit-F2": [
+     32.2668,
+     0.543
+    ],
+    "sfx/punch-wave-F1": [
+     32.9298,
+     0.8361
+    ],
+    "sfx/punch-wave-F2": [
+     33.8859,
+     0.6886
+    ],
+    "sfx/punch-dent-pop-F1": [
+     34.6945,
+     0.5274
+    ],
+    "sfx/punch-dent-pop-F2": [
+     35.3419,
+     0.5335
+    ],
+    "sfx/wild-frame-on-F1": [
+     35.9954,
+     1.0505
+    ],
+    "sfx/toss-ticket-F1": [
+     37.1659,
+     0.8086
+    ],
+    "sfx/toss-ticket-F2": [
+     38.0945,
+     0.8606
+    ],
+    "sfx/lever-pull-F1": [
+     39.0751,
+     1.0059
+    ],
+    "sfx/lever-blackout-F1": [
+     40.201,
+     1.8781
+    ],
+    "sfx/kitchen-enter-F1": [
+     42.1992,
+     1.4866
+    ],
+    "sfx/sack-coin-in-F1": [
+     43.8058,
+     0.0652
+    ],
+    "sfx/sack-coin-in-F2": [
+     43.991,
+     0.0637
+    ],
+    "sfx/sack-coin-in-F3": [
+     44.1747,
+     0.0643
+    ],
+    "sfx/sack-coin-in-F4": [
+     44.359,
+     0.0639
+    ],
+    "sfx/sack-coin-in-F5": [
+     44.5429,
+     0.0641
+    ],
+    "sfx/sack-coin-in-F6": [
+     44.727,
+     0.0642
+    ],
+    "sfx/sack-lamp-on-F1": [
+     44.9111,
+     0.3668
+    ],
+    "sfx/sack-lamp-on-F2": [
+     45.398,
+     0.3355
+    ],
+    "sfx/sack-dump-F1": [
+     45.8535,
+     1.0772
+    ],
+    "sfx/sack-coins-pour-F1": [
+     47.0507,
+     3.2577
+    ],
+    "sfx/sack-paid-again-F1": [
+     50.4284,
+     1.4334
+    ],
+    "sfx/freespins-add-F1": [
+     51.9818,
+     0.932
+    ],
+    "sfx/scatter-land-F1": [
+     53.0337,
+     0.5009
+    ],
+    "sfx/scatter-land-F2": [
+     53.6547,
+     0.8257
+    ],
+    "sfx/scatter-land-F3": [
+     54.6004,
+     1.2973
+    ],
+    "sfx/cams-enter-F1": [
+     56.0176,
+     1.6968
+    ],
+    "sfx/cams-monitor-lock-F1": [
+     57.8344,
+     0.3472
+    ],
+    "sfx/cams-monitor-lock-F2": [
+     58.3016,
+     0.338
+    ],
+    "sfx/cams-monitor-lock-F3": [
+     58.7596,
+     0.3557
+    ],
+    "sfx/cams-respin-tick-F1": [
+     59.2354,
+     0.05
+    ],
+    "sfx/cams-respin-tick-F2": [
+     59.4054,
+     0.05
+    ],
+    "sfx/cams-respin-tick-F3": [
+     59.5754,
+     0.05
+    ],
+    "sfx/cams-respin-reset-F1": [
+     59.7454,
+     0.6443
+    ],
+    "sfx/cams-respin-reset-F2": [
+     60.5097,
+     0.6101
+    ],
+    "sfx/cams-rocco-step-F1": [
+     61.2398,
+     0.632
+    ],
+    "sfx/cams-rocco-step-F2": [
+     61.9918,
+     0.6585
+    ],
+    "sfx/cams-double-F1": [
+     62.7703,
+     0.5483
+    ],
+    "sfx/cams-full-F1": [
+     63.4386,
+     2.2156
+    ],
+    "sfx/bigwin-drum-tick-F1": [
+     65.7742,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-F2": [
+     65.9292,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-F3": [
+     66.0842,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-F4": [
+     66.2392,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-F5": [
+     66.3942,
+     0.035
+    ],
+    "sfx/bigwin-drum-tick-F6": [
+     66.5492,
+     0.035
+    ],
+    "sfx/bigwin-tier-up-F1": [
+     66.7042,
+     1.4699
+    ],
+    "sfx/bigwin-tier-up-F2": [
+     68.2942,
+     1.4735
+    ],
+    "sfx/bigwin-lamp-F1": [
+     69.8877,
+     0.4174
+    ],
+    "sfx/bigwin-lamp-F2": [
+     70.4251,
+     0.5879
+    ],
+    "sfx/bigwin-lamp-F3": [
+     71.133,
+     0.8573
+    ],
+    "sfx/bigwin-lamp-F4": [
+     72.1103,
+     1.0442
+    ],
+    "sfx/bigwin-land-F1": [
+     73.2745,
+     1.0188
+    ],
+    "sfx/maxwin-hit-F1": [
+     74.4134,
+     3.4841
+    ]
+   }
+  }
+ }
+}
