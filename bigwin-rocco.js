@@ -30,6 +30,8 @@ const CLIPS={
  idle2:{file:'BW-idle',unm:false,of:'idle'},   // второй экземпляр покоя: меняется с первым без перемотки на виду (idleStep)
  cheer:{file:'BW-cheer',unm:true,dur:4.38},    // 4,38 с, покой → радость → покой, петля; собран из частей Kling (tools/clip_bw_build.py, asset-source/openrouter/bigwin-rocco/BW-cheer.provenance.txt)
  cheer2:{file:'BW-cheer',unm:true,dur:4.38,of:'cheer'},   // второй экземпляр того же ролика: петля идёт по очереди то на одном, то на другом (перемотка в 0 — пока другой играет), потому что перемотка под нагрузкой тянется и «loop» встаёт
+ cheerIn:{file:'BW-cheer-in',unm:true,dur:.42},    // вход: покой → первый кадр петли за 10 кадров (tools/bw_cheer_inout.py), первый кадр ≡ покой, последний ≡ первый кадр BW-cheer; смена в обе стороны жёсткая
+ cheerOut:{file:'BW-cheer-out',unm:true,dur:.42},  // выход: последний кадр петли → покой за 10 кадров, последний кадр ≡ покой
  max:{file:'BW-max',unm:true,dur:5.54}};     // 5,54 с, покой → оборот на месте и танец → покой, один проход (MAX WIN) 
 const CSS=`
 .bw-rk{position:absolute;pointer-events:none;opacity:var(--rkop,1)}
@@ -138,7 +140,10 @@ function create(o){
   if(!opt.arm) watch(P);
   return P; }
  function watch(P){   // конец ролика — в покой; петля — за 0,2 с до конца второй экземпляр уже стартует и встаёт на место (оба кадра — поза покоя); ролик встал — тоже в покой
-  const v=P.v; v.onended=()=>{ if(S.cur===P) leave(P,FD()); };
+  const v=P.v; v.onended=()=>{ if(S.cur!==P) return;
+   if(P.n==='cheerIn'){ start('cheer',{loop:!S.cheerEnd,instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // вход кончился (его последний кадр ≡ первый кадр петли) — петля жёстко
+   if(P.n==='cheer'&&!P.loop){ start('cheerOut',{instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // последний круг кончился — выход в покой роликом, а не наплывом
+   leave(P,P.n==='cheerOut'?0:FD()); };   // выход кончился: его последний кадр ≡ покой — жёсткая смена
   let lt=-1, lw=performance.now(); clearInterval(S.mon);
   S.mon=setInterval(()=>{ if(S.cur!==P||P.over){ clearInterval(S.mon); return; } const t=v.currentTime, w=performance.now();
    if(P.loop&&!P.chained&&t>=dur(P.n)-.2/SLOW()){ P.chained=true; start(P.n,{loop:true,instant:true,chain:P}); }
@@ -166,7 +171,7 @@ function create(o){
    return; }
   if(!c.live){ if(S.cheerOn&&!S.cheerEnd){ S.cheerEnd=true; finishLoop(); } return; }   // часы шоу встали (конец): круг доигрывается сам
   /* радость нужна с tC до tF: нет ролика (ещё не стартовал, не успел загрузиться, ролик встал и ушёл в покой) — запускаем заново, не чаще раза в 0,6 с; после tF новых кругов нет, текущий доигрывается */
-  if(!S.cheerEnd&&t>=c.tC&&!S.cur&&!S.starting&&performance.now()>=S.retryAt){ S.cheerOn=true; S.starting=true; start('cheer',{loop:true}).then(P=>{ S.starting=false; if(!P){ S.retryAt=performance.now()+600; } }); }
+  if(!S.cheerEnd&&t>=c.tC&&!S.cur&&!S.starting&&performance.now()>=S.retryAt){ S.cheerOn=true; S.starting=true; start('cheerIn',{instant:true}).then(P=>{ S.starting=false; if(!P){ S.retryAt=performance.now()+600; } }); }
   if(S.cheerOn&&!S.cheerEnd&&t>=c.tF){ S.cheerEnd=true; finishLoop(); } }
  /* раскадровка и запись: ролики не играют, а ставятся на кадр по расписанию (то же расписание, как функция времени) */
  const seekTo=(v,t)=>new Promise(res=>{ if(v.readyState<1||Math.abs(v.currentTime-t)<.01) return res(); let d=false; const f=()=>{ if(d) return; d=true; v.removeEventListener('seeked',f); res(); }; v.addEventListener('seeked',f); setTimeout(f,900); try{ v.currentTime=Math.max(0,Math.min(t,(v.duration||t)-.001)); }catch(e){ f(); } });
