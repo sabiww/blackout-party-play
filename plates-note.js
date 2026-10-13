@@ -23,12 +23,13 @@ function toast(text,ms){
  t.dataset.keep=ms<0?'1':'';
  const pod=document.getElementById('pod'), r=pod&&window.bpPodRect&&window.bpPodRect(); // записка стоит над пультом, по его центру (нет пульта — по центру экрана)
  if(r&&r.width){ t.style.left=Math.max(8,Math.min(innerWidth-8,r.left+r.width/2))+'px'; t.style.top=Math.max(60,r.top-12)+'px'; } else { t.style.left='50%'; t.style.top=(innerHeight*.8)+'px'; }
+ { const w=t.offsetWidth, L=parseFloat(t.style.left); if(w&&isFinite(L)) t.style.left=Math.max(w/2+8,Math.min(innerWidth-w/2-8,L))+'px'; } // записка целиком на экране: у телефона боком пульт стоит у правого края, и центр над пультом выталкивал её за кромку
  if(!keep){ t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
  clearTimeout(tT); if(!(ms<0)) tT=setTimeout(()=>t.classList.remove('on'),ms||2600);
 }
 function hide(text){ const t=document.getElementById('pn-toast'); if(!t||!t.classList.contains('on')||(text&&t.textContent!==text)) return; clearTimeout(tT); t.dataset.keep=''; t.classList.remove('on'); }
 window.bpPlates={mode,on:()=>mode()==='note',dark:()=>mode()==='dark',apply,toast,hide,
  set(v){ if(!OK.includes(v)) return; ss.set(KEY,v); let u=null; try{ u=new URL(location.href); u.searchParams.delete('plates'); }catch(e){} if(u) location.replace(u.toString()); else location.reload(); }};
-// страница могла открыться без запроса, а q (index.html?bpv=b0d45272) прочитать адрес позже — подстрахуемся после загрузки
+// страница могла открыться без запроса, а q (index.html?bpv=52316320) прочитать адрес позже — подстрахуемся после загрузки
 document.addEventListener('DOMContentLoaded',apply);
 })();

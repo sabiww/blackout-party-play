@@ -8,11 +8,17 @@
 (()=>{
 'use strict';
 const SS={get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} },del(k){ try{ sessionStorage.removeItem(k); }catch(e){} }};
-const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=b0d45272)
+const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=52316320)
 const NAVS=['top','side'], DEF_NAV='top';
 const pick=(name,list,def)=>{ const v=QQ().get(name)||SS.get('bp-'+name); return list.includes(v)?v:def; };
-const cfg=()=>({old:(QQ().get('dlg')||SS.get('bp-dlg'))==='old',nav:pick('dlgnav',NAVS,DEF_NAV)});
+const DLGS=['old','plate','clean']; // ?dlg=old — окна-мониторы; ?dlg=plate — окна F на плите (рама, лента); по умолчанию clean — чистый вид на затемнении (как Buy bonus и Autoplay, 2026-10-13)
+const dlgMode=()=>{ const v=QQ().get('dlg')||SS.get('bp-dlg'); return DLGS.includes(v)?v:'clean'; };
+const cfg=()=>({old:dlgMode()==='old',nav:pick('dlgnav',NAVS,DEF_NAV)});
 const on=()=>!cfg().old;
+// чистый вид — только на тёмных плашках (?plates=dark, по умолчанию): «Записка» и прежний красный вид плашек остаются как были
+const clean=()=>dlgMode()==='clean'&&!(window.bpPlates&&window.bpPlates.mode()!=='dark');
+const markDlg=()=>{ try{ document.documentElement.setAttribute('data-dlg',clean()?'clean':dlgMode()); }catch(e){} }; // <html data-dlg>: по нему dialogs-clean-doc.css красит ворота и итог бонуса, записку, строку реплея
+markDlg(); document.addEventListener('DOMContentLoaded',markDlg);
 const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- шрифты: Black Ops One, Barlow SC и VT323 уже объявлены в index.html (в shadow DOM @font-face не работает, но семейства из документа доступны) ----------
@@ -30,6 +36,10 @@ const styleHTML=()=>{ const t=cssText(); return t?`<style>${t}</style>`:`<link r
 // «Записка на плите» (plates-note.js, <html data-plates=note>): поверх основных стилей окна добавляется dialogs-f-note.css — тот же приём, что с dialogs-f.css (<link id="bp-dlgnote" media="not all"> или <style id="bp-dlgnote">). В режиме plates=old файл не читается, окна прежние.
 let NCSS=null;
 (()=>{ const l=document.getElementById('bp-dlgnote'); if(l&&l.tagName==='LINK'&&l.href) fetch(l.href).then(r=>r.ok?r.text():null).then(t=>{ if(t) NCSS=t; }).catch(()=>{}); })();
+// «Чистый вид» (dialogs-clean.css): ложится после dialogs-f.css — тем же приёмом (<link id="bp-dlgclean" media="not all"> или <style id="bp-dlgclean">)
+let CLCSS=null;
+(()=>{ const l=document.getElementById('bp-dlgclean'); if(l&&l.tagName==='LINK'&&l.href) fetch(l.href).then(r=>r.ok?r.text():null).then(t=>{ if(t) CLCSS=t; }).catch(()=>{}); })();
+const cleanHTML=()=>{ if(!clean()) return ''; let t=CLCSS; if(!t){ const l=document.getElementById('bp-dlgclean'); if(l&&l.tagName==='STYLE'&&l.textContent.trim()){ t=CLCSS=l.textContent; } } return t?`<style>${t}</style>`:`<link rel="stylesheet" href="dialogs-clean.css">`; };
 const noteHTML=()=>{ if(!(window.bpPlates&&window.bpPlates.on())) return ''; let t=NCSS; if(!t){ const l=document.getElementById('bp-dlgnote'); if(l&&l.tagName==='STYLE'&&l.textContent.trim()){ t=NCSS=l.textContent; } } return t?`<style>${t}</style>`:`<link rel="stylesheet" href="dialogs-f-note.css">`; };
 
 // ---------- мелочи ----------
@@ -71,7 +81,7 @@ function socialize(root){
 const A11Y_CSS='.dlg .vol input[type=range]:focus-visible{outline:3px solid var(--pn-red,#fff4c4);outline-offset:0;border-radius:6px}';
 function shell(host,popup,extraCss){
  const c=cfg(), sh=host.attachShadow({mode:'open'});
- sh.innerHTML=`${styleHTML()}<style>${A11Y_CSS}</style>${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
+ sh.innerHTML=`${styleHTML()}${cleanHTML()}<style>${A11Y_CSS}</style>${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
  return {sh,stage:sh.getElementById?sh.getElementById('stage'):sh.querySelector('#stage'),layer:sh.querySelector('.layer')};
 }
 const frame=(s,title,body,foot)=>`<div class="dlg dlg-${s}" tabindex="-1"><div class="face"><header class="hd"><button type="button" class="x" aria-label="Close">${screw()}</button></header>
@@ -92,12 +102,12 @@ function menu(C,b){
  const vol=(k,lab)=>`<div class="row vol"><label class="lb" for="v-${k}">${lab}</label><input type="range" id="v-${k}" data-k="${k}" min="0" max="100" step="10" value="${GS[k]}" style="--n:${GS[k]}"><output for="v-${k}">${GS[k]}%</output></div>`;
  const spd=[['normal','Normal'],['quick','Quick'],['turbo','Turbo']].map(([v,t])=>`<button type="button" data-spd="${v}" aria-pressed="${GS.speed===v}">${t}</button>`).join('');
  const go=[['rules','Rules',IC.rules],['pay','Paytable',IC.table],['hist','History',IC.clock],['fs','Fullscreen',IC.full]].map(([g,t,i])=>`<button type="button" class="go" data-go="${g}"><span class="gi">${i}</span><span class="gt">${t}</span></button>`).join('');
- const body=`<div class="m-cols"><section class="m-set" aria-label="Settings">
+ const body=`<div class="m-cols"><section class="m-set" aria-label="Settings"><h3 class="cap" aria-hidden="true">Settings</h3>
    <div class="row sw"><span class="lb" id="l-snd">Sound</span><button type="button" class="tg" role="switch" aria-checked="${!GS.mute}" aria-labelledby="l-snd"><i></i><span class="tgt">${GS.mute?'Off':'On'}</span></button></div>
    ${vol('music','Music')}${vol('sfx','Effects')}
    <div class="row spd"><span class="lb" id="l-spd">Speed</span><div class="seg" role="group" aria-labelledby="l-spd">${spd}</div></div>
    <div class="row lng"><label class="lb" for="lang">Language</label><span class="sel"><select id="lang"><option>English</option></select>${IC.chevd}</span></div></section>
-  <nav class="m-go" aria-label="Game information">${go}</nav></div>`;
+  <nav class="m-go" aria-label="Game information"><h3 class="cap" aria-hidden="true">Game info</h3>${go}</nav></div>`;
  layer.innerHTML=frame('menu','Menu',body).replace('<div class="dlg dlg-menu"','<div class="dlg dlg-menu'+(GS.mute?' muted':'')+'"');
  socialize(sh); document.body.append(m);
  const dlg=layer.querySelector('.dlg'), mw=m.offsetWidth, mode=stage.dataset.mode; let mh=m.offsetHeight;
@@ -110,8 +120,9 @@ function menu(C,b){
   m.animate(kf,{duration:340,easing:'cubic-bezier(.2,.8,.3,1)'}); // видна только часть над краем пульта
   // экран включается, как в игре: светлая линия, потом раскрывается и остывает. Раскрытие и яркость идут одной кривой с плавной остановкой (раньше раскрытие обрывалось на полном ходу, а яркость доезжала отдельно: скачки скорости на кадрах 0,25 и 0,7)
   const bd=layer.querySelector('.bd'), E='cubic-bezier(.2,.8,.25,1)';
+  if(!clean()){ // монитор «включается» (линия, раскрытие, яркость) — только в окнах на плите; в чистом виде меню просто выезжает
   bd.animate([{clipPath:'inset(49.5% 0 49.5% 0)'},{clipPath:'inset(49.5% 0 49.5% 0)',offset:.22,easing:E},{clipPath:'inset(0 0 0 0)'}],{duration:320});
-  bd.animate([{filter:'brightness(3)'},{filter:'brightness(3)',offset:.22,easing:E},{filter:'brightness(1)'}],{duration:320}); }
+   bd.animate([{filter:'brightness(3)'},{filter:'brightness(3)',offset:.22,easing:E},{filter:'brightness(1)'}],{duration:320}); } }
  m.style.zIndex=50; document.getElementById('pod').style.zIndex=60; // пульт поверх — окно будто выезжает из него
  const setMute=off=>{ GS.mute=off; const tg=sh.querySelector('.tg'); tg.setAttribute('aria-checked',String(!off)); tg.querySelector('.tgt').textContent=window.bpSocialFix&&window.bpSocial?window.bpSocialFix(off?'Off':'On'):(off?'Off':'On'); dlg.classList.toggle('muted',off); }; // при OFF громкости серые (main d3ea8af)
  sh.addEventListener('click',e=>{ const t=e.target;
@@ -184,6 +195,6 @@ function history(C){
 function setPick(k,v){ const name={dlg:'bp-dlg',nav:'bp-dlgnav'}[k]; if(!name) return; if(v==null||v==='') SS.del(name); else SS.set(name,v); }
 window.bpDlgPick=(k,v)=>{ setPick(k,v); const u=new URL(location.href); ['dlg','dlgnav'].forEach(n=>u.searchParams.delete(n)); const p='?state=idle&screen=rules'; // адрес с параметрами главнее запомненного — убираем
  if(typeof goQ==='function') goQ(p); else { u.search=p; location.href=u.toString(); } };
-window.DlgF={on,cfg,menu,rules,history,pick:setPick,NAVS,DEF_NAV,
+window.DlgF={on,cfg,clean,menu,rules,history,pick:setPick,NAVS,DEF_NAV,
  shell,frame,trap,rise,follow,socialize,screw,moneyH,modeNow,esc,IC}; // shell, frame, trap, … — оболочка для других окон F (описание — в начале dialogs-f.css)
 })();

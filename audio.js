@@ -386,13 +386,13 @@ function synth(ev,o){
  const L=SYN[ev], now=performance.now(), v=vol(), cd=L.cd*(v.speed!=='normal'||v.hold||v.auto>0?2:1); if(!o.force){ if(now-(lastW[ev]||0)<cd) return 'cooldown'; lastW[ev]=now; }
  const vs=synVoices[ev]||(synVoices[ev]=[]); while(vs.length>=L.voices){ const x=vs.shift(); try{ const t=ctx.currentTime; x.g.gain.cancelScheduledValues(t); x.g.gain.setTargetAtTime(0,t,.01); x.stop(t+.06); }catch(e){} }
  const fl=SYN_FL[o.flavour||flFor(ev)]||SYN_FL.A, t=ctx.currentTime+Math.max(0,(+o.delay||0)/1000), rnd=(a,b)=>a+Math.random()*(b-a), sp=clamp(o.v==null?.5:+o.v,0,1), k=clamp(+o.k||0,0,1);
- const out=ctx.createGain(); out.connect(sfxBus); const end=[]; let dur;
+ const out=ctx.createGain(); out.connect(sfxBus); const end=[], gm=o.g==null?1:clamp(+o.g,0,2); let dur; /* o.g — множитель громкости (wincel.js: у каждой монеты своя) */
  if(ev==='sack.coin_clink'){   // удар: чем быстрее, тем громче, выше и ярче; пара фиксированных «монетных» частот + случайность
-  const f0=rnd(2100,2900)*fl[0]*(1+.18*sp), amp=.05+.5*Math.pow(sp,1.3); dur=(.07+.11*sp)*fl[1]; out.gain.value=amp;
+  const f0=rnd(2100,2900)*fl[0]*(1+.18*sp), amp=.05+.5*Math.pow(sp,1.3); dur=(.07+.11*sp)*fl[1]; out.gain.value=amp*gm;
   const nz=ctx.createBufferSource(), bp=ctx.createBiquadFilter(), ng=ctx.createGain(); nz.buffer=mkNoise(); bp.type='bandpass'; bp.frequency.value=f0*2.6*fl[2]; bp.Q.value=1.4; ng.gain.setValueAtTime(.55*(.4+sp*.6),t); ng.gain.exponentialRampToValueAtTime(.001,t+.014); nz.connect(bp); bp.connect(ng); ng.connect(out); nz.start(t); nz.stop(t+.05);
   [[1,1],[2.32,.55],[4.16,.3],[6.7,.16]].forEach(([r,a],i)=>{ const os=ctx.createOscillator(), g=ctx.createGain(); os.type='sine'; os.frequency.value=f0*r*rnd(.985,1.015); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(a,t+.0015); g.gain.exponentialRampToValueAtTime(.0008,t+dur/(1+i*.7)); os.connect(g); g.connect(out); os.start(t); os.stop(t+dur+.02); end.push(os); }); }
  else {   // чинк в WIN: тише и мягче, тон поднимается по ходу сбора (до ~4 полутонов)
-  const f0=rnd(1750,2000)*fl[0]*Math.pow(2,k*4/12); dur=.09*fl[1]; out.gain.value=.07+.05*(1-k);
+  const f0=rnd(1750,2000)*fl[0]*Math.pow(2,k*4/12); dur=.09*fl[1]; out.gain.value=(.07+.05*(1-k))*gm;
   [[1,1],[2.76,.35],[5.4,.12]].forEach(([r,a],i)=>{ const os=ctx.createOscillator(), g=ctx.createGain(); os.type='sine'; os.frequency.value=f0*r; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(a,t+.002); g.gain.exponentialRampToValueAtTime(.0008,t+dur/(1+i*.8)); os.connect(g); g.connect(out); os.start(t); os.stop(t+dur+.02); end.push(os); }); }
  const rec={g:out,stop:tt=>end.forEach(x=>{ try{ x.stop(tt); }catch(e){} })}; vs.push(rec); setTimeout(()=>{ const i=vs.indexOf(rec); if(i>=0) vs.splice(i,1); try{ out.disconnect(); }catch(e){} },(dur+.2+(+o.delay||0)/1000)*1000);
  return 'ok'; }

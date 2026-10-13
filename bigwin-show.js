@@ -15,7 +15,7 @@
      на MAX WIN — BW-max (подробнее в шапке bigwin-rocco.js; ролики не ускоряются, в Turbo/Quick, при пропуске и «меньше движения» он стоит в покое); eyes — глаза в темноте; monitor — Рокко на мониторе;
    · безопасное мерцание: сбои света на 50× и 100× — по расписанию, не чаще трёх вспышек в секунду; «меньше движения» — сразу итоговый кадр.
 
-   Подключение (index.html?bpv=b0d45272, до ui.js):   <script src="bigwin-show.js"></script>
+   Подключение (index.html?bpv=52316320, до ui.js):   <script src="bigwin-show.js"></script>
    API:  BigWinShow.play({amount, bet, isMax, moneyFmt, onDone, rocco}) → Promise (выполняется после закрытия)
          amount   — выигрыш в валюте (как money()), bet — ставка в валюте (пороги считаются от неё), isMax — раунд закончился максимальным выигрышем
          moneyFmt — money() игры: строка вида «$25,000.00», «25,000.00 SC» или «1,000,000.00 ARS»; префикс и код валюты разбираются сами
@@ -384,9 +384,79 @@ const CSS=`
 @keyframes bw-cur{50%{opacity:0}}
 @.bw-rm .bw-hint::after{animation:none}
 `;
+/* ---------------------------------------------------------------- плашки Big Win: ?bwplate=0|a|b|c|d (владелец 2026-10-13: «убрать снизу лампочки с иксами, изменить внешний вид плашки») ----------------------------------------------------------------
+   Ряд ламп 10× 25× 50× 100× убран везде; уровень (глава) виден строкой названия под суммой, заголовок — BIG WIN (MAX WIN на максимуме). Всё плоское: без свечений, ореолов и глянца.
+   0 — прежняя тёмная плашка (как окна F) без ряда ламп;  a — вывеска-шатёр: лампы по раме, кремовая эмаль, красная лента с названием;  b — табло автомата: красная жестяная рама на заклёпках, охристая табличка;
+   c — кассовая лента: бумага с зубчатым краем на стальном зажиме, чернила;  d — минимум: заголовок и сумма прямо на затемнении, жестяная табличка с названием. */
+const PLATES=[['0','0 · Прежняя тёмная, без ламп'],['a','a · Вывеска-шатёр: лампы по раме'],['b','b · Табло автомата: жесть и заклёпки'],['c','c · Кассовая лента'],['d','d · Минимум: заголовок и сумма на затемнении']];
+const PLATE_DEF='a';
+function plateOpt(o){ let m=o&&o.plate; if(!m){ try{ m=new URLSearchParams(location.search).get('bwplate'); }catch(e){} } if(!m){ try{ m=sessionStorage.getItem('bp-bwplate'); }catch(e){} } m=String(m||PLATE_DEF).toLowerCase(); return PLATES.some(p=>p[0]===m)?m:PLATE_DEF; }
+const CSS2=(()=>{ const Q=n=>`calc(${n}*var(--q))`, P=k=>`@.cl[data-bwp=${k}]`, out=[];
+ const r=(k,sel,d)=>out.push(sel.split(',').map(s=>P(k)+' '+s.trim()).join(',')+'{'+d+'}');
+ const RUST=`background-image:var(--bw-chips),var(--bw-wear),linear-gradient(rgba(150,44,28,.38),rgba(96,24,14,.5)),var(--bw-rust);background-blend-mode:normal,soft-light,normal,normal;background-size:${Q(70)} ${Q(70)},auto,auto,${Q(70)} auto;background-color:#4a1810`;
+ const LAMP='radial-gradient(circle closest-side,#f4e6b4 0 26%,#c9a24c 28% 46%,#2a0f0a 48% 66%,transparent 68%)';
+ const RIV='radial-gradient(circle closest-side,#dcb877 0 14%,#b08436 16% 26%,#2a0f0a 28% 31%,transparent 33%)';
+ const ring=(g,t,pad)=>`content:'';position:absolute;inset:${pad};z-index:2;pointer-events:none;background-image:${g},${g},${g},${g};background-size:${t} ${t};background-position:0 0,0 100%,0 0,100% 0;background-repeat:space no-repeat,space no-repeat,no-repeat space,no-repeat space`;
+ /* общее для a b c d: ни винтов, ни стекла, ни бликов; тень — только тёмная, без ореола */
+ for(const k of ['a','b','c','d']){
+  r(k,'.bw3-scr,.bw3-rail,.bw3-glass,.bw3-sweep,.bw3-fl,.bw3-foot','display:none');
+  r(k,'.bw3',`padding-top:0;filter:drop-shadow(0 ${Q(1)} ${Q(1.6)} rgba(0,0,0,.6))`);
+  r(k,'.bw3-body>*','position:relative;z-index:1');
+  r(k,'.bw3-sign::after','display:none');
+ }
+ /* a — вывеска-шатёр */
+ r('a','.bw3-body',`border-radius:${Q(1.2)};padding:${Q(7.6)} ${Q(7.6)} ${Q(7.2)};gap:${Q(1.6)};${RUST};box-shadow:inset 0 0 0 ${Q(.4)} #2a0f0a,0 0 0 ${Q(.3)} #190704`);
+ r('a','.bw3-body::before',ring(LAMP,Q(4),Q(.9)));
+ r('a','.bw3-body::after',`content:'';position:absolute;z-index:0;inset:${Q(5)};pointer-events:none;background:var(--bw-paper) 0 0/${Q(46)} auto,#e3d6ae;box-shadow:0 0 0 ${Q(.3)} #190704,inset 0 0 0 ${Q(1)} #e3d6ae,inset 0 0 0 ${Q(1.3)} #8e2a1c`);
+ r('a','.bw3-sign',`height:auto;padding:${Q(.6)} 0 ${Q(1.4)};border-radius:0;background:none;box-shadow:none`);
+ r('a','.bw3-sign::before',`inset:${Q(-.4)} ${Q(-.6)} ${Q(.4)};border-radius:0;box-shadow:none;background:#8e2a1c`);
+ r('a','.bw3-sign span','filter:none;background:none;color:#8e2a1c;letter-spacing:.1em');
+ r('a','.bw3[data-mx="1"] .bw3-sign span','filter:none;background:none;color:#f1dfa4');
+ r('a','.bw3-win',`padding:0;border-radius:0;background:none;box-shadow:none;border-top:${Q(.3)} solid #8e2a1c;border-bottom:${Q(.3)} solid #8e2a1c`);
+ r('a','.bw3-win canvas,.bw3-tit canvas','border-radius:0;box-shadow:none');
+ r('a','.bw3-tit',`width:100%;padding:${Q(.9)} ${Q(1)};border-radius:0;${RUST};box-shadow:0 0 0 ${Q(.3)} #2a0f0a`);
+ /* b — табло автомата */
+ r('b','.bw3-body',`border-radius:${Q(.8)};padding:${Q(6.6)} ${Q(6.6)} ${Q(6.2)};gap:${Q(2)};${RUST};box-shadow:inset 0 0 0 ${Q(.5)} rgba(18,4,2,.85),0 0 0 ${Q(.3)} #190704`);
+ r('b','.bw3-body::before',ring(RIV,Q(7),Q(1.2)));
+ r('b','.bw3-body::after',`content:'';position:absolute;z-index:0;inset:${Q(3.7)};pointer-events:none;border:${Q(.3)} solid rgba(18,4,2,.7);box-shadow:0 ${Q(.3)} 0 rgba(255,200,140,.14)`);
+ r('b','.bw3-win,.bw3-tit','border-radius:0');
+ r('b','.bw3-win canvas,.bw3-tit canvas','border-radius:0');
+ r('b','.bw3-sign',`border-radius:${Q(.3)}`);
+ /* c — кассовая лента */
+ r('c','.bw3',`padding-top:${Q(2.4)}`);
+ r('c','.bw3-body',`width:80%;margin:0 auto;border-radius:0;padding:${Q(6.2)} ${Q(5.4)} ${Q(7)};gap:${Q(1.8)};background:var(--bw-paper) 0 0/${Q(40)} auto,#ddd0a8;box-shadow:none;
+ -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/${Q(3)} 100% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) 50%/${Q(3)} 100% repeat-x;-webkit-mask-composite:source-in;
+ mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/${Q(3)} 100% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) 50%/${Q(3)} 100% repeat-x;mask-composite:intersect`);
+ r('c','.bw3-body::before,.bw3-body::after','display:none');
+ out.push(`${P('c')} .bw3::before{content:'';position:absolute;z-index:3;left:18%;right:18%;top:0;height:${Q(4.6)};border-radius:${Q(.5)};${RUST};box-shadow:0 0 0 ${Q(.3)} #190704;pointer-events:none}`);
+ out.push(`${P('c')} .bw3::after{content:'';position:absolute;z-index:4;left:18%;right:18%;top:0;height:${Q(4.6)};pointer-events:none;background:${RIV.replace(/closest-side/,'closest-side')} ${Q(2.4)} 50%/${Q(2.4)} ${Q(2.4)} no-repeat,${RIV} calc(100% - ${Q(2.4)}) 50%/${Q(2.4)} ${Q(2.4)} no-repeat}`);
+ r('c','.bw3-sign',`height:auto;padding:0 0 ${Q(1.4)};border-radius:0;background:none;box-shadow:none;border-bottom:${Q(.35)} dashed #6a5a3a`);
+ r('c','.bw3-sign::before','display:none');
+ r('c','.bw3-sign span','filter:none;background:none;color:#241a12;font-family:"PN Stardos","Stardos Stencil",var(--bw-disp);font-weight:700;letter-spacing:.12em');
+ r('c','.bw3[data-mx="1"] .bw3-sign span','filter:none;background:none;color:#8e2a1c');
+ r('c','.bw3-win,.bw3-tit',`padding:0;border-radius:0;background:none;box-shadow:none`);
+ r('c','.bw3-win',`padding-bottom:${Q(1.4)};border-bottom:${Q(.35)} dashed #6a5a3a`);
+ r('c','.bw3-win canvas,.bw3-tit canvas','border-radius:0;box-shadow:none');
+ r('c','.bw3-tit','width:100%');
+ /* d — минимум */
+ r('d','.bw3',`filter:none`);
+ out.push(`${P('d')} .bw3::before{content:'';position:absolute;z-index:0;inset:${Q(-12)} ${Q(-18)};pointer-events:none;background:radial-gradient(ellipse closest-side,rgba(8,3,2,.84) 0 60%,rgba(8,3,2,0) 100%)}`);
+ r('d','.bw3-body',`border-radius:0;padding:${Q(1)} 0;gap:${Q(2.2)};background:none;box-shadow:none;filter:none`);
+ r('d','.bw3-sign',`height:auto;padding:${Q(1.2)} 0 ${Q(.4)};border-radius:0;background:none;box-shadow:none`);
+ r('d','.bw3-sign::before','display:none');
+ r('d','.bw3-sign span',`filter:none;background:none;color:#f3e6c4;font-size:calc(var(--sf,6.6)*1.35*var(--q));letter-spacing:.1em;-webkit-text-stroke:${Q(.9)} #1a0905;paint-order:stroke fill;text-shadow:0 ${Q(.6)} 0 #1a0905`);
+ r('d','.bw3[data-mx="1"] .bw3-sign span','filter:none;background:none;color:#f6dc8a');
+ out.push(`${P('d')}[data-sum] .bw3-sign span{font-size:calc(var(--sf,6.6)*var(--q))}`);
+ r('d','.bw3-win',`padding:0;border-radius:0;background:none;box-shadow:none`);
+ r('d','.bw3-win canvas','border-radius:0;box-shadow:none');
+ r('d','.bw3-tit',`width:74%;padding:${Q(1)} ${Q(3.4)};border-radius:${Q(.3)};${RUST};box-shadow:0 0 0 ${Q(.3)} #190704,0 ${Q(.8)} 0 rgba(0,0,0,.45)`);
+ r('d','.bw3-tit canvas','border-radius:0;box-shadow:none');
+ out.push(`${P('d')}[data-dev=phone] .bw3-tit{width:96%;padding:${Q(1)} ${Q(2.6)}}`);
+ out.push(`${P('d')} .bw3-tit::before{content:'';position:absolute;inset:0;pointer-events:none;background:${RIV} ${Q(.7)} 50%/${Q(2.4)} ${Q(2.4)} no-repeat,${RIV} calc(100% - ${Q(.7)}) 50%/${Q(2.4)} ${Q(2.4)} no-repeat}`);
+ return out.join('\n'); })();
 const SCOPE='#bp-big.bw-root';
 const CQ_OK=(()=>{ try{ return !!(window.CSS&&CSS.supports&&CSS.supports('width','1cqw')); }catch(e){ return true; } })(); // Safari <16: нет единиц контейнера — сцена на vw/vh (оверлей fixed inset:0)
-function buildCSS(){ texBuild(); return CSS.replace(/(-?\d*\.?\d+)cqw/g,(m,n)=>`calc(${n}*var(--bw-u))`).replace(/CQW/g,CQ_OK?'cqw':'vw').replace(/CQH/g,CQ_OK?'cqh':'vh').replace(/@(?=[\s\[.>{:])/g,SCOPE).replace(/var\(--bw-(chips|wear|grain)\)/g,(m,k)=>bpvT`url(${TEX[k]})`).replace(/var\(--bw-paper\)/g,()=>bpvT`url(${A_BASE()}plates-note/paper.webp)`).replace(/var\(--bw-tape([ABC])\)/g,(m,k)=>bpvT`url(${A_BASE()}plates-note/tape-${k.toLowerCase()}.webp)`).replace(/var\(--bw-rust\)/g,()=>bpvT`url(${A_BASE()}uikit/hud-m1-rust.webp)`).replace(/var\(--bw-dframe\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-frame.webp)`).replace(/var\(--bw-dband\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-band.webp)`).replace(/var\(--bw-dscrew\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-screw.svg)`).replace(/var\(--bw-gun\)/g,()=>bpvT`url(${A_BASE()}uikit/steel-gun.webp)`).replace(/var\(--bw-wood\)/g,()=>bpvT`url(${A_BASE()}uikit/wood-oxblood.webp)`); }   // текстуры подставляются ПОСЛЕДНИМ шагом: в base64 встречаются «CQW», «5cqw» и подобное, прежние замены испортили бы картинку
+function buildCSS(){ texBuild(); return (CSS+CSS2).replace(/(-?\d*\.?\d+)cqw/g,(m,n)=>`calc(${n}*var(--bw-u))`).replace(/CQW/g,CQ_OK?'cqw':'vw').replace(/CQH/g,CQ_OK?'cqh':'vh').replace(/@(?=[\s\[.>{:])/g,SCOPE).replace(/var\(--bw-(chips|wear|grain)\)/g,(m,k)=>bpvT`url(${TEX[k]})`).replace(/var\(--bw-paper\)/g,()=>bpvT`url(${A_BASE()}plates-note/paper.webp)`).replace(/var\(--bw-tape([ABC])\)/g,(m,k)=>bpvT`url(${A_BASE()}plates-note/tape-${k.toLowerCase()}.webp)`).replace(/var\(--bw-rust\)/g,()=>bpvT`url(${A_BASE()}uikit/hud-m1-rust.webp)`).replace(/var\(--bw-dframe\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-frame.webp)`).replace(/var\(--bw-dband\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-band.webp)`).replace(/var\(--bw-dscrew\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-screw.svg)`).replace(/var\(--bw-gun\)/g,()=>bpvT`url(${A_BASE()}uikit/steel-gun.webp)`).replace(/var\(--bw-wood\)/g,()=>bpvT`url(${A_BASE()}uikit/wood-oxblood.webp)`); }   // текстуры подставляются ПОСЛЕДНИМ шагом: в base64 встречаются «CQW», «5cqw» и подобное, прежние замены испортили бы картинку
 let cssDone=false;
 function ensureCSS(){ if(cssDone&&document.getElementById('bw-css')) return; const s=document.createElement('style'); s.id='bw-css'; s.textContent=buildCSS(); document.head.append(s); cssDone=true; }
 
@@ -456,6 +526,13 @@ const PAL3N={win:null,col:null,dig:['#9a2d1d','#8e2a1c'],dsh:'rgba(0,0,0,0)',glo
  tt:[['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#8e2a1c','#8e2a1c']]};
 /* «Тёмная» плашка (data-pl=dlg, как окна F): окна — тёмно-коричневые ячейки, цифры кремово-охристые без ореола, разделители барабанов — тусклая охра */
 const PAL3D=Object.assign({},PAL3,{win:'#150b07',dsh:'rgba(0,0,0,.5)',glow:['rgba(0,0,0,0)',0],sep:['#3a2416','rgba(205,178,124,.5)','#3a2416'],tbg:'#150b07',coin:['#fff3bc','#F0D890','#b8923a','rgba(60,20,8,.6)','rgba(255,255,230,.5)','#3a1a0a'],tt:[['#FFC861','#F0D890'],['#FFC861','#F0D890'],['#FFC861','#F0D890'],['#FFC861','#F0D890'],['#fffadb','#F6E096']]});
+/* плашки a–d (?bwplate=): cut — края барабана и строки уходят в прозрачность (холст без фона, цвет даёт плашка); ol — тёмный контур цифр */
+const NOC=['rgba(0,0,0,0)','rgba(0,0,0,0)','rgba(0,0,0,0)'];
+const PALA={win:null,col:null,tbg:null,cut:true,paper:'0,0,0',dig:['#9a2d1d','#8e2a1c'],dsh:'rgba(0,0,0,0)',glow:['rgba(0,0,0,0)',0],sep:NOC,coin:['#8e2a1c','#8e2a1c','#8e2a1c','rgba(0,0,0,0)','rgba(0,0,0,0)','#e3d6ae'],dot:['#8e2a1c','#8e2a1c'],tsh:'rgba(0,0,0,0)',tt:[['#efe3bd','#efe3bd'],['#efe3bd','#efe3bd'],['#efe3bd','#efe3bd'],['#efe3bd','#efe3bd'],['#f6e096','#f6e096']]};
+const PALB=Object.assign({},PAL3D,{win:'#120a06',tbg:'#120a06',dig:['#fff1c0','#e8cf88']});
+const PALC=Object.assign({},PALA,{dig:['#2e1d14','#241610'],coin:['#2e1d14','#2e1d14','#2e1d14','rgba(0,0,0,0)','rgba(0,0,0,0)','#ddd0a8'],dot:['#2e1d14','#2e1d14'],tt:[['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#8e2a1c','#8e2a1c']]});
+const PALD=Object.assign({},PALA,{ol:'#1a0905',dig:['#f7ecd0','#e5d3a2'],dsh:'rgba(10,3,1,.9)',dot:['#f3e3b0','#d2b46a'],coin:['#f3e3b0','#d2b46a','#a98a44','rgba(26,9,5,.9)','rgba(0,0,0,0)','#3a1a0a'],tsh:'rgba(10,3,1,.7)',tt:[['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f6dc8a','#f6dc8a']]});
+const PALP={a:PALA,b:PALB,c:PALC,d:PALD};
 const easeBack=u=>{ u=clamp(u); const c1=1.9, c3=c1+1; return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2); };
 /* текстуры кодом (один раз на страницу): пятна и царапины, зерно, облупленная краска */
 const TEX={};
@@ -509,7 +586,7 @@ function play(o){
  const fmtRaw=o.moneyFmt||defaultFmt, fmt=c=>{ let s=fmtRaw(c===finalC&&o.amount>=0?o.amount:c/100);   /* итог — точная выплата игры, а не округлённые центы (иначе ARS и суммы с долями цента расходятся с WIN) */ if(typeof window.bpSocialFix==='function') s=window.bpSocialFix(s); return s; };
  const betC=Math.max(1,Math.round((o.bet>0?o.bet:1)*100)), finalC=Math.max(0,Math.round((o.amount||0)*100)), isMax=!!o.isMax||finalC>=MAXX*betC;
  const RMODE=roccoMode(o), SUM=o.summary&&o.summary.title?o.summary:null;   // SUM — шоу как итог бонуса (см. заголовок файла)
- const root=document.createElement('div'); const FXK=fxMode(o), CL=FXK!=='old'; root.id='bp-big'; root.className='bw-root'+(isMax?' max':'')+(CL?' cl':''); root.dataset.fx=FXK; const PLK=CL?BigWinFx.opt('pl',o):'', HTK=CL?BigWinFx.opt('hint',o):''; const NOTE=PLK==='note', DLG=PLK==='dlg', LPK=CL?(NOTE?'bulbs':BigWinFx.opt('lamp',o)):'', TPK=CL?(NOTE||DLG?'none':BigWinFx.opt('top',o)):'', PALX=NOTE?PAL3N:DLG?PAL3D:PAL3; if(CL){ root.dataset.pl=PLK; root.dataset.lamp=LPK; root.dataset.hint=HTK; root.dataset.top=TPK; } if(SUM) root.dataset.sum='1'; root.setAttribute('role','dialog'); root.setAttribute('aria-label',(isMax?'Max win ':'Big win ')+fmt(finalC));
+ const root=document.createElement('div'); const FXK=fxMode(o), CL=FXK!=='old'; root.id='bp-big'; root.className='bw-root'+(isMax?' max':'')+(CL?' cl':''); root.dataset.fx=FXK; const PLATE=CL?plateOpt(o):'', PLK=CL?(PLATE==='0'?'dlg':PLATE?'bp':BigWinFx.opt('pl',o)):'', HTK=CL?BigWinFx.opt('hint',o):''; const NOTE=PLK==='note', DLG=PLK==='dlg', LPK=CL?(NOTE?'bulbs':BigWinFx.opt('lamp',o)):'', TPK=CL?(NOTE||DLG?'none':BigWinFx.opt('top',o)):'', PALX=PALP[PLATE]||(NOTE?PAL3N:DLG?PAL3D:PAL3); if(CL){ root.dataset.pl=PLK; root.dataset.lamp=LPK; root.dataset.hint=HTK; root.dataset.top=TPK; root.dataset.bwp=PLATE; } if(SUM) root.dataset.sum='1'; root.setAttribute('role','dialog'); root.setAttribute('aria-label',(isMax?'Max win ':'Big win ')+fmt(finalC));
  let closed=false, resolve, onKey=null; const promise=new Promise(r=>resolve=r);
  const under=document.getElementById('app'), underVis=under?under.style.visibility:'';   // игра под непрозрачным шоу не рисуется: меньше нагрузки на слабых устройствах
  const gone=()=>{ if(root.isConnected) root.remove(); if(under) under.style.visibility=underVis; };
@@ -535,8 +612,6 @@ function play(o){
  const setBg=()=>{ const e=root.querySelector('.bw-bg'); if(e) e.style.backgroundImage=bpvT`url(${a}bg-hall-${S.dev==='phone'?'portrait':'landscape'}.webp)`; };
 const roccoHTML=RMODE==='eyes'?`<div class="bw-re" data-re><i class="bw-re-pit"></i><div class="bw-re-eyes"><i class="bw-re-e"><b></b></i><i class="bw-re-e"><b></b></i></div></div>`
   :RMODE==='monitor'?`<div class="bw-mon" data-rm><i class="bw-mon-arm"></i><div class="bw-mon-case"><div class="bw-mon-scr"><i class="bw-mon-bg"></i><video class="bw-mon-v" muted playsinline preload="auto" src="${a}rocco/K-cheer${ext}"></video><i class="bw-mon-nz"></i><i class="bw-mon-scan"></i><i class="bw-mon-vg"></i><i class="bw-mon-gl"></i><span class="bw-mon-osd"><b>CAM 02</b><b><i></i>REC</b></span></div><div class="bw-mon-pan"><i class="bw-mon-led"></i><span>CAM-02</span><i class="bw-mon-kn"></i></div></div><i class="bw-mon-cab"></i></div>`:'';
- const BULB='<svg class="bw3-bulb" viewBox="0 0 40 64" aria-hidden="true"><circle class="hl" cx="20" cy="24" r="34"/><path class="gl" d="M20 3C31 3 37 11 37 21C37 30 31 34 28 39L28 44L12 44L12 39C9 34 3 30 3 21C3 11 9 3 20 3Z"/><path class="lt" d="M20 3C31 3 37 11 37 21C37 30 31 34 28 39L28 44L12 44L12 39C9 34 3 30 3 21C3 11 9 3 20 3Z"/><path class="f0" d="M15.5 44V33L17.5 27L20 35L22.5 27L24.5 33V44"/><path class="f1" d="M15.5 44V33L17.5 27L20 35L22.5 27L24.5 33V44"/><rect class="cp" x="11" y="43" width="18" height="17" rx="2"/><path class="cp2" d="M11 48H29M11 52.5H29M11 57H29" stroke="#2a1a08" stroke-width="1.3"/><rect x="15" y="59" width="10" height="4" rx="2" fill="#2a1a08"/></svg>';
- const lampHTML=[...THRL,...(isMax?['MAX']:[])].map(x=>CL?(LPK==='flip'?`<span class="bw3l"><div class="flt"><b>${esc(x)}</b><s data-n="${esc(x)}"></s></div></span>`:LPK==='rings'?`<span class="bw3l"><div class="rgd"><b>${esc(x)}</b></div></span>`:LPK==='dots'?`<span class="bw3l"><i class="bw3dot"></i><em>${esc(x)}</em></span>`:`<span class="bw3l">${BULB}<em>${esc(x)}</em></span>`):`<span class="bw3l"><i></i><em>${esc(x)}</em></span>`).join('');
  const RAILN=11, railHTML=CL&&TPK==='bolts'?`<div class="bw3-rail">${Array.from({length:RAILN},()=>'<i class="bw3rb"></i>').join('')}</div>`:'';
  const defsHTML=CL?'<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="bw-worn" x="-2%" y="-5%" width="104%" height="110%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".62" numOctaves="2" seed="4" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 14 0 0 0 -3.7" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter><radialGradient id="bw-halo"><stop offset="0" stop-color="#ffb04a" stop-opacity=".75"/><stop offset=".45" stop-color="#ff9a30" stop-opacity=".22"/><stop offset="1" stop-color="#ff9a30" stop-opacity="0"/></radialGradient></defs></svg>':'';
  root.innerHTML=`<div class="bw-stage" data-stage><div class="bw-bg"></div><div class="bw-dim"></div><div class="bw-wash"></div><div class="bw-black"></div>
@@ -550,7 +625,7 @@ const roccoHTML=RMODE==='eyes'?`<div class="bw-re" data-re><i class="bw-re-pit">
     <div class="bw3-sign" data-sign><span data-kick>BIG WIN</span></div>
     <div class="bw3-win"><canvas data-wcv></canvas><i class="bw3-glass"><i class="bw3-sweep"></i></i><i class="bw3-fl"></i></div>
     <div class="bw3-tit"><canvas data-tcv></canvas><i class="bw3-glass"></i></div>
-    <div class="bw3-foot">${lampHTML}</div></div></div></div>
+    </div></div></div>
    <div class="bw-hint" data-hint><i class="bw-hl"></i><span class="bw-ht" data-ht></span><i class="bw-hl r"></i></div>
   </div>
   <canvas class="bw-cv bw-cvf" data-cvf style="z-index:6"></canvas></div>
@@ -602,7 +677,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
   const Hd=PQ.s*k, pad=Math.ceil(Hd*.3); PQ.Hd=Hd;
   PQ.spr=[...'0123456789'].map(d=>{ const w=Math.ceil(Hd*.9)+2*pad, h=Math.ceil(Hd*1.1)+2*pad, c=mk(w,h), g=c.getContext('2d'); g.font=`400 ${Hd*1.02}px "Black Ops One"`; g.textAlign='center'; g.textBaseline='alphabetic'; const by=h*.5+Hd*.37;
    g.save(); g.shadowColor=pal.glow[0]; g.shadowBlur=Hd*(CL?.05:pal.glow[1]);   // чистый вид: цифры без ореола g.fillStyle=pal.glow[0]; g.fillText(d,w/2,by); g.fillText(d,w/2,by); g.restore();
-   g.fillStyle=pal.dsh; g.fillText(d,w/2,by+.35*k); const gr=g.createLinearGradient(0,by-Hd*.75,0,by); gr.addColorStop(0,pal.dig[0]); gr.addColorStop(1,pal.dig[1]); g.fillStyle=gr; g.fillText(d,w/2,by); return {c,w,h}; });
+   if(pal.ol){ g.lineJoin='round'; g.lineWidth=Hd*.075; g.strokeStyle=pal.ol; g.strokeText(d,w/2,by); } g.fillStyle=pal.dsh; g.fillText(d,w/2,by+.35*k); const gr=g.createLinearGradient(0,by-Hd*.75,0,by); gr.addColorStop(0,pal.dig[0]); gr.addColorStop(1,pal.dig[1]); g.fillStyle=gr; g.fillText(d,w/2,by); return {c,w,h}; });
   /* строки глав (4, на MAX — 5) */
   const th=4.5*k; PQ.ttl=Array.from({length:NR},(_,j)=>{ const i=j+1, str=CHAP[i].name, c=mk(Math.ceil(76*k),Math.ceil(th*1.4)), g=c.getContext('2d'); g.font=`400 ${th}px "Black Ops One"`; g.textAlign='center'; g.textBaseline='alphabetic'; const by=th*1.05; g.letterSpacing=(th*.06)+'px';
    g.fillStyle=pal.tsh; g.fillText(str,c.width/2,by+.3*k); const gr=g.createLinearGradient(0,by-th*.75,0,by), col=pal.tt[i-1]; gr.addColorStop(0,col[0]); gr.addColorStop(1,col[1]); g.fillStyle=gr; g.fillText(str,c.width/2,by); return c; });
@@ -633,7 +708,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
      for(let j=Math.floor(p)-3;j<=Math.floor(p)+3;j++){ const phi=(j-p)*Math.PI/5; if(Math.abs(phi)>1.45) continue; const sc=Math.cos(phi), y=cy+R*Math.sin(phi), sp=PQ.spr[((j%10)+10)%10], hh=sp.h*sc, ww=sp.w;
       c.globalAlpha=al*(.2+.8*sc*sc)*dimA; c.drawImage(sp.c,cx-ww/2,y-hh/2,ww,hh); } }
     c.globalAlpha=1;
-    if(pal.paper){ gr=c.createLinearGradient(0,0,0,H); gr.addColorStop(0,`rgba(${pal.paper},1)`); gr.addColorStop(.2,`rgba(${pal.paper},.97)`); gr.addColorStop(.3,`rgba(${pal.paper},.4)`); gr.addColorStop(.37,`rgba(${pal.paper},0)`); gr.addColorStop(.63,`rgba(${pal.paper},0)`); gr.addColorStop(.7,`rgba(${pal.paper},.4)`); gr.addColorStop(.8,`rgba(${pal.paper},.97)`); gr.addColorStop(1,`rgba(${pal.paper},1)`); c.fillStyle=gr; c.fillRect(x,0,w,H); c.restore(); }   // записка: края барабана уходят в цвет бумаги
+    if(pal.paper){ gr=c.createLinearGradient(0,0,0,H); gr.addColorStop(0,`rgba(${pal.paper},1)`); gr.addColorStop(.2,`rgba(${pal.paper},.97)`); gr.addColorStop(.3,`rgba(${pal.paper},.4)`); gr.addColorStop(.37,`rgba(${pal.paper},0)`); gr.addColorStop(.63,`rgba(${pal.paper},0)`); gr.addColorStop(.7,`rgba(${pal.paper},.4)`); gr.addColorStop(.8,`rgba(${pal.paper},.97)`); gr.addColorStop(1,`rgba(${pal.paper},1)`); if(pal.cut) c.globalCompositeOperation='destination-out'; c.fillStyle=gr; c.fillRect(x,0,w,H); c.restore(); }   // записка: края барабана уходят в цвет бумаги
     else {
     gr=c.createLinearGradient(0,0,0,H); gr.addColorStop(0,'rgba(0,0,0,.9)'); gr.addColorStop(.2,'rgba(0,0,0,.32)'); gr.addColorStop(.38,'rgba(0,0,0,0)'); gr.addColorStop(.62,'rgba(0,0,0,0)'); gr.addColorStop(.8,'rgba(0,0,0,.4)'); gr.addColorStop(1,'rgba(0,0,0,.92)'); c.fillStyle=gr; c.fillRect(x,0,w,H);
     gr=c.createLinearGradient(0,cy-H*.34,0,cy-H*.14); gr.addColorStop(0,'rgba(255,240,215,0)'); gr.addColorStop(.5,'rgba(255,240,215,.09)'); gr.addColorStop(1,'rgba(255,240,215,0)'); c.fillStyle=gr; c.fillRect(x,cy-H*.34,w,H*.2);
@@ -644,7 +719,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
   const ct=ctxT, TW=TCV.width, TH=TCV.height, tcy=TH/2, Rt=TH*.9; ct.clearRect(0,0,TW,TH); if(PALX.tbg){ ct.fillStyle=PALX.tbg; ct.fillRect(0,0,TW,TH); }
   let tp=0; for(let i=1;i<=NR;i++){ if(T[i]<=t) tp=i-1+easeBack((t-T[i])/.62); }
   for(let j=Math.floor(tp)-2;j<=Math.ceil(tp)+2;j++){ if(j<1||j>NR) continue; const phi=(j-tp)*Math.PI/3.5; if(Math.abs(phi)>1.4) continue; const sc=Math.cos(phi), y=tcy+Rt*Math.sin(phi), sp=PQ.ttl[j-1], hh=sp.height*sc; ct.globalAlpha=.25+.75*sc*sc; ct.drawImage(sp,0,y-hh*.5,sp.width,hh); }
-  ct.globalAlpha=1; const sh=PALX.paper||'0,0,0', sa=PALX.paper?.95:.72, g2=ct.createLinearGradient(0,0,0,TH); g2.addColorStop(0,`rgba(${sh},${sa})`); g2.addColorStop(.3,`rgba(${sh},0)`); g2.addColorStop(.7,`rgba(${sh},0)`); g2.addColorStop(1,`rgba(${sh},${sa})`); ct.fillStyle=g2; ct.fillRect(0,0,TW,TH); }
+  ct.globalAlpha=1; const sh=PALX.paper||'0,0,0', sa=PALX.paper?.95:.72, g2=ct.createLinearGradient(0,0,0,TH); g2.addColorStop(0,`rgba(${sh},${sa})`); g2.addColorStop(.3,`rgba(${sh},0)`); g2.addColorStop(.7,`rgba(${sh},0)`); g2.addColorStop(1,`rgba(${sh},${sa})`); ct.fillStyle=g2; if(PALX.cut) ct.globalCompositeOperation='destination-out'; ct.fillRect(0,0,TW,TH); ct.globalCompositeOperation='source-over'; }
  const sagAt=(t,per,off)=>{ const p=((t+off)%per+per)%per; return Math.exp(-Math.pow((p-.25)/.12,2)); };   // короткий провал накала: раз в per секунд, ~0,3 с
  const RAIL_BASE=[1,1,.55,1,0,1,1,.5,1,0,1], RAIL_TIRED=5;   // ряд ламп верхней планки: 0 — перегорела, .55 — тусклая; одна (RAIL_TIRED) подмигивает
  const sv=(el,k,v)=>{ if(el._v===undefined) el._v={}; if(el._v[k]!==v){ el._v[k]=v; el.style.setProperty(k,v); } };
@@ -902,7 +977,7 @@ function sumState(on){   // шоу доиграно (или перемотано
  });
  return promise;
 }
-window.BigWinShow={play,warm,MAXX};
+window.BigWinShow={play,warm,MAXX,plates:{list:PLATES,def:PLATE_DEF,opt:plateOpt}};
 // fb/perf 2026-10-12: прогрев шоу (CSS, текстуры, спрайты лучей, 3 ролика Рокко ≈3 МБ) — после роликов и звуков первого спина (loadgate.js), а не на старте: раньше он делил канал с глотанием/броском и давал длинные задачи (≈0,4 с при 4× замедлении процессора)
 const warmLater=()=>{ const go=()=>(window.requestIdleCallback||setTimeout)(warm); if(window.BPLoad) BPLoad.whenOpen('audio',go,1500); else go(); };
 if(document.readyState==='complete') warmLater(); else addEventListener('load',warmLater);

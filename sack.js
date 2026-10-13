@@ -54,14 +54,12 @@ const FX=(()=>{
   g.lineWidth=s*.012; g.strokeStyle='rgba(66,40,8,.75)'; g.beginPath(); g.arc(m,m,m*.72,0,6.2832); g.stroke();
   for(let i=0;i<20;i++){ const a=i/20*6.2832, x=m+Math.cos(a)*m*.84, y=m+Math.sin(a)*m*.84; g.fillStyle='rgba(66,40,8,.7)'; g.beginPath(); g.arc(x+1.2,y+1.2,s*.017,0,6.2832); g.fill(); g.fillStyle='#d9ae55'; g.beginPath(); g.arc(x,y,s*.017,0,6.2832); g.fill(); }
   const emb=draw=>{ g.save(); g.translate(2.4,2.4); g.fillStyle='rgba(58,34,6,.8)'; draw(); g.restore(); g.save(); g.translate(-2,-2); g.fillStyle='rgba(255,233,168,.6)'; draw(); g.restore(); g.fillStyle='#c9972f'; draw(); };
-  if(side){ emb(()=>{ g.beginPath(); for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, r=i%2?m*.2:m*.5; g.lineTo(m+Math.cos(a)*r,m+Math.sin(a)*r); } g.closePath(); g.fill(); }); }
-  else { emb(()=>{ g.beginPath(); g.ellipse(m,m*1.06,m*.42,m*.36,0,0,6.2832); g.fill(); g.beginPath(); g.moveTo(m-m*.38,m*.9); g.lineTo(m-m*.34,m*.44); g.lineTo(m-m*.08,m*.72); g.fill(); g.beginPath(); g.moveTo(m+m*.38,m*.9); g.lineTo(m+m*.34,m*.44); g.lineTo(m+m*.08,m*.72); g.fill(); });
-   g.fillStyle='#4a2f0c'; g.beginPath(); g.moveTo(m-m*.4,m*.98); g.quadraticCurveTo(m,m*.84,m+m*.4,m*.98); g.quadraticCurveTo(m+m*.34,m*1.16,m+m*.14,m*1.14); g.quadraticCurveTo(m,m*1.08,m-m*.14,m*1.14); g.quadraticCurveTo(m-m*.34,m*1.16,m-m*.4,m*.98); g.fill();
-   g.fillStyle='#d3a748'; g.beginPath(); g.ellipse(m-m*.2,m*1.02,m*.065,m*.05,0,0,6.2832); g.fill(); g.beginPath(); g.ellipse(m+m*.2,m*1.02,m*.065,m*.05,0,0,6.2832); g.fill();
-   g.fillStyle='#4a2f0c'; g.beginPath(); g.ellipse(m,m*1.24,m*.07,m*.05,0,0,6.2832); g.fill(); }
-  g.globalCompositeOperation='source-atop'; // износ: тёмные крапинки, светлые потёртости по ободу, царапины
+  // владелец 2026-10-13: без морды-маски и полос посередине — простая гравировка жетона: аверс «BP» (Blackout Party), реверс — звезда; гравировка утоплена (тень сверху-слева, блик снизу-справа)
+  const eng=draw=>{ g.save(); g.translate(-1.6,-1.6); g.fillStyle='rgba(58,34,6,.75)'; draw(); g.restore(); g.save(); g.translate(1.6,1.6); g.fillStyle='rgba(255,231,160,.45)'; draw(); g.restore(); g.fillStyle='#a8771f'; draw(); };
+  if(side){ eng(()=>{ g.beginPath(); for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, r=i%2?m*.19:m*.46; g.lineTo(m+Math.cos(a)*r,m+Math.sin(a)*r); } g.closePath(); g.fill(); }); }
+  else { eng(()=>{ g.font='bold '+Math.round(m*.78)+'px "Black Ops One",Impact,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('BP',m,m*1.04); }); }
+  g.globalCompositeOperation='source-atop'; // износ: тёмные крапинки, светлые потёртости по ободу (царапины-линии убраны по просьбе владельца)
   for(let i=0;i<150;i++){ const a=rr()*6.2832, r=Math.sqrt(rr())*m*.97, x=m+Math.cos(a)*r, y=m+Math.sin(a)*r, w=rr()*s*.012+.6; g.fillStyle=rr()<.7?'rgba(70,42,10,.28)':'rgba(236,208,128,.3)'; g.beginPath(); g.arc(x,y,w,0,6.2832); g.fill(); }
-  for(let i=0;i<7;i++){ const x=rr()*s,y=rr()*s; g.strokeStyle=rr()<.5?'rgba(52,30,6,.3)':'rgba(240,214,140,.35)'; g.lineWidth=.9; g.beginPath(); g.moveTo(x,y); g.lineTo(x+(rr()-.5)*s*.34,y+(rr()-.5)*s*.34); g.stroke(); }
   const pt=g.createRadialGradient(m,m,m*.6,m,m,m); pt.addColorStop(0,'rgba(40,24,4,0)'); pt.addColorStop(1,'rgba(40,24,4,.34)'); g.fillStyle=pt; g.fillRect(0,0,s,s); return c; };
  const tsheet=()=>spr.tok||(spr.tok=(()=>{ const sh=document.createElement('canvas'); sh.width=TN*TC; sh.height=TC; const g=sh.getContext('2d'), fa=[tface(0),tface(1)], cx=TC/2, cy=TC/2;
   for(let k=0;k<TN;k++){ const ph=k/(TN-1)*Math.PI, cs=Math.cos(ph), sn=Math.sin(ph), ox=k*TC, ry=Math.max(.9,TR*Math.abs(cs)), off=TT/2*sn, nearA=cs>=0, ny=cy+(nearA?-off:off), fy=cy+(nearA?off:-off);

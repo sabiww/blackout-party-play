@@ -39,8 +39,8 @@ const idx=x=>Array.isArray(x)?x[0]*COLS+x[1]:+x;
 const uniq=a=>[...new Set([].concat(a==null?[]:a).map(idx))].filter(i=>Number.isInteger(i)&&i>=0&&i<N);
 const fmt=m=>m>=10000?Math.round(m/1000)+'K':String(m);
 const REC_ONLY=()=>window.CamRecLabel==='rec'; // математика 2.0.0 (2026-10-13): метки только показывают кражу и не умножают выигрыш — вместо «×N» надпись REC (цвет ступени остаётся: чем чаще кражи на клетке, тем горячее)
-const lab=m=>REC_ONLY()?'<em>REC</em>':'<em>'+fmt(m)+'</em>';
-const tierOf=m=>m>=64?5:m>=16?4:m>=8?3:m>=4?2:1; // ступени: 1 ×2–3 крем, 2 ×4–7 янтарь, 3 ×8–15 янтарь с кольцом, 4 ×16–63 красный, 5 ×64+ красный с пульсацией
+const lab=m=>REC_ONLY()?'<em><span class="cr-dot">●</span>&#8202;REC</em>':'<em>'+fmt(m)+'</em>';
+const tierOf=m=>REC_ONLY()?4:m>=64?5:m>=16?4:m>=8?3:m>=4?2:1; // ступени: 1 ×2–3 крем, 2 ×4–7 янтарь, 3 ×8–15 янтарь с кольцом, 4 ×16–63 красный, 5 ×64+ красный с пульсацией
 const jit=i=>(((i+3)*2654435761)>>>0)%100/100; // постоянный «случайный» сдвиг клетки 0..1: одинаковые экраны не двигаются в унисон
 const RMq=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
 
@@ -121,6 +121,8 @@ const CSS=`
 .cr-m.hot .cr-rim{filter:brightness(1.5)}
 .cr-x{display:inline-flex;align-items:baseline;transform-origin:0 100%}
 .cr-b[data-d="3"] .cr-x{font-size:.88em}
+.cr-b[data-d="3"]{font-size:clamp(10px,calc(var(--cell)*.2),26px)} /* владелец 2026-10-13: надпись REC на символах мельче */
+.cr-dot{color:#e0362b;font-size:.8em;vertical-align:.08em} /* красная точка записи у REC */
 .cr-n{display:inline-grid;line-height:1.15;margin:-.1em 0}
 .cr-n em{grid-area:1/1;font-style:normal;text-align:left}
 .cr-fl{position:absolute;inset:${INS}%;z-index:2;border-radius:calc(var(--cell)*.085);background:rgba(var(--r),.34);box-shadow:inset 0 0 calc(var(--cell)*.12) rgba(var(--r),.55);opacity:0} /* вспышка — ровная прямоугольная заливка по форме экрана, без круглого пятна */
@@ -241,6 +243,7 @@ async function light(i,mult,o){ // первый раз: рамка и подкр
   tl(o,fl,[[0,{opacity:0},'ease-out'],[70,{opacity:.9},'ease-in'],[360,{opacity:0}]],360)]);
  fl.remove(); }
 async function upgrade(i,from,to,o){ // повышение: пульс числа и рамки, кольцо, цвет ступени, число прокручивается вверх
+ if(REC_ONLY()) return setMark(i,to); // владелец 2026-10-13: «только REC, без чисел и ступеней» — повторная кража ничего не меняет на мониторе
  const c=S.c[i], m=S.m[i], b=roOf(i); if(!b) return setMark(i,to);
  const nb=b.querySelector('.cr-n'), old=nb.querySelector('em'), nu=mk('em',null,fmt(to)), rim=m.querySelector('.cr-rim'), fl=mk('div','cr-fl');
  tierSet(i,tierOf(to)); const d0=+b.dataset.d||1, d1=digits(to); b.dataset.d=d1; // трёхзначное (×128) мельче: размер ставим сразу, чтобы число не вылезало за экран, а вид плавно сжимается из прежнего размера масштабом от того же левого-нижнего угла

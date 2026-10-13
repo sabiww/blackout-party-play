@@ -27,7 +27,7 @@ const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), sm=u=>{ u=clamp(u); return u
    dur — запасная длина, пока видео не сообщило свою. */
 /* Радость на Big Win (2026-10-13, fb/bw-cheer2): ?bwcheer=yes|dance|jump|old (в артефакте — sessionStorage 'bp-bwcheer', тест-панель). Новые ролики (BW-cheer-<имя>, 5,0 с) начинаются и кончаются в позе покоя (хвост и голова подведены rocco_seam_fix --motion),
    поэтому играют кругом сквозь покой без входа и выхода; old — прежний BW-cheer с металлической рукой + BW-cheer-in/out. */
-const BWC_LIST=['yes','dance','jump','old'], BWC_DEF='yes';   // умолчание yes: обе руки мохнатые кулаки, лицо чёткое; jump — кончики пальцев левой руки синеватые (кадры 40–80), оставлен вариантом
+const BWC_LIST=['yes','dance','jump','old'], BWC_DEF='jump';   // умолчание jump (выбор владельца 2026-10-13: «подпрыгивает с руками вверх»; синеватые кончики пальцев левой руки перекрашены в цвет меха, дубли кадров сглажены, fb/bw-jump); yes/dance/old — переключатели
 const bwcMode=()=>{ let m=null; try{ m=new URLSearchParams(location.search).get('bwcheer'); }catch(e){} if(!m){ try{ m=sessionStorage.getItem('bp-bwcheer'); }catch(e){} } m=String(m||BWC_DEF).toLowerCase(); return BWC_LIST.includes(m)?m:BWC_DEF; };
 const BWC=bwcMode(), NEWC=BWC!=='old';
 const CLIPS={
@@ -144,15 +144,17 @@ function create(o){
   P.go=async()=>{ if(P.over||S.dead||!canPlay()||S.warping) return; try{ await v.play(); }catch(e){} watch(P); };
   if(!opt.arm) watch(P);
   return P; }
+ const CHAIN_LEAD=.5;   // второй круг стартует за 0,5 с до конца (хвост ролика — поза покоя, кадры неподвижны ≥0,9 с): запас на старт и первый кадр, ролик не успевает кончиться раньше смены (было 0,2 с — при медленном старте круг кончался, петля вставала на ≥0,6 с)
  function watch(P){   // конец ролика — в покой; петля — за 0,2 с до конца второй экземпляр уже стартует и встаёт на место (оба кадра — поза покоя); ролик встал — тоже в покой
   const v=P.v; v.onended=()=>{ if(S.cur!==P) return;
+   if(P.loop&&P.chained&&NEWC){ setTimeout(()=>{ if(S.cur===P) leave(P,FD()); },700); return; }   // конец круга, а смена на второй экземпляр уже идёт — не обрываем её; не вышло за 0,7 с — в покой
    if(P.n==='cheerIn'){ start('cheer',{loop:!S.cheerEnd,instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // вход кончился (его последний кадр ≡ первый кадр петли) — петля жёстко
    if(P.n==='cheer'&&!P.loop&&NEWC){ leave(P,0); return; }   // новая радость: последний кадр ≡ покой — жёсткая смена
    if(P.n==='cheer'&&!P.loop){ start('cheerOut',{instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // последний круг кончился — выход в покой роликом, а не наплывом
    leave(P,P.n==='cheerOut'?0:FD()); };   // выход кончился: его последний кадр ≡ покой — жёсткая смена
   let lt=-1, lw=performance.now(); clearInterval(S.mon);
   S.mon=setInterval(()=>{ if(S.cur!==P||P.over){ clearInterval(S.mon); return; } const t=v.currentTime, w=performance.now();
-   if(P.loop&&!P.chained&&t>=dur(P.n)-.2/SLOW()){ P.chained=true; start(P.n,{loop:true,instant:true,chain:P}); }
+   if(P.loop&&!P.chained&&t>=dur(P.n)-CHAIN_LEAD/SLOW()){ P.chained=true; start(P.n,{loop:true,instant:true,chain:P}); }
    if(!v.paused&&!document.hidden&&!v.ended){ if(t!==lt){ lt=t; lw=w; } else if(w-lw>2500*SLOW()) leave(P,FD()); } else lw=w; },25); }
  function toRest(ms){ if(S.cur) leave(S.cur,ms==null?FD():ms); S.maxArm=null; }
  function finishLoop(){ const P=S.cur; if(P&&P.n==='cheer') P.loop=false; }   // счётчик остановился: круг доигрывается до покоя, ролик уходит наплывом сам (onended)

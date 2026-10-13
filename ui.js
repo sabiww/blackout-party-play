@@ -169,7 +169,7 @@ const podBtn=l=>document.querySelector(`#pod [aria-label="${l}"]`)||(/^Bet /.tes
 const _render=render;
 render=function(){ _render(); after(); };
 // строки на воротах бонуса (после ворот — сами спины): настоящие числа из BONUS
-const gateList=kind=>{ const B=kind==='cameras'?BONUS.cam:BONUS.kit; return `<li>One counter for the whole bonus: it starts at ×${B.start} and every steal adds ${B.inc}</li><li>Every win is multiplied by the counter. It never resets</li><li>Every free spin Rocco throws ${kind==='cameras'?'a WILD':'a WILD (sometimes two)'}; 3+ invitations add ${BONUS.retroSpins} spins</li>${kind==='cameras'?'<li>Cameras record every steal on the monitors</li>':''}`; };
+const gateList=kind=>{ const B=kind==='cameras'?BONUS.cam:BONUS.kit; return `<li>One counter for the whole bonus: it starts at ×${B.start} and every steal adds ${B.inc}</li><li>Every win is multiplied by the counter. It never resets</li><li>Rocco throws ${kind==='cameras'?'1 WILD':'1–2 WILDs'} every free spin</li><li>3+ invitations: +${BONUS.retroSpins} spins</li>${kind==='cameras'?'<li>Cameras record every steal on the monitors</li>':''}`; };
 function after(){
  // табличка максимального выигрыша под вывеской — во всех сценах
  // табличка MAX WIN убрана из игры (владелец 2026-10-09): максимальный выигрыш показан на экране приветствия и в правилах
@@ -347,15 +347,15 @@ const RULES=[
  ['counter','Rocco’s counter',()=>`<div class="ladder">${['×1','×2','×3 TOSS','×5','×8 PUNCH','×10','×15 LEVER'].map(t=>`<span class="${/[A-Z]/.test(t)?'t':''}">${t}</span>`).join('')}</div>
   <ol><li><b>Toss</b> at ×3 — Rocco throws 2–3 WILDs onto the grid.</li><li><b>Punch</b> at ×8 — Rocco punches the frame and a column turns WILD. The WILDs wait for the next win, help it and leave with it.</li><li><b>Lever</b> at ×15 — the lights go out and every regular symbol turns into one.</li></ol>
   <div class="callout">Rocco’s prank: now and then, at the start of a spin, Rocco tosses 2–3 WILDs or starts the counter at ×2 by himself.</div>`],
- ['kitchen','The Kitchen',()=>`<ol><li>3 invitations anywhere start the Kitchen: ${BONUS.spinsK} free spins.</li><li>The Kitchen has one counter for the whole bonus. It starts at ×${BONUS.kit.start} and every steal adds ${BONUS.kit.inc}: ×1, ×2, ×3, ×4… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter at that moment.</li><li>At the start of every free spin Rocco throws a WILD onto the grid (about ${Math.round(BONUS.kit.wild[2]*100)} spins in 100 — two). The WILDs wait for the next win, help it and leave with it.</li><li>Rocco’s tricks work as in the base game, once per bonus: at the 2nd steal — Toss (2–3 WILDs), at the 4th — Punch (a WILD column), at the 6th — Lever (every symbol turns into one).</li><li>3 or more invitations on a free spin add ${BONUS.retroSpins} spins.</li></ol>
+ ['kitchen','The Kitchen',()=>`<ol><li>3 invitations anywhere start the Kitchen: ${BONUS.spinsK} free spins.</li><li>The Kitchen has one counter for the whole bonus. It starts at ×${BONUS.kit.start} and every steal adds ${BONUS.kit.inc}: ×1, ×2, ×3, ×4… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter at that moment.</li><li>Every free spin Rocco throws 1 WILD (about ${Math.round(BONUS.kit.wild[2]*100)} spins in 100: 2). The WILDs wait for the next win, help it and leave with it.</li><li>Rocco’s tricks work as in the base game, once per bonus: at the 2nd steal — Toss (2–3 WILDs), at the 4th — Punch (a WILD column), at the 6th — Lever (every symbol turns into one).</li><li>3 or more invitations on a free spin add ${BONUS.retroSpins} spins.</li></ol>
   <div class="callout">Example: the counter shows ×7 and Rocco steals 8 cupcakes (${PAY['sym-low-cupcake'][1]}× the bet). The win is ${PAY['sym-low-cupcake'][1]} × 7 = ${+(PAY['sym-low-cupcake'][1]*7).toFixed(2)}× the bet, and the counter moves to ×8.</div>`],
- ['cameras','The Cameras',()=>`<ol><li>4 or more invitations anywhere start the Cameras: ${BONUS.spinsC} free spins.</li><li>The rules are the Kitchen’s, with a stronger counter: it starts at ×${BONUS.cam.start} and every steal adds ${BONUS.cam.inc}: ×5, ×7, ×9, ×11… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter. At the start of every free spin Rocco throws a WILD; his tricks come at the 2nd, 4th and 6th steal; 3 or more invitations add ${BONUS.retroSpins} spins.</li><li><b>Cameras record.</b> Every cell is a monitor. Where Rocco steals, that screen lights up and keeps a REC mark for the whole bonus. The marks show where Rocco has been; they do not change the pay.</li></ol>
+ ['cameras','The Cameras',()=>`<ol><li>4 or more invitations anywhere start the Cameras: ${BONUS.spinsC} free spins.</li><li>The rules are the Kitchen’s, with a stronger counter: it starts at ×${BONUS.cam.start} and every steal adds ${BONUS.cam.inc}: ×5, ×7, ×9, ×11… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter. Every free spin Rocco throws 1 WILD; his tricks come at the 2nd, 4th and 6th steal; 3 or more invitations add ${BONUS.retroSpins} spins.</li><li><b>Cameras record.</b> Every cell is a monitor. Where Rocco steals, that screen lights up and keeps a REC mark for the whole bonus. The marks show where Rocco has been; they do not change the pay.</li></ol>
   <div class="callout">Example: after 3 steals the counter shows ×11. A win of 10 pizzas (${PAY['sym-high-pizza'][2]}× the bet) pays ${PAY['sym-high-pizza'][2]} × 11 = ${+(PAY['sym-high-pizza'][2]*11).toFixed(2)}× the bet.</div>`],
  ['buy','Buy bonus',()=>`<p>Bonuses and modes are bought from the Buy bonus machine next to the grid. They are not available during free spins and autoplay. A bought bonus starts with one spin of the base game where the invitations land; its wins are paid, then the bonus begins.</p>
   ${MODES.map(m=>`<div class="buy"><img src="${A}${m.img}" alt=""><div><b>${m.nm}</b><div class="chips"><span>PRICE <em>${m.x}× bet</em></span>${m.toggle?'<span>EVERY SPIN</span>':'<span>STARTS AT ONCE</span>'}</div><p>${m.d}</p></div></div>`).join('')}`],
  ['max','Max win',()=>`<p>The maximum win is <b>${MAXX.toLocaleString('en-US')}×</b> the bet in every mode. When a round reaches it, the round ends at once and the max win is paid. A whole bonus counts as one round; a bought bonus counts together with its first spin.</p>`],
  ['rtp','RTP',()=>`<p>Theoretical return to player and max win for every mode (game math ${MATH_VERSION}, checked by simulation). Draft values until the game is certified.</p><table><tr><th>Mode</th><th style="text-align:right">Price</th><th style="text-align:right">RTP</th><th style="text-align:right">Max win</th></tr>${[['Base game','1×','base'],...MODES.map(m=>[m.nm.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()),m.x+'×',m.k])].map(([n,p,k])=>`<tr><td>${n}</td><td class="n">${p}</td><td class="n">${(RTP_MODE[k]||96).toFixed(1)}%</td><td class="n">${MAXX.toLocaleString('en-US')}×</td></tr>`).join('')}</table>`],
- ['controls','Controls',()=>`<ul class="ctl"><li><b>Play</b> starts a spin. During a spin it becomes Skip: each press finishes the animation that is playing now, then the game goes on at normal speed. Press again to skip the next one.</li><li><b>Space</b> works like Play. Hold Space to finish the current spin at turbo speed; every new spin needs a new press.</li><li><b>− / +</b> change the bet; the arrow opens the bet list.</li><li><b>Autoplay</b> runs a chosen number of spins after confirmation. Press Play to stop.</li><li><b>Speed key</b> (› ›› ›››) switches Normal, Quick and Turbo; its lamps show the speed.</li><li><b>Menu</b> holds sound on/off, music and effects volume, spin speed, language, rules, paytable, history and fullscreen.</li><li><b>Buy bonus</b> opens the bonus buys and modes.</li></ul>`],
+ ['controls','Controls',()=>`<ul class="ctl"><li><b>Play</b> starts a spin. During a spin it becomes Skip: each press finishes the animation that is playing now, then the game goes on at normal speed. Press again to skip the next one.</li><li><b>Space</b> works like Play. Hold Space (or hold Play) for 0.4 s and the spins keep coming at turbo speed until you let go; the current spin always finishes. It stops by itself on a bonus, a win window or low balance.</li><li><b>− / +</b> change the bet; the arrow opens the bet list.</li><li><b>Autoplay</b> runs a chosen number of spins after confirmation. Press Play to stop.</li><li><b>Speed key</b> (› ›› ›››) switches Normal, Quick and Turbo; its lamps show the speed.</li><li><b>Menu</b> holds sound on/off, music and effects volume, spin speed, language, rules, paytable, history and fullscreen.</li><li><b>Buy bonus</b> opens the bonus buys and modes.</li></ul>`],
  ['legal','Legal information',()=>`<p>Malfunction voids all pays and plays. Results are decided by the game server before the animation starts; animations, speed and skipping never change a result. Pays are shown in the selected currency. Unfinished rounds are completed when you return to the game.</p>`]];
 function rules(start){ if(DLGF()) return DlgF.rules(dlgCtx(),start); // правила — один большой монитор (вариант A, выбор владельца 2026-10-10): каналы на экране, ручки CH−/CH+ листают, [X] закрывает
  let idx=Math.max(0,RULES.findIndex(r=>r[0]===(start||'how'))), turn=0;
@@ -673,6 +673,9 @@ const HUDTONE_DEFAULT='4';
 // рамка плашек М1: ?hudframe=0|a..f главнее, потом sessionStorage 'bp-hudframe', потом HUDFRAME_DEFAULT (0 — прежняя красная рамка с винтами; a–f — рамки-предметы, ui.css «рамки плашек»); ставит data-hudframe на <html>
 const HUDFRAME_DEFAULT='a';
 (function(){ let t=null; try{ t=new URLSearchParams(location.search).get('hudframe'); }catch(e){} if(!/^[0a-f]$/.test(t||'')){ try{ t=sessionStorage.getItem('bp-hudframe'); }catch(e){} } if(!/^[0a-f]$/.test(t||'')) t=HUDFRAME_DEFAULT; document.documentElement.dataset.hudframe=t; })();
+// плашка ×N над полем, форма: ?mplate=0..4 главнее, потом sessionStorage 'bp-mplate', потом MPLATE_DEFAULT (0 — прежняя; 1 тугая, 2 крупная цифра, 3 слитная, 4 следующая крупнее; владелец 2026-10-13, ui.css «плашка множителя над полем: варианты»); ставит data-mplate на <html>
+const MPLATE_DEFAULT='0';
+(function(){ let t=null; try{ t=new URLSearchParams(location.search).get('mplate'); }catch(e){} if(!/^[0-4]$/.test(t||'')){ try{ t=sessionStorage.getItem('bp-mplate'); }catch(e){} } if(!/^[0-4]$/.test(t||'')) t=MPLATE_DEFAULT; document.documentElement.dataset.mplate=t; })();
 function m1Set(e){ // .vv → ячейки (код бонусов пишет в .vv обычный текст, ячейки строим заново); двигаем только то, что изменилось
  const c=m1Canon(e.textContent), prev=e.dataset.c;
  if(prev===c&&e.firstElementChild&&e.firstElementChild.classList.contains('c')) return;
@@ -704,16 +707,39 @@ function hudItems(L,avail,u){
  else if(bonusScene()){ out.push(hWin('fs','Free spins',`${fsLeft()}`,{wm}));
   if(SACK_N) out.push(hWin('sack','Sack',money.win(sackAmt()),{wm:L?wm:116,mw,ex:hLamps(sackLamps()),ico:SACK_ICO,cls:'sk',hw:sackLamps()===3&&!SKV.quiet?'wait':''})); } // мешок выключен (SACK_N=0) — только FREE SPINS
  return out; }
+// место плашки режима (MODE): ?modepos=0..3 главнее, потом sessionStorage 'bp-modepos', потом MODEPOS_DEFAULT (0 — прежнее: столбик слева от поля, на телефоне стоя — слева над полем на месте Buy bonus;
+// 1 — прямо у Buy bonus (над ним; боком — справа от него), 2 — в пульте над окном BET, 3 — над полем слева от плашки ×N; владелец 2026-10-13, fb/hud-plates). Только зал (в бонусах режима нет).
+const MODEPOS_DEFAULT='0';
+const modePos=()=>{ let t=null; try{ t=new URLSearchParams(location.search).get('modepos'); }catch(e){} if(!/^[0-3]$/.test(t||'')){ try{ t=sessionStorage.getItem('bp-modepos'); }catch(e){} } return /^[0-3]$/.test(t||'')?t:MODEPOS_DEFAULT; };
+function modePlace(hud,f,sa){ // переносит окошко MODE из столбика в своё место; если широкое — имя режима сокращается до первого слова
+ const mp=modePos(), hw=hud.querySelector('#bp-mode'); if(mp==='0'||!hw||scene!=='hall') return;
+ const W=innerWidth, H=innerHeight, old=hw.parentElement, col=el('div','wcol mpos'); col.style.margin='0'; hud.append(col); col.append(hw); if(old&&old!==col&&!old.children.length) old.remove();
+ const ffe=document.getElementById('features'); if(ffe) ffe.style.visibility=''; // телефон стоя: Buy bonus не уступает место режиму — у режима своё место
+ const rc=sel=>{ const e=document.querySelector(sel); if(!e) return null; const r=e.getBoundingClientRect(); return r.width&&r.height?r:null; };
+ const ctr=rc('#alt .ctr2'), ff=rc('#features'), pod=rc('#pod'), bet=rc('#pod .pw.bet')||rc('#pod .hot.bet'), grp=rc('#pod .g-bet'), lg=rc('#sign'), port=W<H;
+ const edgeX=16; // «×» выключения выступает за правый край плашки
+ const place=()=>{ const r=hw.getBoundingClientRect(), w=r.width, h=r.height; let x,y,room=W; // room — сколько места по ширине у выбранной точки
+  if(mp==='1'){ if(ff&&H>=ff.bottom){ // у Buy bonus: над ним, а на узком боковом поле — справа от него (над ним логотип)
+     const above=ff.top-8-h>=(lg?lg.bottom+4:8)+2; if(above){ x=Math.min(ff.right-w,f.left-w-edgeX-6); x=Math.max(Math.max(8,sa.l),x); y=ff.top-8-h; room=f.left-6-edgeX-Math.max(8,sa.l); }
+     else { x=ff.right+8; y=ff.bottom-h; room=f.left-6-edgeX-x; } }
+    else { x=Math.max(14,sa.l); y=f.top-6-h; room=f.left-x; } }
+  else if(mp==='2'){ if(bet){ const top=grp?grp.top:port?bet.top-12:(pod?pod.top:bet.top); x=bet.left+bet.width/2-w/2; y=top-5-h; room=Math.min(W-8-x-edgeX, 2*(bet.left+bet.width/2-8)); if(port){ x=W-14-w-edgeX; const wp=rc('.rwp'); room=wp?W-14-edgeX-(wp.right+6):W; } else if(grp){ x=Math.max(Math.max(8,sa.l),grp.left+2); room=W; } } else { x=Math.max(14,sa.l); y=f.top-6-h; } }
+  else { if(ctr){ x=ctr.left-8-w-edgeX; y=ctr.bottom-h; room=ctr.left-8-edgeX-Math.max(8,sa.l); } else { x=Math.max(14,sa.l); y=f.top-6-h; } }
+  if(mp==='3') y=Math.min(y,f.top-3-h); y=Math.max(Math.max(6,sa.t+4),y); return {x,y,room}; };
+ col.style.left='0px'; col.style.top='0px'; col.style.visibility='hidden';
+ hudFit(); let r=hw.getBoundingClientRect(), t=place();
+ const wnE=hw.querySelector('.wn'); if(r.width>t.room||(wnE&&wnE.scrollWidth>wnE.clientWidth+1)){ const mv=hw.querySelector('.mv'), m=MODES.find(x=>x.k===modeOn); if(mv&&m){ mv.innerHTML=`${m.nm.split(' ')[0]} <span class="dim mxv">×${m.x}</span>`; const wn=hw.querySelector('.wn'); if(wn){ wn.style.fontSize=''; delete wn._fk; } hudFit(); t=place(); } }
+ col.style.left=Math.round(t.x)+'px'; col.style.top=Math.round(t.y)+'px'; col.style.visibility=''; }
 function hudBuild(){
  document.getElementById('hud')?.remove();
  const fe=document.getElementById('field'), app=document.getElementById('app'); if(!fe||!app||document.getElementById('wel')) return;
  const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0; let u=hudU(f.width);
- const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=b0d45272 readSafe): окошки не уходят под него слева
+ const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=52316320 readSafe): окошки не уходят под него слева
  let edge=f.left-12*u, avail=Math.max(60,edge-Math.max(8,sa.l)), right=false;
  if(scene==='cameras'&&land&&!(window.BPL&&window.BPL.nl&&window.BPL.mode!=='desk')){ edge=f.left-.063*f.width-10; u=Math.min(u,Math.max(.78,(edge-Math.max(8,sa.l)-4)/152)); avail=Math.max(60,edge-Math.max(8,sa.l)-30*u); } // «Камеры», компьютер: рамка стойки (≈6,3% ширины проёма) шире проёма — плашки стоят левее её внешней кромки (на 10 px), а не на рамке; плашка уже — масштаб u меньше (SACK шире на значок мешка ≈30u слева)
  const pr=document.getElementById('pod')?.getBoundingClientRect(); // телефон боком (844×390): слева от поля всего ~80 px (логотип и «Функции»), а между полем и пультом справа пусто — столбик встаёт туда
  if(land&&H<=500&&scene!=='cameras'&&pr&&pr.left>f.right-10&&pr.left-f.right-16>=100){ right=true; avail=pr.left-f.right-16; }
- const BL=window.BPL||{}, lm=BL.nl&&BL.mode!=='desk'?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=b0d45272 render, ветка NL)
+ const BL=window.BPL||{}, lm=BL.nl&&BL.mode!=='desk'?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=52316320 render, ветка NL)
  const ff=document.getElementById('features'); if(ff) ff.style.visibility=lm==='port'&&scene==='hall'&&modeOn?'hidden':''; // телефон стоя: включённый режим встаёт на место Buy bonus (шаблон «Mode button · active»), сама плашка MODE открывает Функции
  if(lm==='tiny'||(lm==='cmp'&&!bonusScene())) return; // крошечное окно — только поле; мини-окно в зале — без плашки режима (места нет)
  if(lm==='cmp') u=NG.u||.56;
@@ -721,7 +747,7 @@ function hudBuild(){
  const hud=el('div'), top=Math.max(f.top+13*u,sb+8); hud.id='hud'; hud.style.setProperty('--u',u.toFixed(3));
  const rr=s=>{ const e=document.querySelector('#pod '+s); return e&&e.getBoundingClientRect(); };
  if(lm==='port') hud.innerHTML=bonusScene()?`<div class="wrow" style="left:${f.left}px;width:${f.width}px;top:${f.bottom+6}px">${items.join('')}</div>` // шаблон: FREE SPINS и SACK рядом под полем (место занято заранее)
-  :`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${f.top-6}px;transform:translateY(-100%)">${items.join('')}</div>`; // MODE — слева над полем, на месте Buy bonus
+  :`<div class="wcol" style="left:${NG.rs?f.left+6:Math.max(14,sa.l)}px;top:${NG.rs&&rr('.g-auto')?rr('.g-auto').top-6:f.top-6}px;transform:translateY(-100%)">${items.join('')}</div>`; // MODE — слева над полем, на месте Buy bonus (Рокко справа от поля, NG.rs: Autoplay и скорость стоят над правым краем поля — плашка встаёт выше них)
  else if(lm==='phl') hud.innerHTML=bonusScene()?`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${sb+8}px">${items[0]}</div>`+(NG.sack&&items[1]?`<div class="wcol" style="left:${NG.sack.x}px;top:${NG.sack.y}px;transform:translateX(-50%)">${items[1]}</div>`:'') // шаблон: FREE SPINS слева под логотипом, SACK справа на месте Autoplay
   :`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${Math.round((ff&&ff.isConnected?ff.getBoundingClientRect().bottom:sb)+8)}px">${items.join('')}</div>`; // MODE — под Buy bonus
  else if(lm==='cmp'){ const L=rr('.g-lrail'), R=rr('.g-rrail'); // шаблон Compact, бонус: SACK внизу левого столбика (на месте − +), FREE SPINS внизу правого (на месте Autoplay · Buy)
@@ -731,6 +757,7 @@ function hudBuild(){
  else if(scene==='cameras'){ const pb=document.querySelector('#alt .ctr2'), pr2=pb&&pb.getBoundingClientRect(), ty=pr2&&pr2.height?Math.min(f.top-8*u,pr2.top-6-11*u):f.top-8*u; hud.innerHTML=`<div class="wrow" style="left:${f.left}px;width:${f.width}px;top:${ty}px;transform:translateY(-100%)">${items.join('')}</div>`; } // телефон, «Камеры»: рядом над проёмом, выше плашки счётчика и её значка трюка (он выступает на 11u над плашкой)
  else hud.innerHTML=`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${sb+14}px">${items.join('')}</div>`; // телефон: столбиком слева под логотипом
  app.append(hud); m1Watch(hud);
+ if(modeOn&&!bonusScene()) modePlace(hud,f,sa);
  const mb=document.getElementById('bp-mode'); if(mb){ const m=MODES.find(x=>x.k===modeOn);
   mb.onclick=e=>{ if(e.target.closest('.off')){ e.stopPropagation(); modeOn=null; hudBuild(); syncHUD(); return; } openFeatures(); };
   mb.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openFeatures(); } }; mb.setAttribute('aria-label',`${m.nm} active — open features`); }
@@ -1323,7 +1350,7 @@ function showWins(ev,mult,bt,opt){ // надписи группам выигры
  const WP=[]; BOARD.forEach((row,r)=>row.forEach((o,c)=>{ if(o&&o.id==='sym-wild') WP.push(ctr(r*COLS+c)); }));
  const short=true, box=wlLayer(), taken=[], out=[], amt={}; // владелец 2026-10-11: на поле только сумма выигрыша, формулу «10 × HORN × 3» убрали везде (как в популярных слотах; расчёт — в правилах)
  ev.wins.forEach((w,gi)=>{ const P=[]; BOARD.forEach((row,r)=>row.forEach((o,c)=>{ if(o&&o.id===w.s) P.push(ctr(r*COLS+c)); })); if(!P.length) return;
-  const e=el('div','wl'+(w.s==='sym-high-mask'?' trophy':'')); e.style.setProperty('--amt',(cw*.56).toFixed(1)+'px'); e.style.setProperty('--fm',Math.max(11,cw*.2).toFixed(1)+'px');
+  const e=el('div','wl'+(w.s==='sym-high-mask'?' trophy':'')); e.style.setProperty('--amt',(cw*.48).toFixed(1)+'px'); // владелец 2026-10-13: «нынешний вариант, только немного уменьши» (было .56) e.style.setProperty('--fm',Math.max(11,cw*.2).toFixed(1)+'px');
   e.innerHTML=`<div class="amt">${moneyS((opt&&opt.pre?w.x/w.f:w.x)*bt*mult)}</div>`+(short?'':`<div class="fm">${w.m} × <img class="ico" src="${SYM(w.s)}" alt=""> <span>${PAY[w.s][0].toUpperCase()} <span class="mx">× ${mult}</span></span></div>`);
   if(window.WinFx) window.WinFx.dress(e,{gi,w,cw}); // winfx.js: вид суммы на поле (печатный ярлык, штамп, перекидные цифры…); «прежний» ничего не меняет
   box.append(e); const ww=e.offsetWidth, hh=e.offsetHeight, k=Math.min(1,F.width*.9/ww), a=wlAnchor(g,P,WP,taken,ww*k,hh*k); taken.push({x:a.x,y:a.y,w:ww*k,h:hh*k});
@@ -1496,6 +1523,7 @@ function flash(t){ AU('ui.error'); if(window.bpPlates) bpPlates.toast(t); const 
 
 // ---------- кнопки пульта: одна точка входа ----------
 document.addEventListener('click',e=>{
+ if(performance.now()<swallowUntil&&playBtn(e.target)){ swallowUntil=0; e.stopPropagation(); e.preventDefault(); return; } // клик после удержания Play: спины уже шли
  const b=e.target.closest('#pod button,#pod [role="button"]'); if(!b) { // клик мимо панелей закрывает их
   if(!e.target.closest('#bp-menu')&&popEl('bp-menu')){ popOut(popEl('bp-menu')); syncHUD(); }
   if(!e.target.closest('#bp-bets')) closeBets(); return; }
@@ -1513,7 +1541,7 @@ document.addEventListener('click',e=>{
 },true);
 
 // ---------- клавиатура: пробел = Play/Skip, зажатый пробел = турбо; Escape закрывает ----------
-let spaceDown=0, holdT=null;
+let spaceDown=0, holdT=null, holdSpin=false, holdPoll=0, readyAt=0, pdT=0, pdHeld=false, swallowUntil=0; const HOLD_MS=400;
 const CTL='button,a[href],input,select,textarea,summary,[role=button],[role=switch],[role=tab],[role=checkbox],[role=slider],[tabindex]:not([tabindex="-1"])'; // «другой элемент управления» для пробела
 addEventListener('keydown',e=>{
  if(e.key==='Escape'){ const hadBets=!!popEl('bp-bets'), mn=popEl('bp-menu'), wr=document.querySelector('.bp-wrap:not([data-out])'); popOut(mn); closeBets(); if(hadBets) podBtn('Bet list')?.focus(); wr?.close?.(); document.querySelector('#bp-big:not([data-out])')?.next?.(); syncHUD();
@@ -1527,12 +1555,28 @@ addEventListener('keydown',e=>{
  if(document.getElementById('wel')&&window.Welcome){ e.preventDefault(); if(!e.repeat) Welcome.play(); return; } // приветствие: пробел = PLAY (спин не запускается)
  const tg=e.target; if(tg&&tg.closest&&(tg.closest('.bp-wrap,#fmenu,#bp-menu,#bp-bets,#ovl,#wel')||(tg.closest(CTL)&&!tg.closest('#pod .play,#pod .pl')))) return; // в окнах и на любом другом элементе управления (Menu, ±, BET, Autoplay, скорость, звук, Buy bonus) пробел делает своё; крутит с body и с самой кнопки Play (удержание = турбо)
  if(document.documentElement.dataset.lay==='tiny') return; // крошечное окно (шаблон Tiny 200×120): играть нельзя, пробел не крутит
- e.preventDefault(); if(e.repeat) return; // автоповтор клавиши не делает новую ставку
- spaceDown=performance.now(); spin();
- clearTimeout(holdT); holdT=setTimeout(()=>{ if(spaceDown){ GS.holdTurbo=true; GS.speedUp&&GS.speedUp(); syncHUD(); } },350);
+ e.preventDefault(); if(e.repeat) return; // автоповтор клавиши не делает новую ставку, не пропускает фазы и не продлевает удержание
+ spaceDown=performance.now(); const idle=!GS.spinning; spin();
+ clearTimeout(holdT); holdT=setTimeout(()=>{ if(spaceDown){ GS.holdTurbo=true; GS.speedUp&&GS.speedUp(); syncHUD(); if(idle&&GS.spinning) holdStart(); } },HOLD_MS); // удержание ≥0,4 с: турбо и непрерывные спины (только если нажатие само начало спин, а не пропустило фазу)
 },true);
-addEventListener('keyup',e=>{ if(e.code!=='Space') return; spaceDown=0; clearTimeout(holdT); if(GS.holdTurbo){ GS.holdTurbo=false; syncHUD(); } });
-addEventListener('blur',()=>{ spaceDown=0; GS.holdTurbo=false; syncHUD(); });
+addEventListener('keyup',e=>{ if(e.code!=='Space') return; spaceDown=0; clearTimeout(holdT); holdStop(); if(GS.holdTurbo){ GS.holdTurbo=false; syncHUD(); } }); // отпустил: текущий спин доигрывает, новых нет
+addEventListener('blur',()=>{ spaceDown=0; holdStop(); clearTimeout(pdT); GS.holdTurbo=false; syncHUD(); });
+// ---------- удержание: непрерывные спины (пробел и кнопка Play мышью/пальцем, ≥0,4 с; владелец 2026-10-13) ----------
+// Пока клавиша зажата, после конца спина и когда игра готова (нет окон, бонуса, автоигры, денег хватает), через ~0,2 с идёт следующий спин. Отпустил — новых нет.
+const holdOK=()=>scene==='hall'&&!GS.replay&&!GS.auto&&!(GS.fs>0)&&document.documentElement.dataset.lay!=='tiny'&&!dialogOpen();
+function holdStop(){ holdSpin=false; clearInterval(holdPoll); holdPoll=0; }
+function holdStart(){ if(holdSpin||!holdOK()) return; holdSpin=true; readyAt=0;
+ holdPoll=setInterval(()=>{ if(!holdSpin||!holdOK()) return holdStop(); // бонус, окно, автоигра, реплей — непрерывные спины кончаются
+  if(GS.spinning){ readyAt=0; return; }
+  const now=performance.now(); if(!readyAt) readyAt=now; if(now-readyAt<(GS.holdTurbo?120:200)) return;
+  readyAt=0; if(GS.bal<spinCost()){ holdStop(); spin(); return; } // денег нет: стоп, spin() сам скажет «Not enough balance» один раз
+  spin(); },50); }
+const playBtn=t=>t&&t.closest&&t.closest('#pod .play,#pod .pl');
+addEventListener('pointerdown',e=>{ if((e.pointerType==='mouse'&&e.button!==0)||!playBtn(e.target)||GS.spinning||!holdOK()) return; const b=playBtn(e.target); if((b.getAttribute('aria-label')||'')!=='Play') return;
+ clearTimeout(pdT); pdT=setTimeout(()=>{ pdT=0; if(GS.spinning||!holdOK()) return; pdHeld=true; GS.holdTurbo=true; spin(); if(GS.spinning){ holdStart(); } syncHUD(); },HOLD_MS); },true);
+const pdEnd=()=>{ clearTimeout(pdT); pdT=0; if(pdHeld){ pdHeld=false; swallowUntil=performance.now()+500; holdStop(); if(GS.holdTurbo&&!spaceDown){ GS.holdTurbo=false; syncHUD(); } } }; // отпустили Play: клик, который за этим идёт, игра не считает (спин уже был)
+addEventListener('pointerup',pdEnd,true); addEventListener('pointercancel',pdEnd,true);
+addEventListener('contextmenu',e=>{ if(pdHeld&&playBtn(e.target)) e.preventDefault(); },true); // долгое нажатие пальцем не открывает меню браузера
 
 after(); // первая отрисовка уже прошла в index.html
 // Показ трюков Рокко настоящим движком на готовом поле (для разработки и ревью): window.bpFx.punch(seed,_,mult) / .toss(seed,n) / .dump(seed) (кухня); адрес ?state=idle&fx=punch|toss (зал) или ?state=idle&scene=kitchen&fx=punch|dump повторяет трюк по кругу
@@ -1659,7 +1703,11 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
    const ps=f.width/6.35, m=Math.max(10,V.m*W), Z=W-f.right, rIn=P.rExt*(1-(P.rOff||0)), extIn=P.lExt+rIn; // rOff — какая доля хвоста/мешка может уйти за правый край (кухня: мешок частично за кадром, владелец 2026-10-11 «на кухне тоже чуть крупнее»)
    const ov=window.bpRoccoOv||0; // ov — на сколько px ролика правый край Рокко (хвост) заходит за линию отступа m: узкая раскладка index.html roccoSides() выносит хвост за экран, чтобы поле стояло по центру окна; 0 — всё в экране
    const Lmin=Math.max(f.right-.1*ps,pb?pb.right+4:0), fx=P.fixed?fistRail(f):0; // fixed (H-punch5): кулак встаёт на середину правой рамки с места, без сдвига Рокко в ударе: торс на «длине руки» от неё, а если справа не хватает места (тело и хвост в экране с отступом m) — Рокко делаем меньше
-   if(P.fixed){ const sc=Math.min(V.h*H/P.bodyH,(W-(P.rOff?0:m)-Lmin)/(extIn-ov),(W-(P.rOff?0:m)-fx)/(P.reach+Math.max(P.umR,rIn)-ov)); return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY:H*(1-V.fl),shadow:true,lim:W-2}; }
+   if(P.fixed){ const sc=Math.min(V.h*H/P.bodyH,(W-(P.rOff?0:m)-Lmin)/(extIn-ov),(W-(P.rOff?0:m)-fx)/(P.reach+Math.max(P.umR,rIn)-ov)), feet=H*(1-V.fl);
+    if(window.BPL&&window.BPL.nl&&pb&&q.get('rside')!=='0'&&sc*P.bodyH<.3*H&&pb.top>H*.5){ // fb/small-layout: окно ПК 800–950 px — пульт тянется почти на всю ширину и не оставляет Рокко места «справа от пульта» (он пропадал совсем): встаёт справа от поля, ногами на верхнюю кромку пульта
+     const sB=Math.min(V.h*H/P.bodyH,(W-(P.rOff?0:m)-(f.right-.1*ps))/(extIn-ov),(W-(P.rOff?0:m)-fx)/(P.reach+Math.max(P.umR,rIn)-ov),(pb.top-2-Math.max(8,f.top-.12*f.height))/P.bodyH);
+     if(sB>sc*1.2) return {bh:sB*P.bodyH,Sb:fx+P.reach*sB,feetY:pb.top-2,shadow:true,lim:W-2}; }
+    return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY:feet,shadow:true,lim:W-2}; }
    const sc=Math.min(V.h*H/P.bodyH,(W-(P.rOff?0:m)-Lmin)/extIn,(Z+10+V.ov*ps)/(P.reach+P.umR)), Tmax=W-(P.rOff?0:m)-rIn*sc, Tid=f.right-12+P.reach*sc; // три предела: доля высоты; в покое целиком (с хвостом/мешком) в зоне справа от поля, кромку рамки закрыть можно чуть; в ударе (ролик без отражения: хвост/мешок слева, справа только тело) торс на «длине руки» от рамки и в экране, при нехватке места кулак заходит за рамку не больше ov клеток
    return {bh:sc*P.bodyH,Sb:Math.min(Tid,Tmax),feetY:H*(1-V.fl),shadow:true,lim:W-2}; }
   if(land){ // телефон боком: Рокко в просвете между полем и пультом, под окошками счётчиков
@@ -1668,8 +1716,12 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
     return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY,shadow:true,lim:g1}; }
    const sc=Math.min(V.h*H/P.bodyH,(g1-g0)/ext,(feetY-topL)/P.bodyH);
    return {bh:sc*P.bodyH,Sb:g0+P.lExt*sc+((g1-g0)-ext*sc)/2,feetY,shadow:true,lim:g1}; }
-  const BL=window.BPL||{}, lm=BL.nl?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=b0d45272 render, ветка NL)
+  const BL=window.BPL||{}, lm=BL.nl?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=52316320 render, ветка NL)
   if(lm==='cmp'||lm==='tiny') return {bh:0,Sb:0,feetY:0,shadow:false,lim:0}; // мини-окно и крошечное: Рокко нет (шаблон: только столбики и поле)
+  if(lm==='port'&&NG.rs){ // fb/small-layout (владелец 2026-10-13: «на маленьком экране Рокко справа, а не сверху»): Рокко стоит справа от поля, как на компьютере; кулак с места ложится на середину правой рамки (H-punch5, P.fixed), торс на «длине руки» от неё. Не влезает по ширине — хвост уходит за правый край экрана (window.bpRoccoOv, до ≈80 px ролика), потом Рокко меньше. Ноги — на нижней кромке поля (NG.rFeet), голова не выше плашки множителя (NG.rTop)
+   const fx=fistRail(f), m=Math.max(10,V.m*W), ov=window.bpRoccoOv||0, rIn=P.rExt*(1-(P.rOff||0)), feetY=NG.rFeet;
+   const sc=Math.max(.05,Math.min(V.h*H/P.bodyH,(W-m-fx)/(P.reach+Math.max(P.umR,rIn)-ov),(feetY-NG.rTop)/P.bodyH));
+   return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY,shadow:true,lim:W-2}; }
   if(lm==='port'){ // телефон стоя (владелец 2026-10-13, «над полем по центру»): ряд Buy bonus · Рокко · Autoplay, Рокко стоит на верхней кромке поля посередине, голова — не выше плашки множителя
    const ga=document.querySelector('#pod .g-auto'), ar=ga&&ga.getBoundingClientRect(), fe=document.getElementById('features'), fr=fe&&fe.isConnected?fe.getBoundingClientRect():null;
    const lx=Math.max(8,fr&&fr.width?fr.right+6:0,scene==='hall'&&typeof modeOn!=='undefined'&&modeOn?Math.max(14,(window.SA||{l:0}).l)+W*.4+6:0), rx=ar&&ar.width?ar.left-6:W-8, c=W/2, half=Math.max(30,Math.min(c-lx,rx-c));
