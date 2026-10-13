@@ -34,5 +34,5 @@ function start(R,o,ctx){
  setTimeout(()=>{ if(!dead&&st===0) end(true); },6000*SL()); // ролик не дошёл до ладони
  return true; }
 window.RoccoTouch={on:(()=>{ try{ return /[?&]rtouch=1/.test(location.search)||sessionStorage.getItem("bp-rtouch")==="1"; }catch(e){ return false; } })(), start,track:TR,palm,
- test(amt){ if(!window.roccoPlay||!window.roccoPlay('A-rub',true)) return false; const R=window.roccoRun; return start(R,{amt:amt||'$0.72'},{GS:window.bpTime&&window.bpTime.GS}); } };
+ test(amt){ if(!window.roccoPlay||!window.roccoPlay('A-rub',true)) return false; const R=window.roccoRun; return start(R,{amt:amt||bpMoney.win(.72)},{GS:window.bpTime&&window.bpTime.GS}); } };
 })();

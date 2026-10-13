@@ -388,8 +388,8 @@ async function paw2(X,list,gone,o){
  const out=movePaw(X,paw,[{o:0,x:sl.x,y:sl.y,r:sl.rot,m:1,so:1,e:'cubic-bezier(.3,0,.5,1)'},{o:.15,...poseOf(sl,-.08*ps,1.1,.8),e:'cubic-bezier(.5,0,.7,.55)'},{o:1,...poseOf(sl,sl.tEx+2.0*ps,1.18,.1)}],{dur:tOut});
  await X.sleep(tOut*.4); pawLeave(host,gen,out); return true; }
 
-// «Меньше движения»: символы просто гаснут (без полёта), коротко, не по K
-async function fade(list,gone){ const jobs=list.map(e=>{ const a=e.o.sp.animate([{opacity:1},{opacity:0}],{duration:170,easing:'linear',fill:'forwards'}); return a.finished.catch(()=>{}); });
+// «Меньше движения»: символы просто гаснут (без полёта), коротко (80 мс — потолок движения при reduced motion), не по K
+async function fade(list,gone){ const jobs=list.map(e=>{ const a=e.o.sp.animate([{opacity:1},{opacity:0}],{duration:80,easing:'linear',fill:'forwards'}); return a.finished.catch(()=>{}); });
  await Promise.all(jobs); list.forEach(gone); }
 
 // ---------- вход ----------

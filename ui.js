@@ -2,23 +2,24 @@
 // В настоящей игре исход приходит из книги событий RGS, суммы — в микро-единицах (BigInt).
 // Использует общие переменные index.html: A, q, scene, SYM, HALL, BETS, betI, modeOn, MODES, money, render, openFeatures, closeFeatures, el.
 (()=>{
-const MAXX=25000;
+const MAXX=5000; // максимальный выигрыш, × ставки (математика 2.0.0: потолок достижим в основной игре примерно раз в 5 млн спинов, tools/rtp_sim/results_v2.json)
+const MATH_VERSION='2.0.0'; // версия математики (таблица выплат, веса, правила бонусов — tools/rtp_sim/config_v2.json); на экране пока нигде, отдаётся в window.bpMath
 let PITCH_C=0; // кэш шага клеток (см. pitch())
 const HL_NUM=false; // номера 01, 02… рядом с янтарными уголками выигрыша (владелец 2026-10-10: выключены; true вернёт). Всё остальное в подсветке от неё не зависит
 const toScreen=p=>{ const nav=()=>{ if(typeof goQ==='function') goQ(p); else location.search=p; }; if(window.SceneTrans) SceneTrans.go(p,nav); else nav(); }; // в артефакте экраны переключает goQ, в локальном макете — адрес // максимальный выигрыш, × ставки
 // <<<CAL pay
-const PAY={ // × ставки за 8–9 / 10–11 / 12+ всего символов (настоящие + WILD). Черновик: подгонка симуляцией tools/rtp_sim (2026-10-12, «Кухня» 10 спинов за 100× ≈96%, «Камеры» за 150× ≈96%, RTP ≈96% в каждом режиме); обновляет tools/rtp_sim/export_ui.js
- 'sym-high-mask':['Trophy',0.319,0.638,1.276],
- 'sym-high-pizza':['Pizza',0.268,0.536,1.072],
- 'sym-high-gift':['Gift',0.226,0.452,0.904],
- 'sym-high-mic':['Microphone',0.19,0.38,0.76],
- 'sym-low-cupcake':['Cupcake',0.16,0.32,0.64],
- 'sym-low-horn':['Horn',0.134,0.268,0.536],
- 'sym-low-balloon':['Balloon',0.113,0.226,0.452],
- 'sym-low-hat':['Party hat',0.095,0.19,0.38],
- 'sym-low-cup':['Soda',0.08,0.16,0.32]};
+const PAY={ // × ставки за 8–9 / 10–11 / 12+ всего символов (настоящие + WILD). Математика 2.0.0 (2026-10-13): одна таблица для зала и бонусов, без понижающих множителей; tools/rtp_sim/config_v2.json
+ 'sym-high-mask':['Trophy',1.1,2.2,4.4],
+ 'sym-high-pizza':['Pizza',0.7,1.4,2.8],
+ 'sym-high-gift':['Gift',0.55,1.1,2.2],
+ 'sym-high-mic':['Microphone',0.45,0.9,1.8],
+ 'sym-low-cupcake':['Cupcake',0.3,0.6,1.2],
+ 'sym-low-horn':['Horn',0.22,0.44,0.88],
+ 'sym-low-balloon':['Balloon',0.18,0.36,0.72],
+ 'sym-low-hat':['Party hat',0.14,0.28,0.56],
+ 'sym-low-cup':['Soda',0.1,0.2,0.4]};
 // >>>CAL pay
-const COST={hungry:1.5,double:2};
+const COST={double:2}; // цена спина в режиме, × ставки («Голодный Рокко» убран 2026-10-13)
 const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 const AU=(e,o)=>{ try{ window.bpAudio&&window.bpAudio.play(e,o); }catch(_){} try{ window.RoccoAlive&&window.RoccoAlive.ev(e); }catch(_){} }; // звук (audio.js): по одной строке на событие; без audio.js или файлов звука — тишина
 const store={get(){try{return JSON.parse(sessionStorage.getItem('bp-ui')||'null')}catch(e){return null}},set(v){try{sessionStorage.setItem('bp-ui',JSON.stringify(v))}catch(e){}}};
@@ -28,7 +29,7 @@ const GS={fs:S0.fs||0,fst:S0.fst||0,kstep:S0.kstep||0,ksteals:S0.ksteals||0,sack
 // больше уровней ставки (владелец 2026-10-09: «чтобы выбор был большой»). В игре уровни приходят из authenticate RGS.
 BETS.splice(0,BETS.length,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.2,1.4,1.6,1.8,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10,12,14,16,18,20,25,30,40,50,60,70,80,90,100); // 40 уровней — ровно 5 рядов по 8, без пустого места
 betI=BETS.indexOf(1);
-if(S0.betI!=null&&S0.betI<BETS.length) betI=S0.betI; if(S0.modeOn!==undefined) modeOn=S0.modeOn;
+if(S0.betI!=null&&S0.betI<BETS.length) betI=S0.betI; if(S0.modeOn!==undefined) modeOn=S0.modeOn; if(modeOn&&!MODES.some(m=>m.k===modeOn&&m.toggle)) modeOn=null; // режим из старого сохранения (например, убранный «Голодный Рокко») — выключен
 const save=()=>store.set({fs:GS.fs,fst:GS.fst,kstep:GS.kstep,ksteals:GS.ksteals,sack:GS.sack,kintro:GS.kintro,ktotal:GS.ktotal,mute:GS.mute,bal:GS.bal,lastWin:GS.lastWin,speed:GS.speed,sound:GS.sound,music:GS.music,sfx:GS.sfx,hist:GS.hist.slice(0,20),rec:GS.rec,kind:GS.kind,kgo:GS.kgo,betI,modeOn});
 const bet=()=>BETS[betI], spinCost=()=>bet()*(COST[modeOn]||1);
 const $=s=>document.querySelector(s);
@@ -48,7 +49,56 @@ function popOut(p){ if(!p||!p.isConnected||p.dataset.out) return; p.dataset.out=
 // Фокус после закрытия окон (QA m5): окно/меню запоминает кнопку пульта, с которой открыто (w._ret); Esc и закрытие кнопкой с клавиатуры возвращают фокус на неё — как у списка ставок. Мышью закрыли — фокус не трогаем (обводка не «залипает»)
 let nextRet=null; // кому вернуть фокус у окна, которое сейчас откроется (меню → правила / история / paytable: кнопка Menu)
 const takeRet=w=>{ if(w){ w._ret=nextRet; AU('ui.open'); } nextRet=null; return w; };
-const giveBack=w=>{ const r=w&&w._ret; if(r&&r.isConnected&&!r.disabled) r.focus({preventScroll:true}); };
+const giveBack=w=>{ syncInert(); const r=w&&w._ret; if(r&&r.isConnected&&!r.disabled) r.focus({preventScroll:true}); }; // syncInert: фон оживает до возврата фокуса (на inert фокус не встанет)
+// ---------- доступность: живая зона, фон под окнами (inert), порядок Tab ----------
+// Живая зона: невидимая, вежливая; каждая фраза — свой блок (читалка не теряет подряд идущие), через 6 с блок убирается. Слова правит соцрежим (bpSocialFix), суммы вызывающий кладёт уже через money.
+let liveEl=null, liveLast='', liveAt=0;
+function liveRegion(){ if(liveEl&&liveEl.isConnected) return liveEl; liveEl=document.createElement('div'); liveEl.id='bp-live'; liveEl.dataset.raw='1'; liveEl.setAttribute('role','status'); liveEl.setAttribute('aria-live','polite'); liveEl.setAttribute('aria-relevant','additions text');
+ liveEl.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none'; document.body.append(liveEl); return liveEl; }
+function announce(text){ if(!text||window.__sim) return; const t=window.bpSocial&&window.bpSocialFix?window.bpSocialFix(String(text)):String(text), now=performance.now();
+ if(t===liveLast&&now-liveAt<900) return; liveLast=t; liveAt=now; // одна и та же фраза подряд (двойной вызов) — один раз
+ const d=document.createElement('div'); d.textContent=t; liveRegion().append(d); setTimeout(()=>d.remove(),6000); }
+window.bpAnnounce=announce;
+// Окна-модалки: пока одно открыто, всё остальное inert (ни Tab, ни читалка, ни клик не лезут под него); меню Settings — всплывающее, пульт под ним живой (Menu закрывает его). Список ставок — тоже всплывающий, не модалка.
+const MODAL_SEL='.bp-wrap:not([data-out]),#fmenu,#bp-big:not([data-out]),#bp-menu[data-f]:not([data-out]),#ovl:not([data-out]),#wel:not([data-out])';
+const TABQ='a[href],button,input,select,textarea,summary,[tabindex]';
+const tabbables=root=>[...root.querySelectorAll(TABQ)].filter(e=>e.tabIndex>=0&&!e.disabled&&!e.closest('[inert],[hidden]')&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+let lastIn='key', lastOut=null, curModal=null; // lastIn — чем жали последним (фокус на opener возвращаем только после клавиатуры), lastOut — последний фокус вне окон
+addEventListener('keydown',()=>{ lastIn='key'; document.getElementById('bp-bets')?.removeAttribute('data-mouse'); },true); // data-mouse: список ставок открыт мышью — кольцо на текущей ставке не рисуем до первой клавиши
+addEventListener('pointerdown',()=>{ lastIn='mouse'; },true);
+addEventListener('focusin',e=>{ const t=e.target; if(t&&t.closest&&!t.closest(MODAL_SEL+',#bp-bets,#bp-menu')) lastOut=t; },true);
+function syncInert(){
+ const ms=[...document.querySelectorAll(MODAL_SEL)], top=ms[ms.length-1]||null, want=new Set();
+ const skip=s=>/^(SCRIPT|STYLE|LINK|NOSCRIPT)$/.test(s.tagName)||s.id==='bp-live'||s.id==='pn-toast'||s.getAttribute('aria-hidden')==='true';
+ if(top&&top.id==='bp-menu'){ const app=document.getElementById('app'); [...document.body.children].forEach(s=>{ if(s!==top&&s!==app&&!skip(s)) want.add(s); }); if(app) [...app.children].forEach(s=>{ if(s.id!=='pod'&&!skip(s)) want.add(s); }); }
+ else if(top) for(let n=top;n&&n!==document.body&&n.parentElement;n=n.parentElement) for(const s of n.parentElement.children) if(s!==n&&!skip(s)) want.add(s);
+ document.querySelectorAll('[data-bp-inert]').forEach(e=>{ if(!want.has(e)){ e.inert=false; e.removeAttribute('data-bp-inert'); } });
+ want.forEach(e=>{ if(!e.inert){ e.inert=true; e.setAttribute('data-bp-inert','1'); } });
+ if(top&&top!==curModal){ if(!top._opener) top._opener=top._ret||lastOut;
+  top.querySelectorAll('[role=dialog]').forEach(d=>{ if(!d.hasAttribute('aria-modal')) d.setAttribute('aria-modal','true'); }); if(top.getAttribute('role')==='dialog'&&!top.hasAttribute('aria-modal')) top.setAttribute('aria-modal','true');
+  const into=()=>{ if(top.contains(document.activeElement)&&document.activeElement!==top) return; const f=tabbables(top)[0]; if(f) f.focus({preventScroll:true}); else if(!top.shadowRoot){ top.tabIndex=-1; top.focus({preventScroll:true}); } }; // свои окна (shadow F, ворота, итог) берут фокус сами; приветствие и шоу большого выигрыша — здесь
+  into(); setTimeout(()=>{ if(top.isConnected&&!top.dataset.out) into(); },450); } // приветствие собирает кнопку PLAY чуть позже
+ if(curModal&&curModal!==top&&(!curModal.isConnected||curModal.dataset.out)){ const a=document.activeElement; // окно закрылось с клавиатуры: фокус — на то, с чего его открыли (мышью закрыли — не трогаем, чтобы пробел крутил)
+  if(lastIn==='key'&&(!a||a===document.body||!a.isConnected||curModal.contains(a))){ let r=curModal._ret||curModal._opener; if(r&&!r.isConnected&&r.id) r=document.getElementById(r.id); /* раскладку перестроили — кнопка новая, ищем по id */ const ok=x=>x&&x.isConnected&&!x.disabled&&x.getClientRects().length; if(!ok(r)&&r&&r.id==='features') r=document.getElementById('bp-mode'); // Buy bonus ушёл (включён режим) — его место занимает плашка режима
+   if(ok(r)) r.focus({preventScroll:true}); } }
+ curModal=top; }
+{ let t=0; const soon=()=>{ if(t) return; t=1; queueMicrotask(()=>{ t=0; syncInert(); }); };
+  const mo=new MutationObserver(soon), mo2=new MutationObserver(soon); mo.observe(document.body,{childList:true}); mo2.observe(document.body,{attributes:true,attributeFilter:['data-out'],subtree:true}); // два наблюдателя: второй observe() на том же узле заменил бы настройки первого
+  const app=document.getElementById('app'); if(app) mo.observe(app,{childList:true}); liveRegion(); }
+// Порядок Tab = порядок на экране. Пульт (#pod) идёт в своём порядке DOM; всё остальное (Buy bonus, плашка активного режима) стоит в DOM до или после пульта, а на экране — посреди него (телефон, мини-окно) или над ним.
+// Такой элемент ставим после последнего элемента пульта, что выше него или левее в той же строке; кнопка внутри плашки (Turn off) идёт сразу за плашкой.
+function tabRing(){ const all=tabbables(document.body), ring=all.filter(e=>e.closest('#pod')), out=all.filter(e=>!e.closest('#pod')), roots=out.filter(e=>!out.some(a=>a!==e&&a.contains(e))), kids=out.filter(e=>!roots.includes(e));
+ const before=(a,b)=>{ const r=a.getBoundingClientRect(), t=b.getBoundingClientRect(); return r.bottom<=t.top+2||(r.top<t.bottom&&r.bottom>t.top&&r.right<=t.left+2); };
+ roots.forEach(e=>{ let at=0; ring.forEach((x,i)=>{ if(before(x,e)) at=i+1; }); ring.splice(at,0,e); });
+ kids.forEach(k=>{ const i=ring.findIndex(a=>a.contains(k)); if(i<0){ ring.push(k); return; } let j=i+1; while(j<ring.length&&ring[i].contains(ring[j])) j++; ring.splice(j,0,k); });
+ return ring; }
+addEventListener('keydown',e=>{ if(e.key!=='Tab'||e.altKey||e.ctrlKey||e.metaKey||document.querySelector(MODAL_SEL)) return; // в окне Tab ходит по кругу сам (trap)
+ const a=document.activeElement;
+ if(a&&a.closest&&a.closest('#bp-bets')){ e.preventDefault(); closeBets(); podBtn('Bet list')?.focus(); return; } // Tab из списка ставок: закрыть, фокус на окно BET (а не 20 ставок подряд)
+ if(a&&a.closest&&a.closest('#bp-menu')) return;
+ const ring=tabRing(), i=ring.indexOf(a); if(a&&a!==document.body&&i<0) return;
+ const n=i<0?(e.shiftKey?ring.length-1:0):i+(e.shiftKey?-1:1); if(n<0||n>=ring.length) return; // край кольца — пусть браузер выходит из страницы
+ e.preventDefault(); ring[n].focus(); },true);
 // Игра готова к показу: картинки под заставкой разобраны (decode), фон тоже, два кадра прошло — до этого заставку не убираем (иначе поле и Рокко «выскакивают кусками»)
 function gameReady(ms){ const L=[...document.querySelectorAll('#app img')].map(i=>i.decode?i.decode().catch(()=>0):0);
  try{ const bg=document.getElementById('bg'), m=bg&&/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(bg).backgroundImage); if(m){ const im=new Image(); im.src=m[1]; if(im.decode) L.push(im.decode().catch(()=>0)); } }catch(e){}
@@ -68,11 +118,19 @@ function leaveOverlay(ov,then){ if(!ov||!ov.isConnected||ov.dataset.out) return;
    const a=ov.animate([{opacity:1},{opacity:0}],{duration:D,easing:E,fill:'forwards'}); a.onfinish=fin; a.oncancel=fin; }catch(e){ fin(); } setTimeout(fin,D+150); }); }
 
 // ---------- HUD: баланс, ставка, выигрыш ----------
+// Мало денег: баланс меньше ставки — записка «Not enough balance» висит над пультом, пока ставку не снизят или баланс не хватит; Play при этом не блокируется (нажатие просто не списывает и останавливает автоигру)
+const LOWTXT='Not enough balance', lowBal=()=>!GS.replay&&!GS.spinning&&!(bonusScene()&&GS.fs>0)&&GS.bal<spinCost();
+function lowNote(price){ // окно Buy bonus: не хватает на покупку — та же записка, что при малом балансе, плюс сколько не хватает (деньги через money; в социальном режиме слова правит bpSocialFix); окно не блокируется и текст кнопки не меняется
+ AU('ui.error'); const need=Math.max(0,price-GS.bal); let t=LOWTXT+(need>0?': need '+money(need)+' more':''); if(typeof window.bpSocialFix==='function') t=window.bpSocialFix(t); announce(t);
+ if(window.bpPlates&&bpPlates.mode()!=='old') bpPlates.toast(t,3200); else flash(LOWTXT); }
+let lowAnn=false; // записка висит, пока ставку не снизят: читалке говорим один раз при переходе в «мало денег» (и ещё раз, когда нажали Play — см. spin)
+function syncLow(){ const low=lowBal()&&!!document.getElementById('pod')&&!document.getElementById('wel'); if(low&&!lowAnn) announce(LOWTXT); lowAnn=low; if(!window.bpPlates) return; if(low) bpPlates.toast(LOWTXT,-1); else bpPlates.hide(LOWTXT); }
 function syncHUD(){
+ syncLow();
  document.querySelectorAll('#pod .k').forEach(k=>{const v=k.nextElementSibling; if(!v) return;
-  if(k.textContent==='Balance') v.textContent=money(GS.bal);
+  if(k.textContent==='Balance') v.textContent=money.bal(GS.bal);
   if(k.textContent==='Bet'||k.textContent==='Play') v.textContent=money(spinCost());});
- const r=document.getElementById('result'); if(r&&scene==='hall'){ const b=r.querySelector('b'); if(b) b.textContent=money(GS.replay?GS.replay.win:GS.lastWin); }
+ const r=document.getElementById('result'); if(r&&scene==='hall'){ const b=r.querySelector('b'); if(b) b.textContent=money.win(GS.replay?GS.replay.win:GS.lastWin); }
  const play=podBtn('Play')||podBtn('Skip')||podBtn('Stop autoplay')||podBtn('Replay');
  if(play){ const lab=GS.replay?'Replay':GS.auto?'Stop autoplay':GS.spinning?'Skip':'Play'; play.setAttribute('aria-label',lab);
   play.dataset.state=GS.auto?'stop':GS.spinning?'skip':GS.replay?'replay':''; } // значок на самой кнопке вместо таблички SKIP
@@ -84,9 +142,10 @@ function syncHUD(){
   sp.setAttribute('aria-label',`Spin speed: ${GS.holdTurbo?'Turbo (Space held)':{normal:'Normal',quick:'Quick',turbo:'Turbo'}[GS.speed]}`); }
  const betsOpen=!!popEl('bp-bets'), ch=document.getElementById('bp-chev'); if(ch) ch.classList.toggle('open',betsOpen); // стрелка в окне BET переворачивается, пока открыт список
  const bk=podBtn('Bet list'); if(bk) bk.setAttribute('aria-expanded',betsOpen);
- const au=podBtn('Autoplay'); if(au){ au.classList.toggle('on',GS.auto>0); // в бонусах («Камеры», «Кухня») автоигры нет — как и Buy bonus (машина есть только в зале): кнопка выключена, окно не открывается (QA m3)
+ const au=podBtn('Autoplay'); if(au){ au.classList.toggle('on',GS.auto>0); au.setAttribute('aria-pressed',String(GS.auto>0)); // в бонусах («Камеры», «Кухня») автоигры нет — как и Buy bonus (машина есть только в зале): кнопка выключена, окно не открывается (QA m3)
   const lock=autoLocked(); au.disabled=lock; if(lock){ au.setAttribute('aria-disabled','true'); au.title='Autoplay is not available during bonuses'; } else{ au.removeAttribute('aria-disabled'); au.removeAttribute('title'); } }
- const mn=podBtn('Menu'); if(mn) mn.classList.toggle('on',!!popEl('bp-menu'));
+ const mn=podBtn('Menu'); if(mn){ mn.classList.toggle('on',!!popEl('bp-menu')); mn.setAttribute('aria-haspopup','dialog'); mn.setAttribute('aria-expanded',String(!!popEl('bp-menu'))); }
+ document.querySelectorAll('#pod .snd').forEach(b=>{ b.classList.toggle('off',!!GS.mute); b.setAttribute('aria-label','Sound'); b.setAttribute('aria-pressed',String(!GS.mute)); }); // имя постоянное, состояние — aria-pressed (нажата = звук включён)
  fitPod(); save();
 }
 // суммы в окнах пульта (BALANCE, BET): шрифт уменьшается, пока сумма не влезет в окно, но не меньше 11 px — так читаются и длинные валюты («10,000,000,000.00 ARS»)
@@ -110,7 +169,7 @@ const podBtn=l=>document.querySelector(`#pod [aria-label="${l}"]`)||(/^Bet /.tes
 const _render=render;
 render=function(){ _render(); after(); };
 // строки на воротах бонуса (после ворот — сами спины): настоящие числа из BONUS
-const gateList=kind=>kind==='cameras'?`<li>Same as the Kitchen: the counter never resets, a full sack adds ${BONUS.dumpSpins} spins, Rocco pulls a trick every spin</li><li>Plus cameras record: where Rocco steals, that screen multiplies ×2, then ×4, ×${BONUS.recCap}</li><li>Screens keep their multipliers all bonus; a win is multiplied by ${BONUS.recMode==='sum'?'the sum':'the average'} of the multipliers under it</li>`:`<li>The counter never resets — it keeps growing</li><li>A full sack (${SACK_N} steals) pays again, steps the counter up and adds ${BONUS.dumpSpins} spins</li><li>Every spin Rocco pulls a trick: WILDs or a WILD column</li>`;
+const gateList=kind=>{ const B=kind==='cameras'?BONUS.cam:BONUS.kit; return `<li>One counter for the whole bonus: it starts at ×${B.start} and every steal adds ${B.inc}</li><li>Every win is multiplied by the counter. It never resets</li><li>Every free spin Rocco throws ${kind==='cameras'?'a WILD':'a WILD (sometimes two)'}; 3+ invitations add ${BONUS.retroSpins} spins</li>${kind==='cameras'?'<li>Cameras record every steal on the monitors</li>':''}`; };
 function after(){
  // табличка максимального выигрыша под вывеской — во всех сценах
  // табличка MAX WIN убрана из игры (владелец 2026-10-09): максимальный выигрыш показан на экране приветствия и в правилах
@@ -133,7 +192,7 @@ function after(){
  // экраны поверх: закрыть правила, продолжить бонус
  const ov=document.getElementById('ovl');
  if(ov&&ov.querySelector('.rules')){ const x=el('button','bp-x','✕'); x.setAttribute('aria-label','Close'); x.onclick=()=>{q.delete('screen');render();}; ov.querySelector('.rules').append(x); x.focus(); }
- if(ov&&!window.__gateSnd&&ov.querySelector('.btnplay')&&(scene==='kitchen'||scene==='cameras')){ window.__gateSnd=1; AU(scene==='kitchen'?'kitchen.enter':'cams.enter',{delay:500}); } // ворота бонуса появились (раз на страницу)
+ if(ov&&!window.__gateSnd&&ov.querySelector('.btnplay')&&(scene==='kitchen'||scene==='cameras')){ window.__gateSnd=1; AU(scene==='kitchen'?'kitchen.enter':'cams.enter',{delay:500}); setTimeout(()=>announce(`${scene==='kitchen'?'Kitchen':'Cameras'} bonus starts. ${GS.fs||10} free spins`),500); } // ворота бонуса появились (раз на страницу)
  if(ov) ov.querySelectorAll('.btnplay').forEach(b=>b.onclick=()=>{ if(ov.dataset.out) return; AU(bonusScene()&&GS.fs>0?'freespins.start':'ui.confirm'); if(bonusScene()&&GS.fs>0){ GS.kgo=true; save(); } leaveOverlay(ov); }); // CONTINUE на воротах: ворота гаснут над готовой игрой; render() внутри запускает цепочку спинов «Кухни» / перезапуски «Камер» (after)
  // приветствие W2 (welcome.js): разметка, размеры и три демонстрации; PLAY, клик мимо пульта и пробел закрывают; без приветствия — часы и видео демонстраций остановлены
  const wl=document.getElementById('wel');
@@ -155,7 +214,7 @@ function roccoGuard(){
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) document.querySelectorAll('#rocco video:not(.act),#paw video').forEach(v=>v.play().catch(()=>{})); });
 // ---------- активный режим: окошко MODE в столбике счётчиков слева (вариант H, владелец 2026-10-10); автомат «Функции» остаётся на месте ----------
 function modeBadge(){ hudBuild(); setSpinsMeter(); }
-const _close=closeFeatures; closeFeatures=function(){ _close(); setTimeout(()=>{modeBadge();syncHUD();},260); };
+const _close=closeFeatures; closeFeatures=function(){ _close(); setTimeout(()=>{ const hadF=document.activeElement===document.getElementById('features'); modeBadge();syncHUD(); if(hadF) requestAnimationFrame(()=>{ const a=document.activeElement; if(lastIn==='key'&&(!a||a===document.body||getComputedStyle(a).visibility==='hidden')) (document.getElementById('bp-mode')||document.getElementById('features'))?.focus(); }); },260); }; // телефон стоя: включённый режим прячет Buy bonus — фокус переходит на плашку режима
 // покупка — второй шаг с подтверждением (гайд Engine): суть, цена, одна кнопка BUY и тихая «Назад»
 // Окно Buy bonus меняет содержимое (список режимов <-> подтверждение): размер плавно перетекает, содержимое выступает из затухания. Раньше ширина 980 -> 520 px и обратно прыгала за один кадр.
 function buMorph(box,swap){ if(RM()||!box.animate){ swap(); return; }
@@ -168,22 +227,31 @@ function buMorph(box,swap){ if(RM()||!box.animate){ swap(); return; }
  const a=box.animate([{width:w0+'px',height:h0+'px'},{width:w1+'px',height:h1+'px'}],{duration:280,easing:E});
  const fin=()=>{ box.style.overflow=''; }; a.onfinish=fin; a.oncancel=fin;
  const inn=box.querySelector('.bu-in,.bb-in'); if(inn) inn.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:200,delay:100,easing:'cubic-bezier(.2,.8,.3,1)',fill:'backwards'}); }
-window.bbOpts=()=>({modes:MODES,bet:bet(),bal:GS.bal,on:modeOn,money,A,screw:buScrew,mini:'cards/'+POSTART+'kitchen.webp',inline:{pick:k=>`fpick('${k}')`,bet:d=>`fbet(${d})`,close:'closeFeatures()'}}); // данные для BuyBoard (buy-board.js)
+if(modeOn&&!MODES.some(m=>m.k===modeOn)) modeOn=null; // режим из сохранённой сессии, которого больше нет («Голодный Рокко» убран) — выключаем
+window.bbOpts=()=>({modes:MODES,bet:bet(),bal:GS.bal,on:modeOn,money,A,screw:buScrew,rtp:RTP_MODE.base.toFixed(2)+'%',prov:false,maxx:MAXX,inline:{pick:k=>`fpick('${k}')`,bet:d=>`fbet(${d})`,close:'closeFeatures()'}}); // данные для BuyBoard (buy-board.js); RTP — из математики 2.0.0 (RTP_MODE, симуляция), без пометки «черновой»
+// подсказка «MORE BONUSES ⌄» внизу: видна, пока ниже есть что прокрутить
+function bbMore(){ const s=document.querySelector('#fmenu .bb-in'), h=document.querySelector('#fmenu .bb-more'); if(!s||!h) return; const f=()=>{ h.hidden=s.scrollTop+s.clientHeight>=s.scrollHeight-4; }; s.onscroll=f; f(); }
+new MutationObserver(ms=>{ if(ms.some(m=>[...m.addedNodes].some(n=>n.id==='fmenu'))) requestAnimationFrame(bbMore); }).observe(document.body,{childList:true});
+addEventListener('resize',()=>{ if(document.getElementById('fmenu')) bbMore(); });
+// перерисовка окна (ставка, режим) не сбрасывает прокрутку
+{ const _fr=fredraw; fredraw=function(f){ const y=document.querySelector('#fmenu .bb-in')?.scrollTop||0; _fr(f); const s=document.querySelector('#fmenu .bb-in'); if(s) s.scrollTop=y; bbMore(); }; }
+// окно прозрачное и во весь экран: клик по пустому месту вокруг содержимого закрывает, как клик по затемнению
+document.addEventListener('click',e=>{ const t=e.target; if(t&&t.matches&&t.matches('#fmenu .bb,#fmenu .bb-in')) closeFeatures(); });
 fpick=function(k){ const m=MODES.find(x=>x.k===k), box=document.querySelector('#fmenu .bb'), price=bet()*m.x;
- if(m.toggle){ if(modeOn!==k&&GS.bal<price){ AU('ui.error'); return; } modeOn=modeOn===k?null:k; fredraw('#bu-go-'+k); return; } // режим выключить можно всегда; включить — только если хватает на спин
- if(GS.bal<price){ AU('ui.error'); return; } // карточка «NEED … MORE» не открывает подтверждение
- buMorph(box,()=>{ box.classList.add('bb-sm'); box.innerHTML=BuyBoard.confirm(bbOpts(),m); }); // второй шаг покупки: афиша, кнопка BUY и тихая «Back»
+ if(m.toggle){ if(modeOn!==k&&GS.bal<price){ lowNote(price); return; } modeOn=modeOn===k?null:k; fredraw('#bu-go-'+k); return; } // режим выключить можно всегда; включить — только если хватает на спин
+ if(GS.bal<price){ lowNote(price); return; } // карточка «NEED … MORE» не открывает подтверждение, а говорит запиской
+ buMorph(box,()=>{ box.classList.add('bb-sm'); box.innerHTML=BuyBoard.confirm(bbOpts(),m); }); // второй шаг покупки: одна большая карточка, цена, кнопка BUY и стрелка назад
  box.querySelector('#bp-buy').focus();
  box.querySelector('#bp-back').onclick=()=>{ const t=document.createElement('div'); t.innerHTML=fmenuHTML(); const np=t.firstElementChild; // обратно к списку — тем же окном, без пересоздания
-  buMorph(box,()=>{ box.className=np.className; box.innerHTML=np.innerHTML; }); box.querySelector('#bu-go-'+k)?.focus(); };
- box.querySelector('#bp-buy').onclick=()=>{ if(GS.bal<price){ AU('ui.error'); box.querySelector('#bp-buy span').textContent='NOT ENOUGH BALANCE'; return; } AU('ui.buy');
-  GS.bal-=price; save(); if(k==='kitchen') startBonus(BONUS.spinsK,null,null,'kitchen'); else startBonus(BONUS.spinsC4,null,null,'cameras'); };
+  buMorph(box,()=>{ box.className=np.className; box.innerHTML=np.innerHTML; }); bbMore(); const b=box.querySelector('#bu-go-'+k); if(b){ b.scrollIntoView({block:'nearest'}); b.focus({preventScroll:true}); } };
+ box.querySelector('#bp-buy').onclick=()=>{ if(GS.bal<price){ lowNote(price); return; } AU('ui.buy');
+  GS.bal-=price; save(); closeFeatures(); buySpin(k,price); }; // покупка: сначала настоящий вступительный спин зала с приглашениями (его выигрыш платится), бонус начинается после него
 };
 
 // ---------- окна F: меню, правила, история (dialogs-f.js, выбор владельца 2026-10-11) ----------
 // Логика остаётся здесь, оформление — в dialogs-f.js/.css. Тексты правил (RULES) — общие для F и прежних окон (?dlg=old). Переключатели для сравнения: ?dlg=old, ?dlgnav=top|side. Вид один: шрифты набора 2, латунная линейка (выбор владельца 2026-10-11).
 const DLGF=()=>!!(window.DlgF&&DlgF.on());
-const dlgCtx=()=>({GS,RM,money,bet,A,SYM,MAXX,RULES,el,save,syncHUD,popOut,winOut,takeRet,giveBack,startReplay,rules,history,popEdge,setRet:v=>{nextRet=v;}});
+const dlgCtx=()=>({GS,RM,money,moneyW:money.win,bet,A,SYM,MAXX,RULES,el,save,syncHUD,popOut,winOut,takeRet,giveBack,startReplay,rules,history,popEdge,setRet:v=>{nextRet=v;}});
 
 // ---------- меню ----------
 function toggleMenu(){ // меню — монитор охраны (выбор владельца 2026-10-09): корпус как у пульта, внутри экран ночного видения
@@ -201,14 +269,14 @@ function toggleMenu(){ // меню — монитор охраны (выбор �
   <i class="rv" style="left:7px;top:7px"></i><i class="rv" style="right:7px;top:7px"></i><i class="rv" style="left:7px;bottom:7px"></i><i class="rv" style="right:7px;bottom:7px"></i><span class="led" aria-hidden="true"></span>`);
  m.id='bp-menu'; m.setAttribute('role','dialog'); m.setAttribute('aria-label','Menu'); m._ret=b;
  document.body.append(m); const mh=m.offsetHeight, mw=m.offsetWidth;
- const pod=document.getElementById('pod').getBoundingClientRect(), E=popEdge(); // выдвигается из верхнего края пульта
+ const pod=window.bpPodRect(), E=popEdge(); // выдвигается из верхнего края пульта (на телефоне по шаблону — из нижней панели)
  m.style.left=Math.max(E.l,Math.min(innerWidth-mw-E.r,pod.left+8))+'px'; m.style.top=Math.max(E.t,pod.top-mh+6)+'px';
  if(!RM()) m.animate([{clipPath:`inset(0 0 ${mh}px 0)`,transform:`translateY(${mh}px)`},{clipPath:'inset(0 0 0px 0)',transform:'translateY(0px)'}],{duration:340,easing:'cubic-bezier(.2,.8,.3,1)'}); // видна только часть над краем пульта
  m.style.zIndex=50; document.getElementById('pod').style.zIndex=60; // пульт поверх — экран будто выезжает из него
  if(!RM()) m.querySelector('.scr').animate([{clipPath:'inset(49.5% 0 49.5% 0)',filter:'brightness(3)'},{clipPath:'inset(49.5% 0 49.5% 0)',filter:'brightness(3)',offset:.25},{clipPath:'inset(0 0 0 0)',filter:'brightness(1.4)',offset:.7},{clipPath:'inset(0 0 0 0)',filter:'brightness(1)'}],{duration:320,easing:'ease-out'}); // экран включается, как старый монитор
  m.querySelectorAll('input[type=range]').forEach(inp=>{ const k=inp.id.slice(3), o=inp.previousElementSibling, cells=inp.parentElement.querySelectorAll('.bar i');
   const paint=()=>{ o.textContent=inp.value+'%'; cells.forEach((c,n)=>c.classList.toggle('f',n<Math.round(inp.value/10))); };
-  paint(); inp.oninput=()=>{ GS[k]=+inp.value; paint(); if(GS.mute) setMute(false); save(); }; }); // сдвинул громкость при OFF — звук включается
+  paint(); inp.oninput=()=>{ GS[k]=+inp.value; paint(); if(GS.mute) setMute(false); save(); }; inp.onkeydown=e=>{ if(/^(Arrow|Home$|End$|Page)/.test(e.key)) AU('ui.click'); }; }); // стрелки на ползунке громкости щёлкают // сдвинул громкость при OFF — звук включается
  const setMute=off=>{ GS.mute=off; m.querySelectorAll('[data-m]').forEach(x=>{const on=(x.dataset.m==='off')===off; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on);}); m.classList.toggle('muted',off); }; // при OFF ползунки MUSIC и EFFECTS серые (владелец 2026-10-11)
  m.classList.toggle('muted',GS.mute);
  m.onclick=e=>{ const v=e.target.closest('[data-v]'), g=e.target.closest('[data-go]'), mu=e.target.closest('[data-m]');
@@ -224,11 +292,11 @@ function betList(){
  AU('ui.open');
  document.querySelectorAll('#bp-bets[data-out]').forEach(e=>e.remove());
  const b=podBtn('Bet list'), r=b.getBoundingClientRect();
- const p=el('div',null,BETS.map((v,i)=>`<button class="bp-chip${i===betI?' on':''}" data-i="${i}">${money(v)}</button>`).join('')); p.id='bp-bets'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Bet list');
+ const p=el('div',null,BETS.map((v,i)=>`<button class="bp-chip${i===betI?' on':''}" data-i="${i}"${i===betI?' aria-current="true"':''}>${money(v)}</button>`).join('')); p.id='bp-bets'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Bet list');
  document.body.append(p); const w=p.offsetWidth, h=p.offsetHeight;
  const E=popEdge(); p.style.left=Math.max(E.l,Math.min(innerWidth-w-E.r,r.left+r.width/2-w/2))+'px'; p.style.top=Math.max(E.t,r.top-h-10)+'px';
- p.onclick=e=>{ const c=e.target.closest('[data-i]'); if(!c) return; AU(+c.dataset.i>betI?'ui.bet_up':'ui.bet_down'); betI=+c.dataset.i; closeBets(); b.focus(); };
- p.querySelector('.on')?.focus(); syncHUD();
+ p.onclick=e=>{ const c=e.target.closest('[data-i]'); if(!c) return; AU(+c.dataset.i>betI?'ui.bet_up':'ui.bet_down'); betI=+c.dataset.i; closeBets(); b.focus(); announce('Bet '+money(spinCost())); };
+ if(lastIn==='mouse') p.dataset.mouse='1'; p.querySelector('.on')?.focus(); syncHUD();
 }
 // ---------- окна ----------
 function dlg(title,html,onClose){
@@ -259,7 +327,7 @@ function history(){ if(DLGF()) return DlgF.history(dlgCtx()); // история 
    <span class="mon-knobs"><button class="knob kprev" aria-label="Newer rounds"><i></i>CH −</button><button class="knob knext" aria-label="Older rounds"><i></i>CH +</button><span class="pwr" aria-hidden="true"></span><button class="mon-x" aria-label="Close">[X]</button></span></div></div>`); takeRet(w);
  const close=e=>{ winOut(w); syncHUD(); if(e&&e.detail===0) giveBack(w); }; w.close=close; w.querySelector('.mon-x').onclick=close; w.onclick=e=>{ if(e.target===w) close(); };
  const show=p=>{ pg=(p+pages)%pages; const rows=GS.hist.slice(pg*PER,pg*PER+PER);
-  w.querySelector('.mon-txt').innerHTML=rows.length?`<table><tr><th>#</th><th>TIME</th><th>MODE</th><th style="text-align:right">COST</th><th style="text-align:right">WIN</th><th></th></tr>${rows.map((h,k)=>{const n=pg*PER+k; return `<tr class="${h.win>0?'w':''}"><td>${String(n+1).padStart(2,'0')}</td><td>${h.t}</td><td>${h.mode.toUpperCase()}</td><td class="n">${money(h.cost)}</td><td class="n">${money(h.win)}</td><td style="text-align:right">${h.norep?'':`<button class="rp" data-r="${n}">[REPLAY]</button>`}</td></tr>`;}).join('')}</table>`:'<p>NO ROUNDS YET. PRESS PLAY.</p>';
+  w.querySelector('.mon-txt').innerHTML=rows.length?`<table><tr><th>#</th><th>TIME</th><th>MODE</th><th style="text-align:right">COST</th><th style="text-align:right">WIN</th><th></th></tr>${rows.map((h,k)=>{const n=pg*PER+k; return `<tr class="${h.win>0?'w':''}"><td>${String(n+1).padStart(2,'0')}</td><td>${h.t}</td><td>${h.mode.toUpperCase()}</td><td class="n">${money(h.cost)}</td><td class="n">${money.win(h.win)}</td><td style="text-align:right">${h.norep?'':`<button class="rp" data-r="${n}">[REPLAY]</button>`}</td></tr>`;}).join('')}</table>`:'<p>NO ROUNDS YET. PRESS PLAY.</p>';
   w.querySelector('.mon-pos').textContent=`PAGE ${pg+1} / ${pages}`; };
  const knob=d=>{ turn+=d*30; w.querySelectorAll('.knob i').forEach(i=>i.style.transform=`rotate(${turn}deg)`); show(pg+d); };
  w.querySelector('.kprev').onclick=()=>knob(-1); w.querySelector('.knext').onclick=()=>knob(1);
@@ -270,8 +338,8 @@ function history(){ if(DLGF()) return DlgF.history(dlgCtx()); // история 
 
 // ---------- правила игры: вкладки-разделы, как в Fat Food (RNGeesus) ----------
 const RULES=[
- ['pay','Paytable',()=>`<p>Pays for 8 or more of the same symbol anywhere on the grid. Values are shown for the current bet of ${money(bet())}. Inside the Kitchen and the Cameras they are scaled down: see their sections.</p>
-  <table><tr><th></th><th></th><th style="text-align:right">8–9</th><th style="text-align:right">10–11</th><th style="text-align:right">12+</th></tr>${Object.entries(PAY).map(([id,[nm,a,b2,c]])=>`<tr><td><img src="${SYM(id)}" alt=""></td><td>${nm}</td>${[a,b2,c].map(x=>`<td class="n">${money(x*bet())}</td>`).join('')}</tr>`).join('')}</table>`],
+ ['pay','Paytable',()=>`<p>Pays for 8 or more of the same symbol anywhere on the grid. Values are shown for the current bet of ${money(bet())}. The same values count in the base game, the Kitchen and the Cameras; Rocco’s counter multiplies them.</p>
+  <table><tr><th></th><th></th><th style="text-align:right">8–9</th><th style="text-align:right">10–11</th><th style="text-align:right">12+</th></tr>${Object.entries(PAY).map(([id,[nm,a,b2,c]])=>`<tr><td><img src="${SYM(id)}" alt=""></td><td>${nm}</td>${[a,b2,c].map(x=>`<td class="n">${money.win(x*bet())}</td>`).join('')}</tr>`).join('')}</table>`],
  ['special','Special symbols',()=>`<div class="sym"><img src="${SYM('sym-wild')}" alt=""><div><b>WILD — golden ticket</b><p>Counts as any regular symbol, in every win on the grid at once. It leaves with the win it helped. It has no multiplier of its own.</p></div></div>
   <div class="sym"><img src="${SYM('sym-scatter-invitation')}" alt=""><div><b>Invitation</b><p>3 anywhere start the Kitchen. 4 or more start the Cameras. Rocco never steals invitations.</p></div></div>`],
  ['how','How to play',()=>`<ol><li>6 columns × 5 rows, 30 symbols.</li><li>A win is 8 or more of the same symbol anywhere. WILDs count as that symbol: 5 balloons and 3 WILDs win. The pay depends on the total: 8–9, 10–11 or 12+. Wins of different symbols add up.</li><li>Rocco steals the winning symbols and the WILDs that helped, new ones fall in, and you can win again in the same spin. This repeats while there are wins.</li><li>Invitations start the bonus: 3 start the Kitchen, 4 or more start the Cameras. Both are free spins, and each has its own section here.</li></ol>
@@ -279,13 +347,14 @@ const RULES=[
  ['counter','Rocco’s counter',()=>`<div class="ladder">${['×1','×2','×3 TOSS','×5','×8 PUNCH','×10','×15 LEVER'].map(t=>`<span class="${/[A-Z]/.test(t)?'t':''}">${t}</span>`).join('')}</div>
   <ol><li><b>Toss</b> at ×3 — Rocco throws 2–3 WILDs onto the grid.</li><li><b>Punch</b> at ×8 — Rocco punches the frame and a column turns WILD. The WILDs wait for the next win, help it and leave with it.</li><li><b>Lever</b> at ×15 — the lights go out and every regular symbol turns into one.</li></ol>
   <div class="callout">Rocco’s prank: now and then, at the start of a spin, Rocco tosses 2–3 WILDs or starts the counter at ×2 by himself.</div>`],
- ['kitchen','The Kitchen',()=>`<ol><li>3 invitations anywhere start the Kitchen: ${BONUS.spinsK} free spins.</li><li>The rules are the same as in the base game, but Rocco’s counter never resets. It keeps growing for the whole bonus, up to ×${LADDER.kitchen[LADDER.kitchen.length-1]}.</li><li>At the start of every free spin Rocco pulls a trick: he throws ${BONUS.spinWild[0]}–${BONUS.spinWild[1]} WILDs onto the grid, or (about ${Math.round(BONUS.startPunch*10)} spins in 10) punches the frame and one column turns WILD. The WILDs wait for the next win, help it and leave with it.</li><li>Rocco’s sack: every stolen win counts at once and is also added to his sack. Every ${SACK_N} steals he empties it: its contents are added to your win a second time, the counter goes up one step and you get ${BONUS.dumpSpins} more free spins. The ${SACK_N} lamps next to the SACK window show the steals.</li><li>3 or more new invitations add ${BONUS.retroSpins} spins.</li><li>In the Kitchen the paytable values count ×${+BONUS.kitPay.toPrecision(2)}: the counter and the sack make up for it.</li></ol>`],
- ['cameras','The Cameras',()=>`<ol><li>4 invitations anywhere start the Cameras: ${BONUS.spinsC4} free spins. 5 or more give ${BONUS.spinsC5}.</li><li>The rules are the Kitchen’s: the counter never resets, every spin starts with Rocco’s trick (WILDs or a WILD column), a full sack of ${SACK_N} steals pays again, steps the counter up and adds ${BONUS.dumpSpins} spins, and 3 or more new invitations add ${BONUS.retroSpins} spins.</li><li><b>Cameras record.</b> Every cell is a monitor. Where Rocco steals, that screen lights up and shows ×2. Steal there again — ×4, then ×${BONUS.recCap} (the highest). The glow turns from cream to amber to red as the number grows, and stays for the whole bonus.</li>${BONUS.recMode==='sum'?`<li>A win is multiplied by the sum of the numbers on its winning screens, then by the counter. Dark screens add nothing, and if there are none the factor is ×1. A WILD that is part of the win counts its screen’s number.</li>`:`<li>A win is multiplied by the average of the screen multipliers on its winning cells — add them up and divide by the number of winning cells; a screen without a multiplier counts as 0, and the factor is never below ×1. A WILD that is part of the win counts its screen’s multiplier. Then the counter multiplies it as usual.</li>`}<li>A screen’s multiplier appears after the steal, so it works from the next win.</li><li>In the Cameras the paytable values count ×${+BONUS.camPay.toPrecision(2)}: the screen multipliers make up for it.</li></ol>
-  <div class="callout">${BONUS.recMode==='sum'?'Example: one screen shows ×4 and another ×2. A win covers both, so it is multiplied by 4 + 2 = 6. If the counter shows ×3, that makes ×18 in all.':'Example: a win covers 10 cells. Four of them show ×2, ×2, ×4 and ×8; the other six screens have no multiplier. The average is (2 + 2 + 4 + 8) ÷ 10 = 1.6, so the win is multiplied by 1.6. With the counter at ×3 that makes ×4.8 in all.'}</div>`],
- ['buy','Buy bonus',()=>`<p>Bonuses and modes are bought from the Buy bonus machine next to the grid. They are not available during free spins and autoplay.</p>
+ ['kitchen','The Kitchen',()=>`<ol><li>3 invitations anywhere start the Kitchen: ${BONUS.spinsK} free spins.</li><li>The Kitchen has one counter for the whole bonus. It starts at ×${BONUS.kit.start} and every steal adds ${BONUS.kit.inc}: ×1, ×2, ×3, ×4… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter at that moment.</li><li>At the start of every free spin Rocco throws a WILD onto the grid (about ${Math.round(BONUS.kit.wild[2]*100)} spins in 100 — two). The WILDs wait for the next win, help it and leave with it.</li><li>Rocco’s tricks work as in the base game, once per bonus: at the 2nd steal — Toss (2–3 WILDs), at the 4th — Punch (a WILD column), at the 6th — Lever (every symbol turns into one).</li><li>3 or more invitations on a free spin add ${BONUS.retroSpins} spins.</li></ol>
+  <div class="callout">Example: the counter shows ×7 and Rocco steals 8 cupcakes (${PAY['sym-low-cupcake'][1]}× the bet). The win is ${PAY['sym-low-cupcake'][1]} × 7 = ${+(PAY['sym-low-cupcake'][1]*7).toFixed(2)}× the bet, and the counter moves to ×8.</div>`],
+ ['cameras','The Cameras',()=>`<ol><li>4 or more invitations anywhere start the Cameras: ${BONUS.spinsC} free spins.</li><li>The rules are the Kitchen’s, with a stronger counter: it starts at ×${BONUS.cam.start} and every steal adds ${BONUS.cam.inc}: ×5, ×7, ×9, ×11… It never resets until the bonus ends.</li><li>Every win is the paytable value × the counter. At the start of every free spin Rocco throws a WILD; his tricks come at the 2nd, 4th and 6th steal; 3 or more invitations add ${BONUS.retroSpins} spins.</li><li><b>Cameras record.</b> Every cell is a monitor. Where Rocco steals, that screen lights up and keeps a REC mark for the whole bonus. The marks show where Rocco has been; they do not change the pay.</li></ol>
+  <div class="callout">Example: after 3 steals the counter shows ×11. A win of 10 pizzas (${PAY['sym-high-pizza'][2]}× the bet) pays ${PAY['sym-high-pizza'][2]} × 11 = ${+(PAY['sym-high-pizza'][2]*11).toFixed(2)}× the bet.</div>`],
+ ['buy','Buy bonus',()=>`<p>Bonuses and modes are bought from the Buy bonus machine next to the grid. They are not available during free spins and autoplay. A bought bonus starts with one spin of the base game where the invitations land; its wins are paid, then the bonus begins.</p>
   ${MODES.map(m=>`<div class="buy"><img src="${A}${m.img}" alt=""><div><b>${m.nm}</b><div class="chips"><span>PRICE <em>${m.x}× bet</em></span>${m.toggle?'<span>EVERY SPIN</span>':'<span>STARTS AT ONCE</span>'}</div><p>${m.d}</p></div></div>`).join('')}`],
- ['max','Max win',()=>`<p>The maximum win is <b>${MAXX.toLocaleString('en-US')}×</b> the bet in every mode. When a round reaches it, the round ends at once and the max win is paid.</p>`],
- ['rtp','RTP',()=>`<p>Theoretical return to player and max win for every mode. Draft values until the game math is final.</p><table><tr><th>Mode</th><th style="text-align:right">Price</th><th style="text-align:right">RTP</th><th style="text-align:right">Max win</th></tr>${[['Base game','1×'],...MODES.map(m=>[m.nm.replace(/\b\w/g,c=>c).toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()),m.x+'×'])].map(([n,p])=>`<tr><td>${n}</td><td class="n">${p}</td><td class="n">96.0%</td><td class="n">${MAXX.toLocaleString('en-US')}×</td></tr>`).join('')}</table>`],
+ ['max','Max win',()=>`<p>The maximum win is <b>${MAXX.toLocaleString('en-US')}×</b> the bet in every mode. When a round reaches it, the round ends at once and the max win is paid. A whole bonus counts as one round; a bought bonus counts together with its first spin.</p>`],
+ ['rtp','RTP',()=>`<p>Theoretical return to player and max win for every mode (game math ${MATH_VERSION}, checked by simulation). Draft values until the game is certified.</p><table><tr><th>Mode</th><th style="text-align:right">Price</th><th style="text-align:right">RTP</th><th style="text-align:right">Max win</th></tr>${[['Base game','1×','base'],...MODES.map(m=>[m.nm.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()),m.x+'×',m.k])].map(([n,p,k])=>`<tr><td>${n}</td><td class="n">${p}</td><td class="n">${(RTP_MODE[k]||96).toFixed(1)}%</td><td class="n">${MAXX.toLocaleString('en-US')}×</td></tr>`).join('')}</table>`],
  ['controls','Controls',()=>`<ul class="ctl"><li><b>Play</b> starts a spin. During a spin it becomes Skip: each press finishes the animation that is playing now, then the game goes on at normal speed. Press again to skip the next one.</li><li><b>Space</b> works like Play. Hold Space to finish the current spin at turbo speed; every new spin needs a new press.</li><li><b>− / +</b> change the bet; the arrow opens the bet list.</li><li><b>Autoplay</b> runs a chosen number of spins after confirmation. Press Play to stop.</li><li><b>Speed key</b> (› ›› ›››) switches Normal, Quick and Turbo; its lamps show the speed.</li><li><b>Menu</b> holds sound on/off, music and effects volume, spin speed, language, rules, paytable, history and fullscreen.</li><li><b>Buy bonus</b> opens the bonus buys and modes.</li></ul>`],
  ['legal','Legal information',()=>`<p>Malfunction voids all pays and plays. Results are decided by the game server before the animation starts; animations, speed and skipping never change a result. Pays are shown in the selected currency. Unfinished rounds are completed when you return to the game.</p>`]];
 function rules(start){ if(DLGF()) return DlgF.rules(dlgCtx(),start); // правила — один большой монитор (вариант A, выбор владельца 2026-10-10): каналы на экране, ручки CH−/CH+ листают, [X] закрывает
@@ -314,37 +383,39 @@ function rules(start){ if(DLGF()) return DlgF.rules(dlgCtx(),start); // прав
  const knob=(d)=>{ turn+=d*30; w.querySelectorAll('.knob i').forEach(i=>i.style.transform=`rotate(${turn}deg)`); show(idx+d); }; // ручка поворачивается на щелчок
  w.querySelector('.kprev').onclick=()=>knob(-1); w.querySelector('.knext').onclick=()=>knob(1);
  w.addEventListener('click',e=>{ const t=e.target.closest('[data-t]'); if(t) show(+t.dataset.t); });
- w.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); knob(1); } if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); knob(-1); } });
+ w.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); AU('ui.click'); knob(1); } if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); AU('ui.click'); knob(-1); } }); // стрелки тоже щёлкают (мышью щёлкает общий клик audio.js)
  document.body.append(w); show(idx); w.querySelector('.mon-ch button.on').focus();
  if(!RM()) w.querySelector('.mon-scr').animate([{filter:'brightness(3)',clipPath:'inset(49% 0 49% 0)'},{filter:'brightness(1.3)',clipPath:'inset(0 0 0 0)',offset:.6},{filter:'brightness(1)',clipPath:'inset(0 0 0 0)'}],{duration:320,easing:'ease-out'});
 }
 // ---------- реплей ----------
 function startReplay(h){
  GS.replay=h; document.getElementById('bp-replay')?.remove();
- const bar=el('div',null,`REPLAY · ${h.t} · WIN ${money(h.win)} <button id="bp-rpa">PLAY AGAIN</button><button id="bp-rpx">EXIT</button>`); bar.id='bp-replay'; document.body.append(bar);
+ const bar=el('div',null,`REPLAY · ${h.t} · WIN ${money.win(h.win)} <button id="bp-rpa">PLAY AGAIN</button><button id="bp-rpx">EXIT</button>`); bar.id='bp-replay'; document.body.append(bar);
  bar.querySelector('#bp-rpa').onclick=()=>spin(); bar.querySelector('#bp-rpx').onclick=()=>{GS.replay=null;bar.remove();syncHUD();};
  spin();
 }
 // ---------- большой / максимальный выигрыш: шоу bigwin-show.js (владелец 2026-10-10: плашка A1, главы 10×/25×/50×/100×, финал на максимуме) ----------
 function bigWin(amount,isMax,done,bt,summary){ // summary — шоу как итог бонуса ({title,btn,hold}, см. bigwin-show.js)
- if(document.querySelector('#bp-big:not([data-out])')||BWWAIT) return;   // data-out — оверлей уже гаснет (bigwin-show.js), он не считается
+ if(document.querySelector('#bp-big:not([data-out])')||BWWAIT) return;
+ announce(summary?`${summary.title[0]+summary.title.slice(1).toLowerCase()}. Total win ${money.win(amount)}`:`${isMax?'Max win':'Big win'}. ${money.win(amount)}`); // data-out — оверлей уже гаснет (bigwin-show.js), он не считается
  // «Тот же Рокко»: шоу ставит своего Рокко ровно на место Рокко зала в позе покоя. Если зальный как раз в движении (радость, глотание), даём ему дойти до нейтрального окна своего ролика — не дольше 1,5 с; в Turbo/Quick (роликов нет), под ?screen=… и «меньше движения» не ждём.
  const wait=(!q.get('screen')&&K()>=1&&window.roccoRestIn)?Math.min(1500,window.roccoRestIn()):0; if(window.roccoHush&&wait>=0&&!q.get('screen')) window.roccoHush();
- const go=()=>{ BWWAIT=0; BigWinShow.play({amount,bet:bt||bet(),isMax,moneyFmt:money,summary,onDone:()=>{ if(q.get('screen')){q.delete('screen');} done&&done(); syncHUD(); }}); }; // оверлей #bp-big с .next(): тап/пробел — доматать, ещё раз — закрыть
+ const go=()=>{ BWWAIT=0; BigWinShow.play({amount,bet:bt||bet(),isMax,moneyFmt:money.win,summary,onDone:()=>{ if(q.get('screen')){q.delete('screen');} done&&done(); syncHUD(); }}); }; // оверлей #bp-big с .next(): тап/пробел — доматать, ещё раз — закрыть
  if(wait>60){ BWWAIT=1; setTimeout(go,wait+30); } else go();
 }
 function bonusEnd(onlyWindow){ // итог бонуса — ОДИН экран (владелец/QA m2: раньше BIG WIN и сразу «COMPLETE» с той же суммой, два нажатия). Сумма ≥ 10× ставки: шоу большого выигрыша, и его последний кадр и есть итог («CAMERAS COMPLETE», сумма, CONTINUE). Меньше — окно «Красная сталь» D1 (bonus-ui.css): сумма на стекле и одна кнопка CONTINUE; Esc и клик мимо окна делают то же самое (раньше в «Кухне» закрытие оставляло игру в пустой кухне). onlyWindow — только окно (?screen=end в «Экранах макета»)
- if(document.querySelector('.bp-wrap')||document.querySelector('#bp-big:not([data-out])')) return; const nm=scene==='cameras'?'CAMERAS':'KITCHEN', tot=GS.ktotal||84.2, amt=money(tot); if(bonusScene()&&!onlyWindow) AU('kitchen.end');
+ if(document.querySelector('.bp-wrap')||document.querySelector('#bp-big:not([data-out])')) return; const nm=scene==='cameras'?'CAMERAS':'KITCHEN', tot=GS.ktotal||84.2, amt=money.win(tot); if(bonusScene()&&!onlyWindow) AU(scene==='cameras'?'cams.total':'kitchen.end'); // итог «Камер» — свой звук
  let gone=false; const fin=()=>{ if(gone) return; gone=true; GS.fs=0; GS.fst=0; GS.ktotal=0; GS.sack=0; GS.kstep=0; GS.ksteals=0; GS.kintro=false; GS.rec=null; GS.kind=null; GS.kgo=false; if(window.CamRec) CamRec.clear(); save(); toScreen('?state=idle'); };
  const bt=bet();
  if(!onlyWindow&&tot>=10*bt){ bigWin(tot,tot>=MAXX*bt,()=>{ q.delete('screen'); fin(); },bt,{title:nm+' COMPLETE',btn:'CONTINUE',hold:true}); return; } // шоу остаётся под шторкой до ухода со страницы (hold)
+ announce(`${nm[0]+nm.slice(1).toLowerCase()} bonus complete. Total win ${amt}`); // читалке: итог бонуса (окно без шоу)
  // CONTINUE: окно остаётся на экране, пока шторка (занавес) не закроет всё — раньше оно исчезало на кадр раньше шторки, и между ними мелькала игра. Страница не ушла (шторка отменилась) — окно гаснет само.
  const w=el('div','bp-wrap',`<div class="bu-panel bu-end" role="dialog" aria-modal="true" aria-labelledby="bu-et"><div class="bu-in"><span class="bu-tag">Bonus</span><div class="bu-h" id="bu-et" role="heading" aria-level="2">${nm} COMPLETE</div>
   <div class="bu-fit"><div class="bu-scr bu-total" style="--n:${amt.length}">${amt}</div></div><span class="bu-cap">Total bonus win</span>
   <div class="bu-btns"><button class="bu-lens" id="bp-cont">CONTINUE</button></div></div></div>`);
- w.close=()=>{ if(gone) return; q.delete('screen'); w.style.pointerEvents='none'; fin(); syncHUD(); setTimeout(()=>{ if(w.isConnected){ gone=false; winOut(w); } },9500); };
+ let opened=0; w.close=()=>{ if(gone||performance.now()-opened<600) return; q.delete('screen'); w.style.pointerEvents='none'; fin(); syncHUD(); setTimeout(()=>{ if(w.isConnected){ gone=false; winOut(w); } },9500); };
  w.onclick=e=>{ if(e.target===w) w.close(); }; w.querySelector('#bp-cont').onclick=()=>w.close();
- document.body.append(w); w.querySelector('#bp-cont').focus(); syncHUD();
+ opened=performance.now(); document.body.append(w); w.querySelector('#bp-cont').focus(); syncHUD();
 }
 
 // ---------- движок спина (2026-10-10): падение символов, каскады, счётчик Рокко, трюки, кухня ----------
@@ -353,22 +424,26 @@ function bonusEnd(onlyWindow){ // итог бонуса — ОДИН экран 
 const ROWS=5, COLS=6;
 // --- правила бонусов и веса символов (черновые числа; подгонка симуляцией tools/rtp_sim, блок между CAL-метками пишет tools/rtp_sim/export_ui.js из config_final.json) ---
 // <<<CAL rules
-const INV_W=0.875, INV_B=0.9678, WILD_W=2; // вес приглашения среди символов в зале; вес приглашения в бесплатных спинах (отдельно, чтобы частота «Кухни» в зале не меняла внутренности бонусов); вес WILD в зале (в бонусах WILD падают только от Рокко)
-const MODE_X={hungry:{inv:0.9335,wild:0.5},double:{inv:1.1612,wild:1.9}}; // во сколько раз режим меняет вес приглашения (inv) и WILD (wild, только зал); без режима — ×1
-const BONUS={spinsK:10,spinsC4:10,spinsC5:12,spinWild:[1,2],startPunch:0.3,sackEvery:8,dumpSpins:3,retroSpins:5,recCap:8,recMode:"sum",kitPay:0.195276,camPay:0.003691,camPayAvg:0.038191,camPaySum:0.003691}; // правила бонусов: спины «Кухни» / «Камер» (4 и 5+ приглашений), начало спина — подброс 1–2 WILD или (с шансом startPunch) удар, мешок раз в sackEvery краж (+dumpSpins спинов), +retroSpins за 3+ приглашения, потолок множителя экрана, как считается множитель выигрыша (sum — сумма, как решил владелец; avg — среднее), множитель выплат таблицы в «Кухне» (kitPay) и в «Камерах» для каждого из двух способов (camPay — действующий)
+const INV_W=0.7934, INV_B=3.0692, WILD_W=1.15; // вес приглашения среди символов в зале; вес приглашения в бесплатных спинах (от него частота +спинов, т. е. разброс бонуса); вес WILD в зале (в бонусах WILD приходят только от Рокко)
+const MODE_X={double:{inv:1.6297,wild:1}}; // во сколько раз режим меняет вес приглашения (inv) и WILD (wild, только зал); без режима — ×1
+const BONUS={spinsK:10,spinsC:10,retroSpins:6,recCap:8,kit:{start:1,inc:1,punch:0,wild:[0,0.9309,0.0691]},cam:{start:5,inc:2,punch:0,wild:[0,1]}}; // спины «Кухни» и «Камер», +спинов за 3+ приглашения, потолок REC-значка (только вид); счётчик бонуса: start, +inc за кражу; ход Рокко в начале бесплатного спина: с шансом punch удар (столбец WILD), иначе n WILD, wild[n] — вероятность n
+const FORCE_P=0.02, PRANK_P=0.07, LEVER_TOP=0.25; // шанс готового кластера 8–11 на поле; шанс шалости Рокко в начале спина зала; шанс, что «Рубильник» превращает поле в кубки
 // >>>CAL rules
-// способ счёта множителей экранов «Камер»: sum — сумма (решение владельца), avg — среднее по клеткам выигрыша (запасной, см. docs/MECHANICS.md); ?rec=sum|avg, выбор помнит вкладка (sessionStorage bp-rec); у каждого способа свой множитель выплат camPay
-{ let m=q.get('rec'); try{ if(m==='sum'||m==='avg') sessionStorage.setItem('bp-rec',m); else m=sessionStorage.getItem('bp-rec'); }catch(e){} if((m==='sum'||m==='avg')&&BONUS.camPayAvg!=null&&BONUS.camPaySum!=null){ BONUS.recMode=m; BONUS.camPay=m==='avg'?BONUS.camPayAvg:BONUS.camPaySum; } }
-const SACK_N=BONUS.sackEvery; // кражи до высыпания мешка = лампы SACK
+const RTP_MODE={base:96.0,double:96.0,kitchen:96.0,cameras:96.0}; // RTP по режимам для правил (tools/rtp_sim/results_v2.json: все четыре — 96,0% ± 0,15)
+window.CamRecLabel='rec'; // REC-значки «Камер» без «×N»: они только для вида (cams-rec.js)
+window.bpMath={version:MATH_VERSION,maxWin:MAXX,pay:PAY,bonus:BONUS,rtp:RTP_MODE}; // для будущей связки с RGS и проверок
+const SACK_N=0; // мешок «Кухни» убран из математики 2.0.0 (не платит ещё раз, не двигает счётчик); 0 — окошко SACK и ролики мешка не показываются, код sack.js остался в проекте
 const WILD_KITCHEN=0; // вес WILD среди символов бесплатных спинов: там билеты приходят только от Рокко (начало спина, ступени счётчика); в зале вес обычный (WGT)
-const FORCE_P=0.0382; // шанс, что на поле сразу лежит кластер 8–11 одинаковых символов
-const bonusScene=()=>scene==='kitchen'||scene==='cameras'; // «Кухня» и «Камеры» — одна механика (бесплатные спины), «Камеры» добавляют REC на клетках
-const spinsFor=inv=>inv>=5?{kind:'cameras',n:BONUS.spinsC5}:inv===4?{kind:'cameras',n:BONUS.spinsC4}:inv===3?{kind:'kitchen',n:BONUS.spinsK}:null; // 3 приглашения — «Кухня», 4+ — «Камеры»
+const bonusScene=()=>scene==='kitchen'||scene==='cameras'; // «Кухня» и «Камеры» — одна механика (бесплатные спины), у «Камер» счётчик сильнее и REC-значки на клетках (только вид)
+const spinsFor=inv=>inv>=4?{kind:'cameras',n:BONUS.spinsC}:inv===3?{kind:'kitchen',n:BONUS.spinsK}:null; // 3 приглашения — «Кухня», 4+ — «Камеры»
 const symSrc=id=>SYM(id);
 const WGT=[['sym-low-cup',12],['sym-low-hat',12],['sym-low-balloon',12],['sym-low-horn',12],['sym-low-cupcake',12],['sym-high-mic',9],['sym-high-gift',8],['sym-high-pizza',7],['sym-high-mask',6],['sym-wild',WILD_W],['sym-scatter-invitation',INV_W]];
 WGT.forEach(([id])=>{ const im=new Image(); im.decoding='async'; im.src=SYM(id); }); /* заранее загружаем символы, чтобы первый спин не лагал */
 const REGULAR=WGT.slice(0,9).map(w=>w[0]);
-const LADDER={hall:[1,2,3,5,8,10,15],kitchen:[1,2,3,5,8,10,15,20,30,50,100]};
+const LADDER={hall:[1,2,3,5,8,10,15]}; // счётчик зала: ступени на спин, сбрасывается каждый спин
+const KB=()=>scene==='cameras'?BONUS.cam:BONUS.kit; // правила счётчика текущего бонуса
+const ctrTop=()=>bonusScene()?Infinity:LADDER.hall.length-1; // в бонусе счётчик растёт без верхней ступени
+const ctrVal=idx=>bonusScene()?KB().start+KB().inc*idx:LADDER.hall[Math.min(idx,LADDER.hall.length-1)]; // число на счётчике: зал — ступень, бонус — start + inc × краж
 const TRICK_AT={2:'toss',4:'punch',6:'lever'}; // на эту ступень встал счётчик → трюк
 const TRICK_KEY={toss:'throw',punch:'jump',lever:'lever'};
 const IDLE_CLIPS=['I-wave','I-hat','I-look','I-sway','I-glitch']; // I-mic убран из оживления (2026-10-12, владелец: «зачем Рокко открывает рот в микрофон» — без звука жест пустой); файлы I-mic/H-mic остались
@@ -384,15 +459,16 @@ function genIds(rng,mk,rich){
  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) g[r][c]=pickSym(rng,mk);
  if(rng()<FORCE_P){ const s=REGULAR[(rng()*9)|0], cnt=8+((rng()*4)|0); shuffle([...Array(30).keys()],rng).slice(0,cnt).forEach(i=>g[(i/COLS)|0][i%COLS]=s); }
  return g; }
-function evalIds(B,bt,rec){ // символ выигрывает, если настоящих n ≥ 1 и n + ВСЕ WILD на поле ≥ 8; WILD заменяет любой символ полностью, считается в каждом таком выигрыше и уходит вместе с ним (владелец 2026-10-11)
- // rec — REC-значки «Камер» (30 чисел по клеткам, 0 — нет значка; владелец 2026-10-12): выплата символа × множитель REC. Клетки выигрыша — клетки символа и все WILD поля.
- // Множитель = среднее значков по клеткам выигрыша (сумма значков ÷ число клеток, клетки без значка — 0), не меньше ×1; BONUS.recMode:'sum' — просто сумма (в симуляции слишком сильна, docs/MECHANICS.md). Выплаты символов в «Камерах» × BONUS.camPay.
+function forceInv(g,rng,n){ // вступительный спин покупки: недостающие приглашения — на случайные клетки без приглашений (порядок rng как в tools/rtp_sim/engine.js forceInv)
+ let have=0; g.forEach(row=>row.forEach(s=>{ if(s==='sym-scatter-invitation') have++; }));
+ for(const i of shuffle([...Array(30).keys()],rng)){ if(have>=n) break; const r=(i/COLS)|0, c=i%COLS; if(g[r][c]!=='sym-scatter-invitation'){ g[r][c]='sym-scatter-invitation'; have++; } } }
+function evalIds(B,bt){ // символ выигрывает, если настоящих n ≥ 1 и n + ВСЕ WILD на поле ≥ 8; WILD заменяет любой символ полностью, считается в каждом таком выигрыше и уходит вместе с ним (владелец 2026-10-11)
+ // математика 2.0.0: выплата — значение таблицы PAY × ставка (дальше × счётчик в runRound); REC-значки «Камер» на выплату не влияют
  const flat=B.flat(), W=flat.filter(s=>s==='sym-wild').length, cnt={};
  flat.forEach(s=>{ if(REGULAR.includes(s)) cnt[s]=(cnt[s]||0)+1; });
  const wins=[]; let base=0;
- for(const s of REGULAR){ const n=cnt[s]||0, m=n+W; if(n<1||m<8) continue; const p=PAY[s], x0=m>=12?p[3]:m>=10?p[2]:p[1];
-  let f=1; const rc=[]; if(rec){ let sum=0; B.forEach((row,r)=>row.forEach((o,c)=>{ const v=rec[r*COLS+c]; if(v&&(o===s||o==='sym-wild')){ sum+=v; rc.push(r*COLS+c); } })); f=BONUS.recMode==='sum'?(sum>0?sum:1):Math.max(1,sum/m); }
-  const pf=rec?BONUS.camPay:bonusScene()?BONUS.kitPay:1, x=x0*f*pf; wins.push({s,n,m,x,x0:x0*pf,f,rc}); base+=x*bt; } // pf: выплаты символов в «Камерах» × camPay, в «Кухне» × kitPay, в зале × 1
+ for(const s of REGULAR){ const n=cnt[s]||0, m=n+W; if(n<1||m<8) continue; const p=PAY[s], x=m>=12?p[3]:m>=10?p[2]:p[1];
+  wins.push({s,n,m,x,x0:x,f:1,rc:[]}); base+=x*bt; }
  const cells=[]; if(wins.length){ const ws=new Set(wins.map(w=>w.s)); for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const s=B[r][c]; if(ws.has(s)||s==='sym-wild') cells.push([r,c]); } } // все WILD поля участвуют в выигрыше и уходят с ним
  return {wins,cells,base}; }
 
@@ -458,7 +534,7 @@ function vcue(v,rateAt){ // S.cue(t,fn): вызвать fn, когда роли�
  S.at=t=>new Promise(res=>S.cue(t,res));
  S.t=()=>v.currentTime; return S; }
 window.bpTime={K,RM,GS,fast,readyV,seekV,vcue}; // общие часы и состояние для блока «Рокко в полный рост» (он в отдельной области видимости)
-window.bpTest={startBonus,startCameras:()=>startBonus(BONUS.spinsC4,null,null,'cameras'),bigWin,bonusEnd,save,syncHUD,startKitchenSack:()=>startBonus(BONUS.spinsK,null,()=>{ GS.ksteals=SACK_N-1; GS.sack=2.4*bet(); GS.kintro=true; })}; // startKitchenSack — «Кухня» с мешком на предпоследней краже: следующая кража высыпает мешок // тестовая панель (test-panel.js)
+window.bpTest={startBonus,buySpin,startCameras:()=>startBonus(BONUS.spinsC,null,null,'cameras'),bigWin,bonusEnd,save,syncHUD,startKitchenSack:()=>startBonus(BONUS.spinsK,null,()=>{ GS.ksteals=SACK_N-1; GS.sack=2.4*bet(); GS.kintro=true; })}; // startKitchenSack — «Кухня» с мешком на предпоследней краже: следующая кража высыпает мешок // тестовая панель (test-panel.js)
 const skipAll=()=>{ ST.fast=true; if(window.CamRec&&CamRec.finish) CamRec.finish(); ST.anims.slice().forEach(a=>{ try{a.finish();}catch(e){} }); ST.sleeps.slice().forEach(([t,res])=>{ clearTimeout(t); res(); }); ST.sleeps=[]; };
 window.bpTime.skip=on=>{ if(on) skipAll(); else ST.fast=false; }; // для проверок (tools/rocco_flow_check.js): «Skip» из кода
 // --- пропуск по фазам (отзыв тестера 2026-10-12: «скип должен скипать следующую анимацию, а не фулл спин или не фулл бонуску») ---
@@ -539,8 +615,8 @@ function restoreBoard(){ // после перерисовки (resize) — ве�
 function setCounter(idx,pop){
  const w=document.querySelector('#alt .ctr2'); if(!w) return; const win=w.querySelector('.win'), v=w.querySelector('.win .v'), inn=w.querySelector('.in')||win; if(!v) return; // .win — стекло плашки (flyMult ищет `#alt .ctr2 .win .v`)
  const go=!!pop&&!RM()&&K()>0, w0=go?inn.getBoundingClientRect().width:0; // ширина платы до правки: ячейки равной ширины держат её, но на последней ступени табличка «▸ следующий» исчезает — тогда ширина меняется плавно, а не прыжком
- const L=LADDER[bonusScene()?'kitchen':'hall']; idx=Math.min(idx,L.length-1); m1Roll(v,m1Cells(String(L[idx])),go);
- const nxt=L[idx+1], on=idx+1, ntr=!!TRICK_AT[on]; let sg=w.querySelector('.sg');
+ idx=Math.min(idx,ctrTop()); m1Roll(v,m1Cells(String(ctrVal(idx))),go); // зал: ступени ×1…×15; бонус: ×start, +inc за кражу, без верха
+ const nxt=idx<ctrTop()?ctrVal(idx+1):null, on=idx+1, ntr=!!TRICK_AT[on]; let sg=w.querySelector('.sg');
  if(nxt){ if(!sg){ sg=el('div','sg','<i class="ar"></i><span class="nx"><span class="nt"></span></span>'); inn.append(sg); }
   const nx=sg.querySelector('.nx'), nt=sg.querySelector('.nt'); nx.className='nx'+(ntr?' tr':''); m1Roll(nt,m1Cells('×'+nxt),go);
   let tk=nx.querySelector('.tki'); // значок трюка на уголке: зажигается, когда следующая ступень — трюк
@@ -563,7 +639,7 @@ async function counterLift(from,to){ await phase('counter',{from,to});
  anim(r,[{transform:'scale(.96)',opacity:.95},{transform:'scale(1.3)',opacity:0}],{duration:640,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards'}).then(()=>r.remove());
  anim(c,[{opacity:0,transform:'translate(-50%,6px) scale(.85)'},{opacity:1,transform:'translate(-50%,0) scale(1)',offset:.16},{opacity:1,transform:'translate(-50%,0) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-5px) scale(1)'}],{duration:1150,fill:'forwards',smooth:true}).then(()=>c.remove());
  await sleep(780); }
-function setResult(v){ const r=document.getElementById('result'), b=r&&r.querySelector('b'); if(b) b.textContent=money(v); }
+function setResult(v){ const r=document.getElementById('result'), b=r&&r.querySelector('b'); if(b) b.textContent=money.cnt(v); }
 // ---------- счётчики (вариант H из hud-light.html, владелец 2026-10-10) ----------
 // Окошки: тёмное стекло, подпись внутри (Barlow), янтарное число (VT323), красная обводка. Столбиком слева у поля (ландшафт), на телефоне — под логотипом
 // (в «Камерах» — рядом над проёмом). Бонусы: FREE SPINS «7» (осталось спинов) и SACK (сумма + лампы = кражи до высыпания мешка, SACK_N). Зал: MODE, только когда режим включён.
@@ -577,7 +653,7 @@ const SKV={on:false,v:0,n:0,quiet:false}; window.bpTime=window.bpTime||{}; windo
 const sackLamps=()=>SKV.on?SKV.n:((GS.sack>0&&GS.ksteals>0&&GS.ksteals%SACK_N===0)?SACK_N:((GS.ksteals||0)%SACK_N)); // кражи в текущей четвёрке: 4 горят до «высыпать мешок», после него снова 0
 const sackAmt=()=>SKV.on?SKV.v:(GS.sack||0);
 const SACK_ICO='<svg class="skic" viewBox="0 0 40 44" aria-hidden="true"><defs><linearGradient id="skg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d58a"/><stop offset=".55" stop-color="#d9a94a"/><stop offset="1" stop-color="#9a6a1e"/></linearGradient></defs><path d="M14 6 L11 1.5 L17 4 L20 .5 L23 4 L29 1.5 L26 6 C27.5 9 28.5 11 28.5 12.5 C37 16.5 38 25 36 32 C34.5 38 28 42 20 42 C12 42 5.5 38 4 32 C2 25 3 16.5 11.5 12.5 C11.5 11 12.5 9 14 6 Z" fill="url(#skg)" stroke="#2b1704" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 12.6 C16.5 14.6 23.5 14.6 28 12.6" fill="none" stroke="#2b1704" stroke-width="2.2" stroke-linecap="round"/><path d="M12.5 12.6 C16.5 14.2 23.5 14.2 27.5 12.6" fill="none" stroke="#b3361f" stroke-width="1.1" stroke-linecap="round"/><path d="M11 22 C9 27 10 32 13 36" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/><text x="20" y="33" text-anchor="middle" font-family="Black Ops One,Impact,sans-serif" font-size="16" fill="#5a3a0c" opacity=".85">$</text></svg>'; // иконка мешка у окошка SACK (рисуется кодом, без картинки нейросети)
-function hWin(id,lb,val,o){ if(M1_IDS.includes(id)||id==='mode') return m1Win(id,lb,val,o); // MODE (HUNGRY ROCCO / DOUBLE INVITATION) — тоже плашка М1, в том же стиле, что FREE SPINS и SACK o=o||{}; const fit=o.mw?`data-fit style="--mw:${Math.round(o.mw)}px;--wm:${Math.round(o.wm||0)}px"`:`style="--wm:${Math.round(o.wm||0)}px"`;
+function hWin(id,lb,val,o){ if(M1_IDS.includes(id)||id==='mode') return m1Win(id,lb,val,o); // MODE (DOUBLE INVITATION) — тоже плашка М1, в том же стиле, что FREE SPINS и SACK o=o||{}; const fit=o.mw?`data-fit style="--mw:${Math.round(o.mw)}px;--wm:${Math.round(o.wm||0)}px"`:`style="--wm:${Math.round(o.wm||0)}px"`;
  return `<div class="hw${o.hw?' '+o.hw:''}"${id==='mode'?' id="bp-mode" role="button" tabindex="0" aria-label="Active mode — open features"':` id="hw-${id}"`}><div class="hgl two${o.cls?' '+o.cls:''}" ${fit}><span class="lb">${lb}${o.ex||''}</span><span class="vv">${val}</span>${o.sub||''}${o.ico||''}</div>${id==='mode'?`<button class="off" aria-label="Turn off ${o.nm}"></button>`:''}</div>`; }
 // ---------- плашки М1 «Вывеска в раме пульта» (владелец 2026-10-12; эскиз — hud-variants.html, стили — ui.css «плашки М1») ----------
 // FREE SPINS, SACK и TOTAL: рама пульта с винтами (.hgl.m1) → ржавая плата (.in) → кремовая табличка с подписью (.lb) и тёмное стекло с золотыми цифрами (.wn > .vv); у SACK под стеклом лампы (.lamps .lp), значок мешка (.skic) стоит на табличке.
@@ -626,19 +702,31 @@ function hudItems(L,avail,u){
  const out=[], wm=L?Math.min(172*u,avail):100, mw=L?Math.min(290*u,avail):Math.min(218,innerWidth*.56); // ширины в «u»: на очень больших экранах окошки растут вместе с цифрами
  if(scene==='hall'){ if(modeOn){ const m=MODES.find(x=>x.k===modeOn); out.push(hWin('mode','Mode',`${m.nm} <span class="dim mxv">×${m.x}</span>`,{wm:L?wm:0,mw,nm:m.nm})); } }
  else if(bonusScene()){ out.push(hWin('fs','Free spins',`${fsLeft()}`,{wm}));
-  out.push(hWin('sack','Sack',money(sackAmt()),{wm:L?wm:116,mw,ex:hLamps(sackLamps()),ico:SACK_ICO,cls:'sk',hw:sackLamps()===3&&!SKV.quiet?'wait':''})); }
+  if(SACK_N) out.push(hWin('sack','Sack',money.win(sackAmt()),{wm:L?wm:116,mw,ex:hLamps(sackLamps()),ico:SACK_ICO,cls:'sk',hw:sackLamps()===3&&!SKV.quiet?'wait':''})); } // мешок выключен (SACK_N=0) — только FREE SPINS
  return out; }
 function hudBuild(){
  document.getElementById('hud')?.remove();
  const fe=document.getElementById('field'), app=document.getElementById('app'); if(!fe||!app||document.getElementById('wel')) return;
- const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0, u=hudU(f.width);
- const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=6c80e99c readSafe): окошки не уходят под него слева
+ const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0; let u=hudU(f.width);
+ const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=b0d45272 readSafe): окошки не уходят под него слева
  let edge=f.left-12*u, avail=Math.max(60,edge-Math.max(8,sa.l)), right=false;
+ if(scene==='cameras'&&land&&!(window.BPL&&window.BPL.nl&&window.BPL.mode!=='desk')){ edge=f.left-.063*f.width-10; u=Math.min(u,Math.max(.78,(edge-Math.max(8,sa.l)-4)/152)); avail=Math.max(60,edge-Math.max(8,sa.l)-30*u); } // «Камеры», компьютер: рамка стойки (≈6,3% ширины проёма) шире проёма — плашки стоят левее её внешней кромки (на 10 px), а не на рамке; плашка уже — масштаб u меньше (SACK шире на значок мешка ≈30u слева)
  const pr=document.getElementById('pod')?.getBoundingClientRect(); // телефон боком (844×390): слева от поля всего ~80 px (логотип и «Функции»), а между полем и пультом справа пусто — столбик встаёт туда
  if(land&&H<=500&&scene!=='cameras'&&pr&&pr.left>f.right-10&&pr.left-f.right-16>=100){ right=true; avail=pr.left-f.right-16; }
- const items=hudItems(land,avail,u); if(!items.length) return;
+ const BL=window.BPL||{}, lm=BL.nl&&BL.mode!=='desk'?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=b0d45272 render, ветка NL)
+ const ff=document.getElementById('features'); if(ff) ff.style.visibility=lm==='port'&&scene==='hall'&&modeOn?'hidden':''; // телефон стоя: включённый режим встаёт на место Buy bonus (шаблон «Mode button · active»), сама плашка MODE открывает Функции
+ if(lm==='tiny'||(lm==='cmp'&&!bonusScene())) return; // крошечное окно — только поле; мини-окно в зале — без плашки режима (места нет)
+ if(lm==='cmp') u=NG.u||.56;
+ const items=lm==='port'&&!bonusScene()?hudItems(true,Math.round(W*.4),u):lm==='cmp'?hudItems(true,NG.RL||80,u):hudItems(land,avail,u); if(!items.length) return;
  const hud=el('div'), top=Math.max(f.top+13*u,sb+8); hud.id='hud'; hud.style.setProperty('--u',u.toFixed(3));
- if(land&&right) hud.innerHTML=`<div class="wcol" style="left:${f.right+8}px;top:${Math.max(8,sa.t+6)}px">${items.join('')}</div>`; // телефон боком: столбик с самого верха (плашки М1 выше прежних окошек); Рокко в просвете ставится под ним (layout), иначе он сжимался бы
+ const rr=s=>{ const e=document.querySelector('#pod '+s); return e&&e.getBoundingClientRect(); };
+ if(lm==='port') hud.innerHTML=bonusScene()?`<div class="wrow" style="left:${f.left}px;width:${f.width}px;top:${f.bottom+6}px">${items.join('')}</div>` // шаблон: FREE SPINS и SACK рядом под полем (место занято заранее)
+  :`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${f.top-6}px;transform:translateY(-100%)">${items.join('')}</div>`; // MODE — слева над полем, на месте Buy bonus
+ else if(lm==='phl') hud.innerHTML=bonusScene()?`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${sb+8}px">${items[0]}</div>`+(NG.sack&&items[1]?`<div class="wcol" style="left:${NG.sack.x}px;top:${NG.sack.y}px;transform:translateX(-50%)">${items[1]}</div>`:'') // шаблон: FREE SPINS слева под логотипом, SACK справа на месте Autoplay
+  :`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${Math.round((ff&&ff.isConnected?ff.getBoundingClientRect().bottom:sb)+8)}px">${items.join('')}</div>`; // MODE — под Buy bonus
+ else if(lm==='cmp'){ const L=rr('.g-lrail'), R=rr('.g-rrail'); // шаблон Compact, бонус: SACK внизу левого столбика (на месте − +), FREE SPINS внизу правого (на месте Autoplay · Buy)
+  hud.innerHTML=(L&&items[1]?`<div class="wcol" style="left:${L.left+L.width/2}px;top:${L.bottom}px;transform:translate(-50%,-100%)">${items[1]}</div>`:'')+(R&&items[0]?`<div class="wcol" style="left:${R.left+R.width/2}px;top:${R.bottom}px;transform:translate(-50%,-100%)">${items[0]}</div>`:''); }
+ else if(land&&right) hud.innerHTML=`<div class="wcol" style="left:${f.right+8}px;top:${Math.max(8,sa.t+6)}px">${items.join('')}</div>`; // телефон боком: столбик с самого верха (плашки М1 выше прежних окошек); Рокко в просвете ставится под ним (layout), иначе он сжимался бы
  else if(land) hud.innerHTML=`<div class="wcol r" style="left:${edge}px;top:${top}px;transform:translateX(-100%)">${items.join('')}</div>`; // у левой кромки поля, под логотипом
  else if(scene==='cameras'){ const pb=document.querySelector('#alt .ctr2'), pr2=pb&&pb.getBoundingClientRect(), ty=pr2&&pr2.height?Math.min(f.top-8*u,pr2.top-6-11*u):f.top-8*u; hud.innerHTML=`<div class="wrow" style="left:${f.left}px;width:${f.width}px;top:${ty}px;transform:translateY(-100%)">${items.join('')}</div>`; } // телефон, «Камеры»: рядом над проёмом, выше плашки счётчика и её значка трюка (он выступает на 11u над плашкой)
  else hud.innerHTML=`<div class="wcol" style="left:${Math.max(14,sa.l)}px;top:${sb+14}px">${items.join('')}</div>`; // телефон: столбиком слева под логотипом
@@ -674,10 +762,10 @@ function hudClamp(){ // столбик окошек слева от поля ш�
  col.style.left=edge+'px'; const r=col.getBoundingClientRect(); if(r.left<lim-.5) col.style.left=(edge+lim-r.left)+'px'; }
 function hudUpdate(){ // числа из состояния игры (GS / бонус «Камеры») в уже построенные окошки
  const h=document.getElementById('hud'); if(!h) return; const vv=id=>h.querySelector(`#hw-${id} .vv`); let e;
- if(bonusScene()){ if(e=vv('fs')) e.textContent=fsLeft(); if(e=vv('sack')) e.textContent=money(sackAmt());
-  const n=sackLamps(); h.querySelectorAll('#hw-sack .lp').forEach((l,i)=>l.classList.toggle('on',i<n)); h.querySelector('#hw-sack')?.classList.toggle('wait',n===SACK_N-1&&!SKV.quiet); } // 3 лампы горят — мешок ждёт четвёртую кражу (мягкая пульсация окошка, мигает последняя лампа)
+ if(bonusScene()){ if(e=vv('fs')) e.textContent=fsLeft(); if(SACK_N&&(e=vv('sack'))) e.textContent=money.win(sackAmt());
+  const n=SACK_N?sackLamps():0; h.querySelectorAll('#hw-sack .lp').forEach((l,i)=>l.classList.toggle('on',i<n)); h.querySelector('#hw-sack')?.classList.toggle('wait',n===SACK_N-1&&!SKV.quiet); } // 3 лампы горят — мешок ждёт четвёртую кражу (мягкая пульсация окошка, мигает последняя лампа)
  hudFit(); }
-function hudTotal(v){ const e=document.querySelector('#hud #hw-tot .vv'); if(e){ e.textContent=money(v); hudFit(); } } // hudFit сам пропускает неизменившийся текст
+function hudTotal(v){ const e=document.querySelector('#hud #hw-tot .vv'); if(e){ e.textContent=money.win(v); hudFit(); } } // hudFit сам пропускает неизменившийся текст
 function hudAdd5(n){ const lb=document.querySelector('#hw-fs .lb'); if(!lb) return; lb.querySelector('.add')?.remove(); const a=el('span','add','+'+(n||5)); lb.append(a); setTimeout(()=>a.remove(),RM()?2200:3500); } // «+5» у подписи FREE SPINS коротко подмигивает
 const setSpinsMeter=()=>hudUpdate(); // старое имя: зовётся из многих мест движка
 window.bpTime.hud={build:hudBuild,update:hudUpdate,fit:hudFit,total:hudTotal};
@@ -1195,7 +1283,7 @@ async function lever(rng){ await phase('lever'); react('R-breaker'); const LCx=l
  const f=document.getElementById('field'), r=f.getBoundingClientRect();
  const o=el('div'); o.id='lightsout'; const rad=Math.max(80,r.width*.2); o.style.background=`radial-gradient(circle ${rad}px at 50% 50%,transparent 0,transparent ${rad*.4}px,rgba(0,0,0,.95) ${rad}px) 100% 0/300% 100% no-repeat`; Object.assign(o.style,{left:LAYER.style.left,top:LAYER.style.top,width:LAYER.style.width,height:LAYER.style.height}); f.append(o);
  AU('lever.blackout'); await anim(o,[{opacity:0},{opacity:1}],{duration:300,fill:'forwards'});
- const pick=rng()<.4?'sym-high-mask':REGULAR[(rng()*5)|0], jobs=[];
+ const pick=rng()<LEVER_TOP?'sym-high-mask':REGULAR[(rng()*5)|0], jobs=[];
  const sweep=anim(o,[{backgroundPosition:'100% 0'},{backgroundPosition:'0% 0'}],{duration:1500,easing:'ease-in-out',fill:'forwards'});
  let k=0; for(let c=0;c<COLS;c++) for(let rr=0;rr<ROWS;rr++){ const s=BOARD[rr][c]; if(!s||s.id==='sym-scatter-invitation'||s.id==='sym-wild') continue; const d=(COLS-1-c)*240+rr*20; // за лучом фонарика (справа налево)
   jobs.push((async()=>{ await sleep(d); await anim(s.sp,[{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:130,fill:'forwards'}); setSprite(s,pick); AU('lever.flip'); await anim(s.sp,[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:150,fill:'forwards'}); s.sp.style.transform=''; })()); k++; }
@@ -1254,7 +1342,8 @@ function demoWin(){ // страница без ?state=idle (по умолчан�
  glow(cells,true); showWins({wins:[{s:'sym-low-hat',n:8,m:8,x:.4}]},3,bet()); }
 function flyMult(m,tgt){ const v=document.querySelector('#alt .ctr2 .win .v'); if(!v||RM()||m<2||!tgt) return Promise.resolve(); const a=v.getBoundingClientRect(), b=tgt.getBoundingClientRect(); // множитель летит со счётчика к «× N» в надписи
  return flyClone('data:image/svg+xml,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='60'><text x='60' y='44' text-anchor='middle' font-family='Black Ops One,Impact,sans-serif' font-size='44' fill='%23FFC861' stroke='%23000' stroke-width='3' paint-order='stroke'>×${m}</text></svg>`),{left:a.left,top:a.top-6,width:70,height:36},{left:b.left+b.width/2,top:b.top,width:0,height:b.height},520,{scale:1,rot:0,arc:-30,fade:0}); }
-function tweenResult(from,to,ms){ if(window.WinFx&&window.WinFx.count){ const p=window.WinFx.count(from,to,ms,{setResult,AU,K,money,anim:animA,fast:()=>ST.fast}); if(p) return p; } // winfx.js: счёт строки WIN у выбранного вида; «прежний» — вернёт null, ниже обычный счёт
+function tweenResult(from,to,ms){ money.fin=to; const p=tweenResult0(from,to,ms); const done=()=>{ if(money.fin===to) money.fin=null; }; p.then(done,done); return p; } // пока идёт счёт, money.win пишет число с точностью итога (money.js)
+function tweenResult0(from,to,ms){ if(window.WinFx&&window.WinFx.count){ const p=window.WinFx.count(from,to,ms,{setResult,AU,K,money:money.cnt,anim:animA,fast:()=>ST.fast}); if(p) return p; } // winfx.js: счёт строки WIN у выбранного вида; «прежний» — вернёт null, ниже обычный счёт
  return new Promise(res=>{ const d=ms*K(); if(d<=0){ setResult(to); res(); return; } const t0=performance.now(); let tk=0; const st=n=>{ const k=ST.fast?1:Math.max(0,Math.min(1,(n-t0)/d)); // Skip: число сразу доходит до итога setResult(from+(to-from)*(1-Math.pow(1-k,3))); if(k<1&&n-tk>60){ tk=n; AU('win.count_tick'); } // тик, пока число считает вверх
  if(k<1) requestAnimationFrame(st); else res(); }; requestAnimationFrame(st); }); }
 
@@ -1268,26 +1357,28 @@ function freeChain(ms){ clearTimeout(fsT); let waited=false; fsT=setTimeout(func
  if(window.__sim||!bonusScene()||GS.fs<=0||GS.replay||GS.spinning) return;
  if(dialogOpen()){ waited=true; fsT=setTimeout(tick,150); return; }
  if(waited){ waited=false; fsT=setTimeout(tick,380); return; } // окно только что закрылось (ворота гаснут) — даём взглянуть на поле, потом спин
- if(window.bpSack&&window.bpSack.introDue()){ window.bpSack.intro().then(()=>freeChain(250)); return; } // вход в «Кухню», один раз: окошко SACK загорается, подсказка «каждые 4 кражи мешок платит ещё раз»; тап пропускает
+ if(SACK_N&&window.bpSack&&window.bpSack.introDue()){ window.bpSack.intro().then(()=>freeChain(250)); return; } // вход в «Кухню», один раз: окошко SACK загорается, подсказка «каждые 4 кражи мешок платит ещё раз»; тап пропускает
  spin(); },ms); }
-function startBonus(n,rng,pre,kind){ kind=kind==='cameras'?'cameras':'kitchen'; if(window.__sim){ window.__bonuses=(window.__bonuses||0)+1; return; } GS.fs=n; GS.fst=n; GS.kstep=0; GS.ksteals=0; GS.sack=0; GS.kintro=false; GS.ktotal=0; GS.auto=0; GS.kgo=false; GS.kind=kind; GS.rec=kind==='cameras'?Array(30).fill(0):null; if(pre) pre(); save(); toScreen(`?scene=${kind}&screen=${kind}`); }
+function startBonus(n,rng,pre,kind){ kind=kind==='cameras'?'cameras':'kitchen'; if(window.__sim){ window.__bonuses=(window.__bonuses||0)+1; return; } GS.fs=n; GS.fst=n; GS.kstep=0; GS.ksteals=0; GS.sack=0; GS.kintro=false; GS.ktotal=0; GS.kpre=0; GS.auto=0; GS.kgo=false; GS.kind=kind; GS.rec=kind==='cameras'?Array(30).fill(0):null; if(pre) pre(); save(); toScreen(`?scene=${kind}&screen=${kind}`); }
+// покупка бонуса (математика 2.0.0): вступительный спин зала, на поле ложатся приглашения (3 — «Кухня», 4 — «Камеры»), его выигрыш платится; потом ворота купленного бонуса
+function buySpin(k,price){ if(GS.spinning) return; GS.buyNext={k,price}; let n=0; const go=()=>{ if(GS.spinning||!GS.buyNext) return; if(dialogOpen()&&n++<100) return setTimeout(go,80); spin(); }; go(); } // окно покупки ещё гаснет (dialogOpen) — ждём; Play за это время сам начнёт вступительный спин
 const spinTimer=()=>{ if(!GS.spinning) spin(); }; // автоигра: следующий спин по таймеру; если игрок уже сам начал спин, таймер не нажимает Skip
 function spin(){
  if(GS.spinning){ AU('spin.skip'); GS.skip&&GS.skip(); return; } // второй Play / Space = Skip: домотать ФАЗУ, которая играет сейчас (skipPhase), а не весь спин
  if(dialogOpen()) return;
  if(window.BPLoad&&BPLoad.hold(spin)) return; // fb/perf: ролики Рокко и звуки первого спина ещё докачиваются — спин ждёт (не больше 10 с), внизу плашка с ходом загрузки; иначе глотание/бросок/радость шли бы запасным путём без ролика
  const field=document.getElementById('field'); if(!field) return;
- const replay=GS.replay, free=!replay&&bonusScene()&&GS.fs>0, cost=free?0:spinCost();
- if(!replay&&!free){ if(GS.bal<cost){ GS.auto=0; syncHUD(); flash('NOT ENOUGH BALANCE'); return; } GS.bal-=cost; }
+ const replay=GS.replay, buy=!replay&&GS.buyNext&&scene==='hall'?GS.buyNext:null, free=!replay&&!buy&&bonusScene()&&GS.fs>0, cost=buy?buy.price:free?0:spinCost(); GS.buyNext=null; // buy — цена уже списана при покупке
+ if(!replay&&!free&&!buy){ if(GS.bal<cost){ GS.auto=0; syncHUD(); announce(LOWTXT); if(window.bpPlates&&bpPlates.mode()!=='old') AU('ui.error'); else flash(LOWTXT); return; } GS.bal-=cost; }
  if(!replay) GS.lastWin=0;
  AU('spin.start'); SC_N=0; window.bpAudio&&bpAudio.stopLoop('scatter.anticipation');
  GS.spinning=true; document.getElementById('bp-menu')?.remove(); closeBets(true);
  document.querySelectorAll('.conf,#wlx').forEach(e=>e.remove()); syncHUD();
  ST.fast=false; ST.anims=[]; ST.sleeps=[];
- runRound(field,{replay,free,cost}).catch(err=>{ console.error(err); GS.spinning=false; GS.skip=null; ST.fast=false; syncHUD(); });
+ runRound(field,{replay,free,cost,buy:buy?buy.k:null}).catch(err=>{ console.error(err); GS.spinning=false; GS.skip=null; ST.fast=false; syncHUD(); });
 }
 // --- «Камеры»: показ на мониторах-клетках (cams-rec.js, window.CamRec) ---
-const moneyS=v=>(v>0&&v<.005&&!CUR)?'$'+v.toFixed(v<.0005?5:4):money(v); // суммы меньше полцента (выплаты «Камер» до множителей) — с дробной частью, иначе «$0.00»
+const moneyS=money.win; // суммы меньше самой мелкой единицы (выплаты «Камер» до множителей) money.win показывает с дробной частью (до 4 знаков), иначе «$0.00»
 const camOpts=()=>({K,fast:fast(),rm:RM()});
 function camMath(w,WL,mult,bt){ if(window.__sim||!window.CamRec) return Promise.resolve(); const el=WL&&WL.amt&&WL.amt[w.s]; // значки выигрыша слетаются в метку «×N», она садится на сумму, сумма считается от суммы без REC до умноженной (WL.final() потом гарантирует итоговый текст)
  return Promise.resolve(CamRec.showMath(w.rc,w.f,{...camOpts(),target:el||undefined,amount:el?{el,from:(w.x/w.f)*bt*mult,to:w.x*bt*mult,fmt:moneyS}:undefined})).catch(e=>console.error(e)); }
@@ -1299,11 +1390,12 @@ async function camSteal(cells){ // в «Камерах» Рокко не сто�
  if(window.__sim||!window.CamRec){ list.forEach(gone); return; }
  try{ await CamRec.steal(cells.map(([r,c])=>r*COLS+c),{onTake:()=>list.forEach(gone)},camOpts()); }catch(e){ console.error(e); }
  list.forEach(e=>{ if(BOARD[e.r][e.c]===e.o) gone(e); }); }
-async function runRound(field,{replay,free,cost}){
- const seed=replay?replay.seed:(window.__seeds&&window.__seeds.length?window.__seeds.shift():(Math.random()*4294967296)>>>0), mk=replay?replay.mk:free?null:modeOn, rng=rngOf(seed), bt=bet();
- const BS=bonusScene(), CM=scene==='cameras', L=LADDER[BS?'kitchen':'hall']; let step=free?(GS.kstep||0):(mk==='hungry'?1:0), total=0, chain=0, steals=0, bigs=0;
- const room=Math.max(0,MAXX*bt-(free?(GS.ktotal||0):0)); // сколько ещё можно выиграть до 25 000× ставки (в бонусе — за весь бонус)
- const rec=CM&&free?(GS.rec||(GS.rec=Array(30).fill(0))):null; // REC-значки «Камер» по клеткам (0 — нет); правятся на месте и сохраняются (save)
+async function runRound(field,{replay,free,cost,buy}){
+ buy=replay?(replay.buy||null):(buy||null); // buy — вступительный спин покупки: 'kitchen' | 'cameras'
+ const seed=replay?replay.seed:(window.__seeds&&window.__seeds.length?window.__seeds.shift():(Math.random()*4294967296)>>>0), mk=replay?replay.mk:(free||buy)?null:modeOn, rng=rngOf(seed), bt=bet();
+ const BS=bonusScene(), CM=scene==='cameras', top=free?Infinity:LADDER.hall.length-1; let step=free?(GS.kstep||0):0, total=0, chain=0, steals=0, bigs=0;
+ const room=Math.max(0,MAXX*bt-(free?(GS.ktotal||0)+(GS.kpre||0):0)); // сколько ещё можно выиграть до потолка MAXX× ставки (в бонусе — за весь бонус вместе с вступительным спином покупки)
+ const rec=CM&&free?(GS.rec||(GS.rec=Array(30).fill(0))):null; // REC-значки «Камер» по клеткам (0 — нет); только вид, правятся на месте и сохраняются (save)
  if(!buildLayer(field)) throw new Error('нет поля');
  BOARD=mkBoard((GRIDIDS||HALL).map(r=>r.slice())); // старое поле на новом слое
  GS.skip=skipPhase; GS.speedUp=()=>{};
@@ -1311,73 +1403,69 @@ async function runRound(field,{replay,free,cost}){
  { const cv=document.querySelector('#alt .ctr2 .win .v'); if(cv&&!free&&(+cv.textContent)>1) AU('counter.reset'); } // новый спин: счётчик возвращается на ×1
  setCounter(step,false); setResult(0); if(free) setResult(GS.ktotal||0);
  const ids=genIds(rng,mk,free); TRICK_EARLY=null;
- let pre=null; if(free){ const pu=rng()<BONUS.startPunch; pre={pu}; if(!pu){ const a=BONUS.spinWild; pre.n=a[0]+((rng()*(a[1]-a[0]+1))|0); } trickEarly(pu?'punch':'toss'); } // ход Рокко в начале бесплатного спина решается сразу (порядок rng тот же), его ролик идёт параллельно падению поля
+ if(buy) forceInv(ids,rng,buy==='cameras'?4:3); // вступительный спин покупки: недостающие приглашения ложатся на случайные клетки
+ let pre=null; if(free){ const kb=KB(), pu=rng()<kb.punch; pre={pu}; if(!pu){ let u=rng(), n=0; for(;n<kb.wild.length-1;n++){ u-=kb.wild[n]; if(u<0) break; } pre.n=n; } if(pu||pre.n) trickEarly(pu?'punch':'toss'); } // ход Рокко в начале бесплатного спина решается сразу (порядок rng тот же), его ролик идёт параллельно падению поля
  // 1) старое поле уходит вниз, новое падает
  await phase('drop',{free,seed}); await dropOut(BOARD); BOARD=ids.map(r=>r.map(()=>null));
  await dropIn(BOARD,ids); AU('spin.stop'); window.bpAudio&&bpAudio.stopLoop('scatter.anticipation');
  GRIDIDS=idsOf(BOARD);
  // 2) шалость Рокко в начале спина (зал) / ход Рокко в начале каждого бесплатного спина (бонусы): либо подбросит WILD, либо ударит по рамке — столбец WILD
- if(!free&&rng()<.07){ await phase('giggle'); const tz=rng()<.5; if(tz) trickEarly('toss'); else { react('P-giggle'); await sleep(900); } if(tz){ await toss(rng,2+((rng()*2)|0)); } else if(step<1){ step=1; setCounter(step,true); } } // бросок — без хихиканья перед ним: его замах и есть вступление
- if(pre){ if(pre.pu) await punchColumn(rng,0); else await toss(rng,pre.n); }
+ if(!free&&rng()<PRANK_P){ await phase('giggle'); const tz=rng()<.5; if(tz) trickEarly('toss'); else { react('P-giggle'); await sleep(900); } if(tz){ await toss(rng,2+((rng()*2)|0)); } else if(step<1){ step=1; setCounter(step,true); } } // бросок — без хихиканья перед ним: его замах и есть вступление
+ if(pre){ if(pre.pu) await punchColumn(rng,0); else if(pre.n) await toss(rng,pre.n); } // 0 WILD — ход пропущен (rng не тратится)
  // 3) каскады
  let trophyWon=false;
  while(true){
-  const ev=evalIds(idsOf(BOARD),bt,rec); if(!ev.wins.length) break; chain++;
-  const mult=L[step], stepWin=ev.base*mult, big=ev.wins.reduce((a,w)=>a+w.x,0);
+  const ev=evalIds(idsOf(BOARD),bt); if(!ev.wins.length) break; chain++;
+  const mult=ctrVal(step), stepWin=ev.base*mult, big=ev.wins.reduce((a,w)=>a+w.x,0);
   await phase('win',{n:chain,x:+(stepWin/bt).toFixed(4)}); AU('win.cluster'); glow(ev.cells,true); await sleep(300); // уголки защёлкиваются, остальные символы серые
   if(ev.wins.some(w=>w.s==='sym-high-mask')) trophyWon=true;
   if(window.WinFx) window.WinFx.step(chain,stepWin/bt,{free,mult}); // winfx.js: метка цепочки, толчок поля, мигание света — по шагу выигрыша
-  const recWins=rec?ev.wins.filter(w=>w.f>1):[], WL=showWins(ev,mult,bt,recWins.length?{pre:true}:null); AU('win.amount'); // сумма крупно на выигравших символах (в «Камерах» с REC — сначала сумма без REC); множитель летит к «× N»
-  if(WL&&recWins.length){ await Promise.all(recWins.map(w=>camMath(w,WL,mult,bt))); WL.final(); } // REC-значки выигрыша слетаются в «×N», метка садится на сумму — сумма умножается; потом счётчик, как обычно
+  const WL=showWins(ev,mult,bt,null); AU('win.amount'); // сумма крупно на выигравших символах; множитель летит к «× N» (REC-значки «Камер» на сумму не влияют)
   const before=free?(GS.ktotal||0)+total:total; total+=stepWin; await Promise.all([flyMult(mult,WL&&WL.mx),wlWait(1000)]);
   // Рокко начинает забирать: надпись уплывает вверх и гаснет, строка WIN в этот же миг прибавляет (сумма вниз не летит)
   await phase('steal',{n:chain}); if(WL) WL.release(); const tw=tweenResult(before,before+stepWin,300);
-  if(BS&&free){ const SK=window.bpSack; if(SK) SK.hold(); GS.sack=(GS.sack||0)+stepWin; setSpinsMeter(); } // сумма копится в состоянии сразу; окошко SACK держит старое число (SK.hold), пока монетки этой кражи не долетят (SK.gain ниже)
-  const sfrom=BS&&free?centroidOf(ev.cells):null; // откуда полетят монетки: середина клеток, которые сейчас заберёт Рокко
+  if(SACK_N&&BS&&free){ const SK=window.bpSack; if(SK) SK.hold(); GS.sack=(GS.sack||0)+stepWin; setSpinsMeter(); } // мешок выключен (SACK_N=0) // сумма копится в состоянии сразу; окошко SACK держит старое число (SK.hold), пока монетки этой кражи не долетят (SK.gain ниже)
+  const sfrom=SACK_N&&BS&&free?centroidOf(ev.cells):null; // откуда полетят монетки: середина клеток, которые сейчас заберёт Рокко
   const bg=bigSteal(stepWin,bt,chain); if(bg) bigs++;
   hlRelease(ev.cells); // прицел уходит вместе с началом забирания (если коллект захочет другой миг — он вызовет window.hlRelease сам)
   if(CM) await camSteal(ev.cells); else await steal(ev.cells,{big:bg,x:stepWin/bt,chain,name:chain>=3?'R-grab2':'R-grab'});
-  await tw; glow(ev.cells,false); steals++; GS.ksteals=free?(GS.ksteals||0)+1:GS.ksteals; if(free) setSpinsMeter(); if(BS&&free&&window.bpSack) window.bpSack.gain(stepWin,sfrom); // лампы мешка: сколько краж в текущей порции. Кража съедена: сумма превращается в монетки и летит в окошко SACK (не ждём: поле тем временем падает)
-  if(rec){ ev.cells.forEach(([r,c])=>{ const i=r*COLS+c; rec[i]=rec[i]?Math.min(rec[i]*2,BONUS.recCap):2; }); camRecShow(ev.cells,rec); if(!window.__sim) save(); } // камера записала кражу: на клетке множитель ×2, при следующей краже там же — ×4, ×8… (значок виден уже после кражи — действует на следующий выигрыш)
-  const prev=step; step=Math.min(step+1,L.length-1); if(step!==prev){ await phase('counter',{step}); setCounter(step,true); AU('counter.step'); const te=TRICK_AT[step]; if(te==='toss'||te==='punch') trickEarly(te); } await sleep(160);
+  await tw; glow(ev.cells,false); steals++; GS.ksteals=free?(GS.ksteals||0)+1:GS.ksteals; if(free) setSpinsMeter(); if(SACK_N&&BS&&free&&window.bpSack) window.bpSack.gain(stepWin,sfrom); // лампы мешка: сколько краж в текущей порции. Кража съедена: сумма превращается в монетки и летит в окошко SACK (не ждём: поле тем временем падает)
+  if(rec){ const wasFull=rec.every(v=>v>0); ev.cells.forEach(([r,c])=>{ const i=r*COLS+c; rec[i]=rec[i]?Math.min(rec[i]*2,BONUS.recCap):2; }); if(!window.__sim&&!wasFull&&rec.every(v=>v>0)) AU('cams.full'); camRecShow(ev.cells,rec); if(!window.__sim) save(); } // камера записала кражу: на клетке множитель ×2, при следующей краже там же — ×4, ×8… (значок виден уже после кражи — действует на следующий выигрыш)
+  const prev=step; step=Math.min(step+1,top); if(step!==prev){ await phase('counter',{step}); setCounter(step,true); AU('counter.step'); const te=TRICK_AT[step]; if(te==='toss'||te==='punch') trickEarly(te); } await sleep(160);
   await phase('refill',{n:chain}); await collapseRefill(rng,mk); GRIDIDS=idsOf(BOARD);
   // трюк, если счётчик встал на нужную ступень
-  const dumpDue=free&&GS.ksteals%SACK_N===0, trick=step!==prev?TRICK_AT[step]:null; if(trick) AU('counter.trick'); // dumpDue — каждая SACK_N-я кража: сразу после неё мешок
-  if(trick==='toss') await toss(rng,2+((rng()*2)|0)); else if(trick==='punch') await punchColumn(rng,L[step]); else if(trick==='lever') await lever(rng);
-  // бонусы: каждые SACK_N утаскиваний Рокко высыпает мешок: накопленное платится второй раз → счётчик на ступень выше → +3 спина → трюк новой ступени (если есть). Удара по рамке после высыпания нет (владелец 2026-10-12)
-  if(dumpDue){ const sack=GS.sack||0, t0=(GS.ktotal||0)+total, SK=window.bpSack;
-   const lift=async()=>{ const p0=step; step=Math.min(step+1,L.length-1); await counterLift(p0,step); // счётчик +1 на виду
-    GS.fs+=BONUS.dumpSpins; GS.fst=(GS.fst||0)+BONUS.dumpSpins; setSpinsMeter(); hudAdd5(BONUS.dumpSpins); special('+'+BONUS.dumpSpins,'FREE SPINS'); AU('freespins.add'); await sleep(650); // мешок добавил спины
-    const tr=step!==p0?TRICK_AT[step]:null; if(tr==='toss') await toss(rng,2+((rng()*2)|0)); else if(tr==='lever') await lever(rng); else if(tr==='punch') await punchColumn(rng,L[step]); };
-   if(SK){ SK.hold(); GS.sack=0; total+=sack; await phase('sack',{x:+(sack/bt).toFixed(4)}); await SK.dump(sack,{from:t0,to:t0+sack,lift}); } // Рокко достаёт мешок и высыпает (sack.js), сумма платится второй раз, дальше lift
-   else { react('K-dump'); await sleep((window.roccoKey&&window.roccoKey('K-dump'))||600); GS.sack=0; total+=sack; setSpinsMeter(); special(money(sack),'SACK'); await tweenResult(t0,t0+sack,320); await lift(); } }
+  const trick=step!==prev?TRICK_AT[step]:null; if(trick) AU('counter.trick'); // в бонусе ступени идут дальше 6-й, трюки — только на 2-й, 4-й и 6-й краже
+  if(trick==='toss') await toss(rng,2+((rng()*2)|0)); else if(trick==='punch') await punchColumn(rng,ctrVal(step)); else if(trick==='lever') await lever(rng);
+  // мешок «Кухни» (платил ещё раз, +ступень, +3 спина) убран из математики 2.0.0 — его ролики остались в sack.js, ui.js их не зовёт (SACK_N=0)
   GRIDIDS=idsOf(BOARD); if(ST.fast===false) await sleep(120); if(total>=room||chain>=25) break;
  }
  total=Math.min(total,room);
- if(free&&window.bpSack){ await phase('coins'); await window.bpSack.idle(); } // монетки последней кражи долетели до окошка SACK — только потом итог раунда (и окно итога бонуса)
+ if(SACK_N&&free&&window.bpSack){ await phase('coins'); await window.bpSack.idle(); } // монетки последней кражи долетели до окошка SACK — только потом итог раунда (и окно итога бонуса)
  if(free) GS.kstep=step;
  // 4) итог раунда
  if(window.WinFx) window.WinFx.end();
  if(total>0&&total<10*bt){ AU(total<2*bt?'win.small':total<5*bt?'win.medium':'win.big'); AU('win.end',{delay:420}); } // с 10× ставки говорит шоу большого выигрыша
  const inv=countsOf(idsOf(BOARD))['sym-scatter-invitation']||0;
- if(total>0&&(K()>=1||bigs>0||total>=(BS?30:10)*bt)){ if(!(window.RoccoAlive&&window.RoccoAlive.win(total/bt,{trophy:trophyWon,big:bigs>0,amt:money(total)}))) react(total>=20*bt||trophyWon?'W-huge':total>=8*bt?'W-dance':'W-clap',0,true); } // кубки — Рокко радуется сильнее; в Turbo/Quick — только после крупных выигрышей (≥10× ставки, в бонусе ≥30×, или был крупный шаг цепочки)
+ if(total>0&&(K()>=1||bigs>0||total>=(BS?30:10)*bt)){ if(!(window.RoccoAlive&&window.RoccoAlive.win(total/bt,{trophy:trophyWon,big:bigs>0,amt:money.win(total)}))) react(total>=20*bt||trophyWon?'W-huge':total>=8*bt?'W-dance':'W-clap',0,true); } // кубки — Рокко радуется сильнее; в Turbo/Quick — только после крупных выигрышей (≥10× ставки, в бонусе ≥30×, или был крупный шаг цепочки)
  let capped=false;
  if(!replay){ GS.lastWin=total; GS.bal+=total; if(free) GS.ktotal=(GS.ktotal||0)+total; const d=new Date();
-  GS.hist.unshift({t:d.toTimeString().slice(0,5),mode:free?(CM?'Cameras':'Kitchen'):(mk?MODES.find(m=>m.k===mk).nm:'Base'),cost,win:total,seed,mk,norep:free}); GS.hist=GS.hist.slice(0,20);
-  if(free&&(GS.ktotal||0)>=MAXX*bt-1e-9){ capped=true; GS.fs=0; } } // 25 000× за бонус: дальше бонус не идёт
- window.__last={seed,chain,steals,bigs,step,total:total/bt,inv}; setResult(free?GS.ktotal:total); GS.spinning=false; GS.skip=null; GS.speedUp=null; ST.fast=false; phaseEnd(); syncHUD(); setSpinsMeter();
+  GS.hist.unshift({t:d.toTimeString().slice(0,5),mode:free?(CM?'Cameras':'Kitchen'):buy?(buy==='cameras'?'Buy Cameras':'Buy Kitchen'):(mk&&MODES.find(m=>m.k===mk)?MODES.find(m=>m.k===mk).nm:'Base'),cost,win:total,seed,mk,buy,norep:free}); GS.hist=GS.hist.slice(0,20);
+  if(free&&(GS.ktotal||0)+(GS.kpre||0)>=MAXX*bt-1e-9){ capped=true; GS.fs=0; } } // потолок за бонус (с вступительным спином покупки): дальше бонус не идёт
+ window.__last={seed,chain,steals,bigs,step,total:total/bt,inv,buy}; setResult(free?GS.ktotal:total); GS.spinning=false; GS.skip=null; GS.speedUp=null; ST.fast=false; phaseEnd(); syncHUD(); setSpinsMeter();
  const turbo=GS.holdTurbo||GS.speed==='turbo';
  const next=()=>{ syncHUD(); if(replay||window.__sim) return;
   if(free&&GS.fs<=0){ setTimeout(()=>bonusEnd(),400); return; }
   if(GS.auto>0&&GS.autoOpt.stopWin&&total>=GS.autoOpt.stopWin*bt) GS.auto=0;
   if(GS.auto>0){ GS.auto--; syncHUD(); if(free) freeChain(turbo?250:700); else if(GS.auto>0) setTimeout(spinTimer,turbo?250:700); return; }
   if(free&&GS.fs>0) freeChain(turbo?250:900); };
- const retro=free&&inv>=3&&!capped; // 3+ приглашения в бонусе (в любом: 4 и больше ничего лишнего не дают) — +5 спинов
+ const retro=free&&inv>=3&&!capped; // 3+ приглашения в бонусе (4 и больше ничего лишнего не дают) — +BONUS.retroSpins спинов
  const gate=()=>{ if(replay) return next();
+  if(scene==='hall'&&buy){ const kpre=total; AU('scatter.trigger'); startBonus(buy==='cameras'?BONUS.spinsC:BONUS.spinsK,rng,()=>{ GS.kpre=kpre; },buy); return; } // покупка: бонус купленного вида, что бы ни осталось на поле
   if(scene==='hall'){ const b=spinsFor(inv); if(b){ AU('scatter.trigger'); startBonus(b.n,rng,null,b.kind); return; } } // 3 приглашения — «Кухня», 4 и больше — «Камеры»
-  if(retro){ GS.fs+=BONUS.retroSpins; GS.fst=(GS.fst||0)+BONUS.retroSpins; setSpinsMeter(); hudAdd5(BONUS.retroSpins); special('+'+BONUS.retroSpins,'FREE SPINS'); AU('freespins.add'); }
+  if(retro){ GS.fs+=BONUS.retroSpins; GS.fst=(GS.fst||0)+BONUS.retroSpins; setSpinsMeter(); hudAdd5(BONUS.retroSpins); special('+'+BONUS.retroSpins,'FREE SPINS'); if(scene==='cameras') AU('cams.restart'); AU('freespins.add'); } // в «Камерах» повторный запуск — ещё и помехи на экранах
   next(); };
- const lastFree=free&&!replay&&GS.fs<=0&&!retro; // последний бесплатный спин: отдельного BIG WIN нет, итог бонуса (bonusEnd) сам покажет шоу с суммой всего бонуса
+ const lastFree=free&&!replay&&GS.fs<=0&&!retro;
+ if(total<10*bt||lastFree||replay) announce((replay?'Replay. ':'')+(total>0?'Win '+money.win(total):'No win')+(free&&GS.fs>0?`. ${GS.fs} free spins left`:'')); // читалке: итог раунда (большой выигрыш и итог бонуса объявляют свои окна ниже) // последний бесплатный спин: отдельного BIG WIN нет, итог бонуса (bonusEnd) сам покажет шоу с суммой всего бонуса
  if(lastFree) gate();
  else if(total>=MAXX*bt) bigWin(total,true,()=>{GS.auto=0;gate();},bt);
  else if(total>=10*bt) bigWin(total,false,gate,bt);
@@ -1387,19 +1475,19 @@ async function runRound(field,{replay,free,cost}){
 // ---------- проверка математики в странице (без анимаций); те же правила считает tools/rtp_sim/engine.js (check_ui_bonus.js сверяет по seed) ----------
 // __kitchenSim(N, spins, cameras): N бонусов по spins бесплатных спинов («Кухня» с cameras=false или «Камеры» с cameras=true; +5 за 3+ приглашения, мешок со ступенью и +3 спина, REC); открывать с ?scene=kitchen или ?scene=cameras.
 // Возвращает среднее, разброс, спины на бонус, максимум; со st — подробности по спинам и выплатам (процентили, доли ниже 20× и 50×, события на спин, REC).
-window.__kitchenSim=async(N=20,spins=BONUS.spinsK,cameras=false,init=null)=>{ // init — необязательные поля GS для первого спина (для проверок: tools/skip_phase_check.js ищет seed)
+window.__kitchenSim=async(N=20,spins=BONUS.spinsK,cameras=false,init=null,pre=0)=>{ // pre — выигрыш вступительного спина покупки (идёт в общий потолок) // init — необязательные поля GS для первого спина (для проверок: tools/skip_phase_check.js ищет seed)
  if(!bonusScene()) return 'открой страницу с ?scene=kitchen или ?scene=cameras';
  const field=document.getElementById('field'), keep={bal:GS.bal,hist:GS.hist,fs:GS.fs,fst:GS.fst,kstep:GS.kstep,ksteals:GS.ksteals,sack:GS.sack,ktotal:GS.ktotal,rec:GS.rec,mode:modeOn};
  window.__sim=true; modeOn=null; let sum=0, sq=0, played=0, max=0, over=0, dumps0=0, steals=0, dead=0, retr=0, wins=0, recWins=0, facSum=0; const tot=[];
- for(let k=0;k<N;k++){ GS.fs=spins; GS.fst=spins; GS.kstep=0; GS.ksteals=0; GS.sack=0; GS.ktotal=0; GS.rec=(cameras?Array(30).fill(0):null); if(init) Object.assign(GS,init); let guard=0;
-  while(GS.fs>0&&guard++<400){ GS.replay=null; await runRound(field,{replay:null,free:true,cost:0}); const big=document.getElementById('bp-big'); if(big){ big.next(); big.next(); } played++; const L=window.__last; if(!L.steals) dead++; steals+=L.steals; if(GS.ktotal>=MAXX*bet()) break; }
-  const t=Math.min(GS.ktotal/bet(),MAXX); tot.push(t); sum+=t; sq+=t*t; max=Math.max(max,t); over+=GS.ktotal>=MAXX*bet()?1:0; }
- window.__sim=false; Object.assign(GS,{bal:keep.bal,hist:keep.hist,fs:keep.fs,fst:keep.fst,kstep:keep.kstep,ksteals:keep.ksteals,sack:keep.sack,ktotal:keep.ktotal,rec:keep.rec}); GS.spinning=false; modeOn=keep.mode; save();
+ for(let k=0;k<N;k++){ GS.fs=spins; GS.fst=spins; GS.kstep=0; GS.ksteals=0; GS.sack=0; GS.ktotal=0; GS.kpre=pre*bet(); GS.rec=(cameras?Array(30).fill(0):null); if(init) Object.assign(GS,init); let guard=0;
+  while(GS.fs>0&&guard++<400){ GS.replay=null; await runRound(field,{replay:null,free:true,cost:0}); const big=document.getElementById('bp-big'); if(big){ big.next(); big.next(); } played++; const L=window.__last; if(!L.steals) dead++; steals+=L.steals; if(GS.ktotal+GS.kpre>=MAXX*bet()-1e-9) break; }
+  const t=Math.min(GS.ktotal/bet(),MAXX-pre); tot.push(t); sum+=t; sq+=t*t; max=Math.max(max,t); over+=GS.ktotal+GS.kpre>=MAXX*bet()-1e-9?1:0; }
+ window.__sim=false; Object.assign(GS,{bal:keep.bal,hist:keep.hist,fs:keep.fs,fst:keep.fst,kstep:keep.kstep,ksteals:keep.ksteals,sack:keep.sack,ktotal:keep.ktotal,kpre:0,rec:keep.rec}); GS.spinning=false; modeOn=keep.mode; save();
  tot.sort((a,b)=>a-b); const m=sum/N, pc=p=>tot[Math.min(N-1,Math.floor(p*N))];
  return {bonuses:N, mean:+m.toFixed(6), sd:+Math.sqrt(sq/N-m*m).toFixed(1), spinsPerBonus:+(played/N).toFixed(2), noWinSpins:+(dead/played).toFixed(3), p10:pc(.1),p50:pc(.5),p90:pc(.9), below20:tot.filter(v=>v<20).length/N, below50:tot.filter(v=>v<50).length/N, max:+max.toFixed(1), maxHits:over}; };
-window.__baseSim=async(N=2000,mk=null)=>{ // проверка базы: средний выигрыш и как часто запускаются бонусы (без анимаций)
+window.__baseSim=async(N=2000,mk=null,buy=null)=>{ // проверка базы: средний выигрыш и как часто запускаются бонусы (без анимаций); buy — 'kitchen'|'cameras': вступительные спины покупки
  const field=document.getElementById('field'), bal=GS.bal, hist=GS.hist; window.__sim=true; window.__bonuses=0; let win=0, hits=0, k3=0, k4=0, k5=0;
- for(let i=0;i<N;i++){ GS.replay=null; modeOn=mk; await runRound(field,{replay:null,free:false,cost:0}); const big=document.getElementById('bp-big'); if(big){ big.next(); big.next(); }
+ for(let i=0;i<N;i++){ GS.replay=null; modeOn=mk; await runRound(field,{replay:null,free:false,cost:0,buy}); const big=document.getElementById('bp-big'); if(big){ big.next(); big.next(); }
   const L=window.__last; win+=L.total; hits+=L.total>0?1:0; if(L.inv===3) k3++; else if(L.inv===4) k4++; else if(L.inv>=5) k5++; }
  window.__sim=false; GS.bal=bal; GS.hist=hist; GS.spinning=false; modeOn=null; save();
  return {spins:N,rtpBase:+(win/N).toFixed(3),hit:+(hits/N).toFixed(3),kitchenEvery:Math.round(N/Math.max(1,k3)),kitchen:k3,camerasEvery:Math.round(N/Math.max(1,k4+k5)),cameras:k4+k5,k3,k4,k5}; };
@@ -1414,10 +1502,11 @@ document.addEventListener('click',e=>{
  const l=(b.getAttribute('aria-label')||'').replace(/^Play (down|up|list)$/,'Bet $1'); // социальный режим переименовывает Bet → Play
  if(e.detail>0) setTimeout(()=>b.blur(),0); // после клика мышью фокус снимаем — иначе пробел рисует жёлтый ободок фокуса вокруг кнопки
  if(l==='Menu'){ e.stopPropagation(); if(!popEl('bp-menu')) AU('ui.open'); toggleMenu(); return; }
- if(l.startsWith('Spin speed')){ AU('ui.toggle'); GS.speed={normal:'quick',quick:'turbo',turbo:'normal'}[GS.speed]||'normal'; syncHUD(); return; } // по кругу: обычная → быстрая → турбо
+ if(l.startsWith('Sound')){ GS.mute=!GS.mute; if(!GS.mute) AU('ui.toggle'); save(); syncHUD(); announce(GS.mute?'Sound off':'Sound on'); return; } // клавиша звука (шаблон Slot template): то же, что SOUND ON/OFF в меню
+ if(l.startsWith('Spin speed')){ AU('ui.toggle'); GS.speed={normal:'quick',quick:'turbo',turbo:'normal'}[GS.speed]||'normal'; syncHUD(); announce('Spin speed: '+{normal:'Normal',quick:'Quick',turbo:'Turbo'}[GS.speed]); return; } // по кругу: обычная → быстрая → турбо
  if(GS.replay&&/^(Bet|Autoplay)/.test(l)) return; // в реплее ставка и автоигра недоступны
  if(l==='Bet list'){ e.stopPropagation(); if(!GS.spinning&&!GS.auto) betList(); return; }
- if(l==='Bet down'||l==='Bet up'){ if(GS.spinning||GS.auto) return; AU(l==='Bet up'?'ui.bet_up':'ui.bet_down'); betI=Math.max(0,Math.min(BETS.length-1,betI+(l==='Bet up'?1:-1))); syncHUD(); return; }
+ if(l==='Bet down'||l==='Bet up'){ if(GS.spinning||GS.auto) return; AU(l==='Bet up'?'ui.bet_up':'ui.bet_down'); betI=Math.max(0,Math.min(BETS.length-1,betI+(l==='Bet up'?1:-1))); syncHUD(); announce('Bet '+money(spinCost())); return; }
  if(l==='Play'||l==='Skip'||l==='Replay'){ spin(); return; }
  if(l==='Stop autoplay'){ AU('ui.toggle'); GS.auto=0; syncHUD(); return; }
  if(l==='Autoplay'){ if(autoLocked()) return; if(GS.auto){ AU('ui.toggle'); GS.auto=0; syncHUD(); } else autoplay(); return; }
@@ -1425,17 +1514,19 @@ document.addEventListener('click',e=>{
 
 // ---------- клавиатура: пробел = Play/Skip, зажатый пробел = турбо; Escape закрывает ----------
 let spaceDown=0, holdT=null;
+const CTL='button,a[href],input,select,textarea,summary,[role=button],[role=switch],[role=tab],[role=checkbox],[role=slider],[tabindex]:not([tabindex="-1"])'; // «другой элемент управления» для пробела
 addEventListener('keydown',e=>{
- if(e.key==='Escape'){ const hadBets=!!popEl('bp-bets'), mn=popEl('bp-menu'), wr=document.querySelector('.bp-wrap:not([data-out])'); popOut(mn); closeBets(); if(hadBets) podBtn('Bet list')?.focus(); wr?.close?.(); document.querySelector('#bp-big[data-sum]')?.next?.(); syncHUD();
+ if(e.key==='Escape'){ const hadBets=!!popEl('bp-bets'), mn=popEl('bp-menu'), wr=document.querySelector('.bp-wrap:not([data-out])'); popOut(mn); closeBets(); if(hadBets) podBtn('Bet list')?.focus(); wr?.close?.(); document.querySelector('#bp-big:not([data-out])')?.next?.(); syncHUD();
   if(!hadBets){ const w=wr&&wr._ret?wr:mn; if(w) giveBack(w); } return; } // фокус вернуть на кнопку пульта, с которой открыли меню/окно (QA m5) // Esc закрывает список ставок (фокус — на окно BET) и окна
  if(e.key==='Enter'&&e.repeat&&e.target.closest&&e.target.closest('#pod [aria-label="Bet list"],#pod [aria-label="Play list"],#bp-bets')){ e.preventDefault(); return; } // зажатый Enter не должен открывать и закрывать список по кругу
  const chip=e.target.closest&&e.target.closest('#bp-bets .bp-chip'); // список ставок: стрелки двигают по сетке, Home/End — первая и последняя ставка
  if(chip&&/^(Arrow(Left|Right|Up|Down)|Home|End)$/.test(e.key)){ const all=[...document.querySelectorAll('#bp-bets .bp-chip')], i=all.indexOf(chip), cols=getComputedStyle(document.getElementById('bp-bets')).gridTemplateColumns.split(' ').length||1;
-  const to={ArrowLeft:i-1,ArrowRight:i+1,ArrowUp:i-cols,ArrowDown:i+cols,Home:0,End:all.length-1}[e.key]; e.preventDefault(); if(to>=0&&to<all.length) all[to].focus(); return; }
+  const to={ArrowLeft:i-1,ArrowRight:i+1,ArrowUp:i-cols,ArrowDown:i+cols,Home:0,End:all.length-1}[e.key]; e.preventDefault(); if(to>=0&&to<all.length){ AU('ui.click'); all[to].focus(); } return; } // стрелки по списку ставок щёлкают
  if(e.code!=='Space') return;
  const big=document.querySelector('#bp-big:not([data-out])'); if(big){ e.preventDefault(); if(!e.repeat) big.next(); return; }
  if(document.getElementById('wel')&&window.Welcome){ e.preventDefault(); if(!e.repeat) Welcome.play(); return; } // приветствие: пробел = PLAY (спин не запускается)
- if(e.target.closest&&e.target.closest('.bp-wrap,#fmenu,#bp-menu,#bp-bets,#ovl,#wel,#pod [aria-label="Bet list"],#pod [aria-label="Play list"]')) return; // в окнах и на окне BET пробел нажимает кнопку
+ const tg=e.target; if(tg&&tg.closest&&(tg.closest('.bp-wrap,#fmenu,#bp-menu,#bp-bets,#ovl,#wel')||(tg.closest(CTL)&&!tg.closest('#pod .play,#pod .pl')))) return; // в окнах и на любом другом элементе управления (Menu, ±, BET, Autoplay, скорость, звук, Buy bonus) пробел делает своё; крутит с body и с самой кнопки Play (удержание = турбо)
+ if(document.documentElement.dataset.lay==='tiny') return; // крошечное окно (шаблон Tiny 200×120): играть нельзя, пробел не крутит
  e.preventDefault(); if(e.repeat) return; // автоповтор клавиши не делает новую ставку
  spaceDown=performance.now(); spin();
  clearTimeout(holdT); holdT=setTimeout(()=>{ if(spaceDown){ GS.holdTurbo=true; GS.speedUp&&GS.speedUp(); syncHUD(); } },350);
@@ -1449,18 +1540,18 @@ window.bpPunchPick=(k,v)=>{ try{ sessionStorage.setItem(k==='fx'?'bp-punchfx':'b
 window.bpBwRoccoPick=v=>{ try{ sessionStorage.setItem('bp-bwrocco',v); }catch(e){} const p='?state=idle&screen=bigwin'; if(typeof goQ==='function') goQ(p); else location.search=p+'&bwrocco='+v; }; // меню «Экраны макета»: выбрать, как Рокко стоит на экране большого выигрыша (body|eyes|monitor|none, читает bigwin-show.js), и сразу показать шоу
 window.bpFx={ hl:n=>hlDemo(n), punch:(seed,_,mult)=>punchColumn(rngOf(seed||1),mult), toss:(seed,n)=>toss(rngOf(seed||1),n||3), lever:seed=>lever(rngOf(seed||1)), lift:(a,b)=>counterLift(a,b), counter:(i,pop)=>setCounter(i,pop), board:()=>BOARD, restore:()=>{ document.querySelectorAll('#field .pmark').forEach(e=>e.remove()); restoreBoard(); },
  dump:async seed=>{ const SK=window.bpSack, amt=12.4*bet(), t0=GS.ktotal||0; let st=GS.kstep||0; setCounter(st,false); // «высыпание мешка» на готовом поле: 4 лампы, $12.40 (× ставка), потом счётчик +1, удар и столбец WILD
-  const lift=async()=>{ const p=st; st=Math.min(st+1,LADDER.kitchen.length-1); await counterLift(p,st); GS.kstep=st; };
-  if(!SK){ react('K-dump'); await sleep((window.roccoKey&&window.roccoKey('K-dump'))||600); special('$12.40','SACK'); await lift(); return; }
+  const lift=async()=>{ const p=st; st=st+1; await counterLift(p,st); GS.kstep=st; }; // показ старого мешка (мешок в игре выключен, SACK_N=0)
+  if(!SK){ react('K-dump'); await sleep((window.roccoKey&&window.roccoKey('K-dump'))||600); special(money.win(12.4),'SACK'); await lift(); return; }
   GS.ksteals=SACK_N; GS.sack=amt; setSpinsMeter(); SK.hold(); GS.sack=0; await SK.dump(amt,{from:t0,to:t0+amt,lift}); GS.ksteals=0; setSpinsMeter(); },
  gain:async(a,n)=>{ const SK=window.bpSack; if(!SK) return; for(let i=0;i<(n||1);i++){ SK.hold(); GS.sack=(GS.sack||0)+a; GS.ksteals=(GS.ksteals||0)+1; setSpinsMeter(); SK.gain(a,centroidOf([[2,2],[2,3],[3,2]])); await SK.idle(); } }, intro:()=>window.bpSack&&window.bpSack.intro(true) };
-window.bpTime.ex={SACK_N,DUMP_SPINS:BONUS.dumpSpins,bonusScene,sleep,anim,animA,tweenResult,setResult,hudFit,hudUpdate,hudBuild,pitch:()=>LAYER&&GEO?pitch():0,react,special,wlLayer,wlPlace,wlFade,clipCue,dialogOpen,roccoPoint,fxGeo,K,SKV,bet,rnd,clamp,syncHUD,save}; // всё, что нужно sack.js (мешок «Кухни»); sack.js грузится после ui.js
+window.bpTime.ex={SACK_N,DUMP_SPINS:0,bonusScene,sleep,anim,animA,tweenResult,setResult,hudFit,hudUpdate,hudBuild,pitch:()=>LAYER&&GEO?pitch():0,react,special,wlLayer,wlPlace,wlFade,clipCue,dialogOpen,roccoPoint,fxGeo,K,SKV,bet,rnd,clamp,syncHUD,save}; // всё, что нужно sack.js (мешок «Кухни»); sack.js грузится после ui.js
 { const fx=q.get('fx'); if(fx&&!q.get('screen')&&window.bpFx[fx]){ let n=0; const go=async()=>{ if(!document.getElementById('field')||!BOARD) return setTimeout(go,500); try{ await window.bpFx[fx](...({punch:[++n,0,8],toss:[++n,3],dump:[++n]}[fx]||[++n])); }catch(e){ console.error(e); } setTimeout(()=>{ restoreBoard(); setTimeout(go,1500); },2200*K()+800); }; setTimeout(go,2500); } }
 })();
 
 // ---------- социальный режим stake.us (2026-10-09): запрещённые слова Engine → замены, суммы без «$» в SC ----------
 // В настоящей игре это отдельный языковой файл sweeps_en; здесь — проверочный слой поверх всех текстов, aria-label, title и alt.
 (()=>{
- let on=false; try{ on=new URLSearchParams(location.search).get('social')==='1'; sessionStorage.removeItem('bp-social'); }catch(e){}
+ let on=false; try{ on=new URLSearchParams(location.search).get('social')==='1'||!!(window.bpMoney&&bpMoney.social); sessionStorage.removeItem('bp-social'); }catch(e){}
  window.bpSocialToggle=()=>{ const u=new URL(location.href); if(on) u.searchParams.delete('social'); else u.searchParams.set('social','1'); location.href=u.toString(); };
  window.bpSocial=on; if(!on) return;
  const MAP=[['buy bonus','get bonus'],['bonus buys','bonuses'],['bonus buy','bonus'],['total bet','total play'],['paytable','win table'],['payouts','wins'],['payout','win'],['pays out','wins'],['pays','wins'],['paid','won'],['pay','win'],
@@ -1562,7 +1653,7 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
  const RV={a:{h:.74,ov:.55,m:.035,fl:.034},a0:{h:.68,ov:.3,m:.02,fl:.04},b:{h:.8,ov:.9,m:.012,fl:.025},c:{h:.56,ov:0,m:.04,fl:.055}};
  const fistRail=f=>{ const sl=document.getElementById('symlayer'), rail=sl?Math.max(0,f.right-sl.getBoundingClientRect().right):12; return f.right-rail*.5; }; // экранный x середины правой рамки поля — сюда кладётся кончик кулака в ударе
  function layout(cf,f,W,H,land,V){
-  const P=cf.P, ext=P.lExt+P.rExt, pod=document.getElementById('pod'), pb=pod&&pod.getBoundingClientRect(), side=land&&pb&&pb.left>f.right-10; // side — телефон боком: пульт столбцом справа от поля
+  const P=cf.P, ext=P.lExt+P.rExt, pod=document.getElementById('pod'), pb=pod&&window.bpPodRect(), side=land&&pb&&pb.left>f.right-10; // side — телефон боком: пульт столбцом справа от поля
   const hudB=[...document.querySelectorAll('#hud > *')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>0);
   if(land&&!side){ // обычный экран: зона справа от поля
    const ps=f.width/6.35, m=Math.max(10,V.m*W), Z=W-f.right, rIn=P.rExt*(1-(P.rOff||0)), extIn=P.lExt+rIn; // rOff — какая доля хвоста/мешка может уйти за правый край (кухня: мешок частично за кадром, владелец 2026-10-11 «на кухне тоже чуть крупнее»)
@@ -1572,11 +1663,18 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
    const sc=Math.min(V.h*H/P.bodyH,(W-(P.rOff?0:m)-Lmin)/extIn,(Z+10+V.ov*ps)/(P.reach+P.umR)), Tmax=W-(P.rOff?0:m)-rIn*sc, Tid=f.right-12+P.reach*sc; // три предела: доля высоты; в покое целиком (с хвостом/мешком) в зоне справа от поля, кромку рамки закрыть можно чуть; в ударе (ролик без отражения: хвост/мешок слева, справа только тело) торс на «длине руки» от рамки и в экране, при нехватке места кулак заходит за рамку не больше ov клеток
    return {bh:sc*P.bodyH,Sb:Math.min(Tid,Tmax),feetY:H*(1-V.fl),shadow:true,lim:W-2}; }
   if(land){ // телефон боком: Рокко в просвете между полем и пультом, под окошками счётчиков
-   const g0=f.right+4, g1=pb.left-4, feetY=H-6, topL=Math.max(6,...hudB.filter(r=>r.right>g0&&r.left<g1).map(r=>r.bottom+6));
+   const g0=f.right+4, g1=pb.left-4+((window.BPL&&window.BPL.g&&window.BPL.g.RO)||0), feetY=H-6, /* RO — на сколько хвост Рокко может уйти под правый столбик (узкая раскладка телефона боком, index.html) */ topL=Math.max(6,...hudB.filter(r=>r.right>g0&&r.left<g1).map(r=>r.bottom+6));
    if(P.fixed){ const fx=fistRail(f), sc=Math.min(V.h*H/P.bodyH,(g1-fx)/(P.reach+Math.max(P.umR,P.rExt)),(feetY-topL)/P.bodyH); // кулак на середине правой рамки с места: торс на «длине руки» от неё, хвост до пульта; не помещается — Рокко меньше
     return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY,shadow:true,lim:g1}; }
    const sc=Math.min(V.h*H/P.bodyH,(g1-g0)/ext,(feetY-topL)/P.bodyH);
    return {bh:sc*P.bodyH,Sb:g0+P.lExt*sc+((g1-g0)-ext*sc)/2,feetY,shadow:true,lim:g1}; }
+  const BL=window.BPL||{}, lm=BL.nl?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=b0d45272 render, ветка NL)
+  if(lm==='cmp'||lm==='tiny') return {bh:0,Sb:0,feetY:0,shadow:false,lim:0}; // мини-окно и крошечное: Рокко нет (шаблон: только столбики и поле)
+  if(lm==='port'){ // телефон стоя (владелец 2026-10-13, «над полем по центру»): ряд Buy bonus · Рокко · Autoplay, Рокко стоит на верхней кромке поля посередине, голова — не выше плашки множителя
+   const ga=document.querySelector('#pod .g-auto'), ar=ga&&ga.getBoundingClientRect(), fe=document.getElementById('features'), fr=fe&&fe.isConnected?fe.getBoundingClientRect():null;
+   const lx=Math.max(8,fr&&fr.width?fr.right+6:0,scene==='hall'&&typeof modeOn!=='undefined'&&modeOn?Math.max(14,(window.SA||{l:0}).l)+W*.4+6:0), rx=ar&&ar.width?ar.left-6:W-8, c=W/2, half=Math.max(30,Math.min(c-lx,rx-c));
+   const g0=c-half, g1=c+half, feetY=f.top+2, top=(NG.yCtr||0)+(NG.ctrH||0)+2, sc=Math.min((g1-g0)/ext,(feetY-top)/P.bodyH,(W*.62+Math.max(0,(NG.rowH||0)-Math.min(260,H*.3)))/P.bodyH); // потолок роста — W·0,62; ряд выше обычного (высокий телефон) добавляет Рокко ту же высоту
+   return {bh:sc*P.bodyH,Sb:g0+P.lExt*sc+((g1-g0)-ext*sc)/2,feetY,shadow:false,lim:W-2}; }
   // телефон стоя: Рокко на верхней кромке поля справа от множителя
   const bd=document.querySelector('#alt > *'), br=bd&&bd.getBoundingClientRect(), g0=Math.max(br?br.right+6:W*.62,hudB.length?Math.max(...hudB.map(r=>r.right))+6:0), g1=W-4, feetY=f.top+2;
   const sc=Math.min((g1-g0)/ext,(feetY-8)/P.bodyH,W*.62/P.bodyH);
@@ -1650,7 +1748,7 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
   // release() — лапа уехала совсем (подчистка: пульт на место). Ролик не ускоряется; кадры не смешиваются (cut: наплыв rocco-flow = жёсткая смена в нейтральных позах).
   window.roccoHandoff=()=>{ if(!HANDOFF.ready||scene!=='kitchen'||!act.handoff||RM()||K()<1||fast()||window.__sim||!k.isConnected) return null;
    const v=act.handoff, vr=v.getBoundingClientRect(), gap=innerWidth-vr.right; let pod=null;
-   if(gap>1){ const pe=document.getElementById('pod'), pb=pe&&pe.getBoundingClientRect(); if(!pb||pb.left>=vr.right-8||pb.right<innerWidth-40||pb.top>vr.top+vr.height*.3||pb.bottom<vr.top+vr.height*.7) return null; pod=pe; } // справа пульта нет — рука оборвётся в воздухе: ролика нет
+   if(gap>1){ const pe=document.getElementById('pod'), pb=pe&&window.bpPodRect(); if(!pb||pb.left>=vr.right-8||pb.right<innerWidth-40||pb.top>vr.top+vr.height*.3||pb.bottom<vr.top+vr.height*.7) return null; pod=pe; } // справа пульта нет — рука оборвётся в воздухе: ролика нет
    const R=run('handoff',{...cf.opt.handoff,cut:true}); if(!R||R.dead) return null;
    const S=vcue(v,null); let left=false, gated=false, done=false; const pz=pod&&pod.style.zIndex; R.started.then(ok=>{ if(ok){ S.go(); if(pod) pod.style.zIndex=8; } else S.stop(); }); R.done.then(()=>{ S.stop(); if(pod&&!done){ done=true; pod.style.zIndex=pz||''; } });
    const when=(t,fn)=>{ const t0=performance.now(), lp=()=>{ if(!R.alive()||performance.now()-t0>20000*(window.__slow||1)) return; if(v.currentTime>=t) fn(); else requestAnimationFrame(lp); }; lp(); };

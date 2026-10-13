@@ -1,253 +1,191 @@
-/* ===== Окно Buy bonus «Афиши на доске» (владелец 2026-10-12: вариант 1 «Афиши», доработать картинки и плашку) =====
-   Один предмет — доска объявлений в пиццерии, но из потёртой красной стали, как рама поля слота (владелец 2026-10-12: «рамки красноватые в нашем стиле, потёртые»; раньше были орех и пробка):
-   рама и планка-шапка — текстура assets/uikit/hud-m1-rust.webp?bpv=7da0f75f (та же, что у плашек М1: краска рамы поля через фильтр .frm, сколы до грунта), по углам рамы четыре винта целиком внутри её ширины (как в воротах бонуса),
-   поле — та же краска, но тёмная (афиши на ней читаются, как бумага на металле; булавки стали магнитами); в планке-шапке название, баланс, ставка и крестовый винт закрытия; между полями режимов и покупок — стальная рейка. Афиши — бумага с зерном, перфорированным корешком цены и
-   вырезами по краям корешка, на красной булавке (режимы; сверху планка с четырьмя лампами накаливания) или на скотче (покупки). Всё освещено одним светом сверху-слева: тени падают вниз и вправо.
-   Шрифты: Black Ops One — название окна, названия афиш, кнопки, штамп (трафарет, как маркировка оборудования); Russo One — суммы, подписи групп на ленте-этикетке, надпись «EVERY SPIN / SUPER SHOW»;
-   Barlow Semi Condensed — описания и мелкие подписи; VT323 — только на тёмных стёклах планки (баланс, ставка).
-   Свои классы bb-/po-, чтобы не пересекаться с bonus-ui.css (ворота и итог бонуса остаются «красной сталью») и с окнами F. Разметка — buy-board.js. Таблица цветов — как в DESIGN.md. */
+/* ===== Окно Buy bonus в чистом виде (2026-10-13, по эталону berserk-mode): без доски, рамы, бумаги, скотча, ламп и штампов =====
+   Содержимое стоит прямо на затемнённой игре (затемнение — #fmenu в index.html): само окно .bb прозрачное и занимает весь экран, внутри прокручивается .bb-in.
+   Сверху название и ставка ‹ ›; винт закрытия — в правом верхнем углу экрана и всегда на виду (он вне прокрутки); раздел SPIN MODE — тонкие строки режимов; BUY BONUS — карточки в ряд; внизу RTP и максимальный выигрыш.
+   Плашки (ставка, строка режима, название карточки) — тёмно-красные #3a1612 → #1c0b09 с латунным кантом #c98a2c, как в DESIGN.md; цифры и акценты — янтарь #FFC861.
+   Шрифты: Black Ops One — название, имена, кнопки; Russo One — суммы; Barlow SC — подписи и строки описания.
+   Свои классы bb-, чтобы не пересекаться с bonus-ui.css (ворота и итог бонуса) и с окнами F. Разметка — buy-board.js. */
 @font-face{font-family:"Russo One";src:url(fonts/RussoOne-Regular.ttf?bpv=c05ca5b6) format("truetype");font-display:swap}
 .bb,.bb *{box-sizing:border-box}
-.bb{--bw:14px;--tex:url(assets/uikit/hud-m1-rust.webp?bpv=7da0f75f);--sh2:radial-gradient(circle at 36% 30%,#b9a884,#8f7f62 38%,#5a4c3a 62%,#2a1a0f 68%,transparent 72%);--paper:#eadcb4;--paper2:#d9c58f;--ink:#2a120b;--rust:#7f2418;--red:#8E2F24;--amber:#FFC861;--cream:#efe4c8;--brass:#c98a2c;
- --boo:"Black Ops One",Impact,sans-serif;--rus:"Russo One","Black Ops One",Impact,sans-serif;--ui:"Barlow SC","Barlow Semi Condensed",system-ui,sans-serif;--mono:"VT323",ui-monospace,monospace;
- --stub:116px;--pgrain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .5 -.1'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
- position:relative;width:min(980px,96%);margin:0;color:var(--cream);font-family:var(--ui);text-align:left;
- border:var(--bw) solid transparent;
- background:linear-gradient(rgba(12,4,3,.7),rgba(12,4,3,.74)) padding-box,var(--tex) 90px 40px/230px auto padding-box,
-  linear-gradient(rgba(18,5,3,.18),rgba(18,5,3,.18)) border-box,var(--tex) 0 0/160px auto border-box,#4a1a11 border-box;
- box-shadow:0 0 0 1px #0a0302,0 24px 50px rgba(0,0,0,.72),0 4px 10px rgba(0,0,0,.5)}
-.bb::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;box-shadow:inset 0 0 0 1px #0a0302,inset 0 0 0 2px rgba(150,113,48,.5),inset 0 3px 9px rgba(0,0,0,.65),inset 0 0 46px rgba(14,6,2,.38)} /* поле утоплено в раму: чёрная кромка и тонкая латунная линия, как у плашек М1 */
-/* четыре крестовых винта по углам рамы: шляпка 6 px целиком внутри ширины рамы (в воротах бонуса так же); шлиц — угол градиента, у каждого свой */
-.bb::after{content:"";position:absolute;inset:calc(var(--bw)*-1);z-index:2;pointer-events:none;--o:calc((var(--bw) - 6px)/2);
- background:linear-gradient(45deg,transparent 40%,#120a06 40% 60%,transparent 60%) left var(--o) top var(--o)/6px 6px no-repeat,var(--sh2) left var(--o) top var(--o)/6px 6px no-repeat,
-  linear-gradient(0deg,transparent 40%,#120a06 40% 60%,transparent 60%) right var(--o) top var(--o)/6px 6px no-repeat,var(--sh2) right var(--o) top var(--o)/6px 6px no-repeat,
-  linear-gradient(60deg,transparent 40%,#120a06 40% 60%,transparent 60%) left var(--o) bottom var(--o)/6px 6px no-repeat,var(--sh2) left var(--o) bottom var(--o)/6px 6px no-repeat,
-  linear-gradient(15deg,transparent 40%,#120a06 40% 60%,transparent 60%) right var(--o) bottom var(--o)/6px 6px no-repeat,var(--sh2) right var(--o) bottom var(--o)/6px 6px no-repeat}
-.bb-defs{position:absolute;width:0;height:0;overflow:hidden}
-.bb-in{position:relative;z-index:1;display:flex;flex-direction:column;max-height:calc(100vh - max(var(--sa-t,0px),12px) - max(var(--sa-b,0px),12px) - 2*var(--bw));max-height:calc(100dvh - max(var(--sa-t,0px),12px) - max(var(--sa-b,0px),12px) - 2*var(--bw))}
+.bb{--amber:#FFC861;--cream:#f3e8cc;--cream2:#e2cfa6;--dim:#c9a46a;--brass:#c98a2c;--p1:#3a1612;--p2:#1c0b09;--edge:#0a0302;
+ --boo:"Black Ops One",Impact,sans-serif;--rus:"Russo One","Black Ops One",Impact,sans-serif;--ui:"Barlow SC","Barlow Semi Condensed",system-ui,sans-serif;
+ --plate:linear-gradient(180deg,var(--p1),var(--p2));--plate-sh:inset 0 0 0 1.5px var(--brass),0 0 0 1px var(--edge),0 8px 18px rgba(0,0,0,.5);
+ position:relative;width:100%;height:100%;margin:0;color:var(--cream);font-family:var(--ui);text-align:center}
+.bb-in{position:absolute;inset:0;display:flex;flex-direction:column;overflow:auto;overscroll-behavior:contain;padding:22px 72px 26px;scrollbar-width:thin;scrollbar-color:rgba(201,138,44,.5) transparent}
+.bb-col{margin:auto;width:min(1040px,100%);display:flex;flex-direction:column;align-items:center;gap:16px} /* margin:auto — по центру, пока всё влезает; не влезает — прокрутка с самого верха */
+.bb :where(h2,h3,h4,p){margin:0;font-weight:400}
+.bb :where(button){font:inherit;-webkit-tap-highlight-color:transparent}
 
-/* ---- планка-шапка ---- */
-.bb-top{position:relative;z-index:2;flex:none;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;min-height:78px;padding:10px 62px 11px 18px;
- background:linear-gradient(rgba(18,5,3,.26),rgba(18,5,3,.26)),var(--tex) 30px 12px/200px auto,#4a1a11;
- box-shadow:inset 0 -1px 0 #0a0302,inset 0 -2px 0 rgba(150,113,48,.42),0 1px 0 #0a0302,0 6px 9px rgba(0,0,0,.55)}
-.bb-h{justify-self:center;font:400 40px/1 var(--boo);letter-spacing:.09em;white-space:nowrap;color:#eadfbf;text-shadow:0 2px 0 #1a0705} /* трафарет по краске: плотная тень вниз, без свечения */
-.bb-ro{position:relative;display:inline-flex;flex-direction:column;gap:1px;min-width:116px;padding:5px 13px 4px;border-radius:5px;overflow:hidden;
- background:radial-gradient(ellipse at 50% 30%,#18120d,#0b0806 80%);
- box-shadow:inset 0 0 9px #000,0 0 0 1px #000,0 0 0 2px var(--brass),0 0 0 3px rgba(0,0,0,.5),0 2px 0 3px rgba(0,0,0,.35)}
-.bb-ro::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
-.bb-ro small{font:700 10.5px/1 var(--ui);letter-spacing:.24em;text-transform:uppercase;color:#c9a46a}
-.bb-ro b{font:400 29px/.95 var(--mono);letter-spacing:.03em;color:var(--amber);text-shadow:0 0 3px rgba(255,170,60,.3);font-variant-numeric:tabular-nums;white-space:nowrap}
-.bb-bal{justify-self:start;width:184px;container-type:inline-size}
-.bb-bal b{font-size:min(var(--fs,29px),calc((100cqi - 28px) / (var(--n,9) * .42)))}
-.bb-bet{justify-self:end;display:flex;align-items:center;gap:12px}
-.bb-rbet{min-width:112px}
-.bb-key{flex:none;width:44px;height:44px;min-width:44px;margin:0;padding:0;border:0;border-radius:50%;cursor:pointer;color:#2a1405;-webkit-tap-highlight-color:transparent;
- font:400 27px/1 var(--boo);display:grid;place-items:center;
- background:#c08a38;
- box-shadow:inset 0 0 0 2px rgba(60,30,8,.72),0 3px 0 #1a0d06,0 5px 5px rgba(0,0,0,.45)}
-.bb-key span{display:block;margin-top:-2px}
-.bb-key:hover{filter:brightness(1.1)}
-.bb-key:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px rgba(60,30,8,.72),0 1px 0 #1a0d06}
-.bb-key:focus-visible,.bb .bu-x:focus-visible .bu-screw{outline:3px solid #fff3d0;outline-offset:3px}
-.bb .bb-x{right:7px;top:50%;margin-top:-22px}
-.bb .bu-x .bu-screw{width:32px;height:32px;margin:-16px 0 0 -16px}
-.bb-top .bb-x:focus-visible .bu-screw{outline-offset:2px}
+/* ---- название и ставка ---- */
+.bb-top{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%}
+.bb-h{font:400 46px/1.05 var(--boo);letter-spacing:.06em;color:var(--amber);text-wrap:balance;text-shadow:0 3px 0 #1a0705,0 0 26px rgba(255,170,60,.28)}
+.bb-bet{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:8px;background:var(--plate);box-shadow:var(--plate-sh)}
+.bb-key{flex:none;display:grid;place-items:center;width:44px;height:44px;margin:0;padding:0;border:0;border-radius:6px;background:none;color:var(--amber);cursor:pointer}
+.bb-key svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.bb-key:hover{background:rgba(255,200,97,.12)}
+.bb-key:active{transform:translateY(1px)}
+.bb-bv{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:118px;padding:2px 6px}
+.bb-bv small{font:700 11px/1 var(--ui);letter-spacing:.26em;color:var(--dim)}
+.bb-bv b{font:400 25px/1 var(--rus);color:var(--amber);white-space:nowrap;font-variant-numeric:tabular-nums}
 
-/* ---- поле: пробка, два участка и рейка между ними ---- */
-.bb-body{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 10px minmax(0,1.2fr);gap:0 16px;padding:18px 20px 26px;overflow:auto;overscroll-behavior:contain}
-.bb-div{align-self:stretch;border-radius:1px;background:linear-gradient(rgba(18,5,3,.22),rgba(18,5,3,.22)),var(--tex) 0 0/160px auto,#4a1a11;box-shadow:0 0 0 1px #0a0302,inset 1px 0 0 rgba(150,113,48,.4),3px 0 6px rgba(0,0,0,.5)}
-.bb-g{display:flex;flex-direction:column;min-width:0}
-.bb-gh{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 10px;margin:0 0 16px}
-/* подпись группы — лента-этикетка (выдавленные буквы на пластике): режимы — чёрная, покупки — красная; различаются длиной и цветом, а не только цветом: у режимов подпись справа «Stay on…» */
-.bb-lab{margin:0;padding:6px 12px 5px;border-radius:2px;font:400 15px/1 var(--rus);letter-spacing:.16em;white-space:nowrap;color:#f3ead0;transform:rotate(-.7deg);
- background:#1d1917;text-shadow:0 1px 0 #000;box-shadow:inset 0 0 0 1px #0a0706,1px 3px 3px rgba(0,0,0,.55)}
-.bb-gb .bb-lab{background:#8a2a1e;transform:rotate(.6deg)}
-.bb-sub{margin:0;font:600 13px/1.2 var(--ui);letter-spacing:.04em;text-align:right;color:#ecd7ae;text-shadow:0 1px 1px #000,0 0 6px rgba(0,0,0,.6)}
-.bb-row{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 18px;align-items:stretch}
+/* ---- подпись раздела: слово между двумя латунными линиями ---- */
+.bb-g{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.bb-lab{display:flex;align-items:center;gap:14px;width:min(520px,100%);font:700 14px/1 var(--ui);letter-spacing:.34em;color:#e9c98e;white-space:nowrap}
+.bb-lab::before,.bb-lab::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--brass))}
+.bb-lab::after{background:linear-gradient(90deg,var(--brass),transparent)}
+.bb-lab span{padding-left:.34em} /* letter-spacing добавляет хвост справа: уравниваем */
 
-/* ---- афиша ---- */
-.po{position:relative;display:flex;flex-direction:column;min-width:0;container-type:inline-size;--r:0deg;transform:rotate(var(--r));transition:transform .2s;
- filter:drop-shadow(1px 3px 1px rgba(0,0,0,.5)) drop-shadow(3px 9px 7px rgba(0,0,0,.4))}
-.po:nth-child(1){--r:-.7deg}.po:nth-child(2){--r:.6deg}
-.po-b:nth-child(2){--r:.5deg}
-.po.on{--r:0deg;transform:translateY(-4px)}
-.po-p{position:relative;flex:1;display:flex;flex-direction:column;gap:8px;padding:38px 9px 0;border-radius:2px;color:var(--ink);
- background:var(--pgrain),radial-gradient(ellipse at 50% 0,#f1e6c0,transparent 75%),linear-gradient(180deg,#e8d9ac,#d9c58f);
- box-shadow:inset 0 0 0 1px rgba(255,248,214,.45),inset 0 0 20px rgba(130,84,30,.3);
- -webkit-mask:radial-gradient(circle 7px at 0 calc(100% - var(--stub)),#0000 98%,#000),radial-gradient(circle 7px at 100% calc(100% - var(--stub)),#0000 98%,#000);-webkit-mask-composite:source-in;
- mask:radial-gradient(circle 7px at 0 calc(100% - var(--stub)),#0000 98%,#000),radial-gradient(circle 7px at 100% calc(100% - var(--stub)),#0000 98%,#000);mask-composite:intersect}
-.po-b .po-p{padding-top:26px}
-.po.off .po-p{filter:saturate(.35) brightness(.84)}
-.po.on .po-p{background:var(--pgrain),radial-gradient(ellipse at 50% 0,#fff0bd,transparent 70%),linear-gradient(180deg,#f0dfae,#dcc68c)} /* бумага под горящими лампами теплее */
-/* булавка и планка с лампами */
-.po-pin{position:absolute;left:50%;top:-7px;z-index:5;width:24px;height:24px;margin-left:-12px;pointer-events:none}
-.po-pin svg{display:block;width:100%;height:100%}
-.po-bar{position:absolute;left:8px;right:8px;top:0;z-index:3;height:34px;display:flex;align-items:flex-start;justify-content:space-around;padding:0 16px;
- background:linear-gradient(180deg,#5e5a52,#2f2c28 55%,#1b1916) 0 0/100% 6px no-repeat;border-radius:1px;box-shadow:0 2px 2px rgba(0,0,0,.4)} /* тонкая стальная планка-шина, лампы свисают вниз */
-.po-bar .po-sc{position:absolute;top:0;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f4d8a0,#a8742a 60%,#4a2c0c)}
-.po-bar .po-sc.l{left:2px}.po-bar .po-sc.r{right:2px}
-.bb-bulb{display:block;width:18px;height:32px;margin-top:0}
-.bb-bulb svg{display:block;width:100%;height:100%;overflow:visible}
-.bb-bulb .cap{fill:#b5822f;stroke:#4a2c0c;stroke-width:.5}.bb-bulb .thr{fill:none;stroke:#4a2c0c;stroke-width:.55}
-.bb-bulb .gl{fill:rgba(224,214,188,.3);stroke:rgba(30,16,8,.6);stroke-width:.6}
-.bb-bulb .pst{fill:none;stroke:#7a5a3a;stroke-width:.5}.bb-bulb .fil{fill:none;stroke:#4a3524;stroke-width:.65;stroke-linejoin:round;stroke-linecap:round}
-.bb-bulb .hi{fill:none;stroke:#fff;stroke-opacity:.5;stroke-width:.9;stroke-linecap:round}
-.po.on .bb-bulb .gl{fill:url(#bb-gl);stroke:rgba(120,60,10,.6)}
-.po.on .bb-bulb .fil{stroke:#fffbe8;stroke-width:1}.po.on .bb-bulb .pst{stroke:#f2cf8a}
-.po.on .bb-bulb svg{filter:drop-shadow(0 0 3px rgba(255,190,80,.95)) drop-shadow(0 2px 5px rgba(255,160,40,.5))}
-/* скотч */
-.po-tape{position:absolute;top:-8px;z-index:4;width:48px;height:18px;pointer-events:none;
- background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 2px,transparent 2px 5px),linear-gradient(180deg,rgba(226,210,152,.8),rgba(204,186,128,.72));
- box-shadow:0 1px 2px rgba(0,0,0,.35);clip-path:polygon(0 0,100% 0,96% 22%,100% 44%,96% 66%,100% 88%,98% 100%,0 100%,4% 78%,0 56%,4% 34%,0 12%)}
-.po-tape.l{left:-10px;transform:rotate(-36deg)}.po-tape.r{right:-10px;transform:rotate(34deg)}
-/* строка-подпись над картинкой */
-.po-k{display:flex;align-items:center;justify-content:center;gap:8px;min-height:14px;font:400 11px/1 var(--rus);letter-spacing:.24em;text-transform:uppercase;color:var(--rust);white-space:nowrap}
-.po-pips{display:inline-flex;gap:4px}.po-pips i{display:block;width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--rust)}.po-pips i.on{background:var(--rust)}
-.po-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.po-m .po-k{display:none}
-/* картинка: снимок в стальной оправе (в игровом стиле, как предметы на поле) */
-.po-il{position:relative;aspect-ratio:6/5;border-radius:1px;background:#2a1b12;
- box-shadow:0 0 0 1px #0a0302,inset 0 0 0 1px rgba(0,0,0,.5)}
-.po-il::before{content:"";position:absolute;inset:-4px;z-index:-1;border-radius:1px;box-shadow:0 0 0 1px #0a0302,inset 0 0 0 1px rgba(150,113,48,.4); /* оправа картинки — та же красная сталь */
- background:linear-gradient(rgba(18,5,3,.2),rgba(18,5,3,.2)),var(--tex) var(--tx,0) var(--ty,0)/130px auto,#4a1a11}
-.po-il>img{display:block;position:absolute;inset:0;border-radius:1px;width:100%;height:100%;object-fit:cover;object-position:var(--op,50% 40%)}
-.po-il::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 18px rgba(20,8,2,.45);background:var(--pgrain);opacity:.55;mix-blend-mode:multiply}
-.po.off .po-il>img{filter:grayscale(1) brightness(.7)}
-.po-m .po-il{margin:4px 3px 0}.po-b .po-il{margin:3px 3px 0}
-.po-nm{margin:10px 0 0;min-height:2.1em;display:grid;align-items:center;justify-items:center;font:400 21px/1.05 var(--boo);letter-spacing:.035em;text-align:center;text-wrap:balance;color:var(--rust)}
-.po-d{flex:1;display:flex;align-items:center;justify-content:center;margin:0;font:600 14px/1.25 var(--ui);text-align:center;text-wrap:balance;color:#33190f}
-/* корешок цены: перфорация и два выреза; высота фиксирована (--stub), по ней стоят вырезы маски */
-.po-st{position:relative;flex:none;height:var(--stub);margin:0 -9px;padding:11px 9px 9px;display:flex;flex-direction:column;justify-content:space-between;gap:6px;
- background:linear-gradient(180deg,rgba(120,70,20,.14),rgba(120,70,20,.26))}
-.po-st::before{content:"";position:absolute;left:8px;right:8px;top:0;border-top:2px dotted rgba(110,34,22,.85)}
-.po-pr{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--rust);line-height:1}
-.po-pr b{font:400 27px/1 var(--rus);letter-spacing:.01em;white-space:nowrap;font-size:min(27px,calc(80cqi / (var(--n,8) * .62)));font-variant-numeric:tabular-nums}
-.po-pr small{font:700 11px/1 var(--ui);letter-spacing:.18em;text-transform:uppercase;color:#4d2216}
-.po-st::after{content:"";position:absolute;left:0;right:0;top:-3px;height:4px;pointer-events:none;box-shadow:0 0 0 1px #0a0302;background:linear-gradient(rgba(18,5,3,.2),rgba(18,5,3,.2)),var(--tex) 20px 6px/130px auto,#4a1a11} /* кромка корешка: полоска той же красной стали */
-.po-nt{display:none}
-/* кнопки */
-.po-go{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:44px;margin:0;padding:0 8px;border:0;border-radius:3px;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;
- font:400 17px/1 var(--boo);letter-spacing:.08em}
-.po-go:active{transform:translateY(2px)}
-.po-b .po-go{color:#f6ebc8;text-shadow:0 1px 0 #2a0f0a;background:linear-gradient(rgba(18,5,3,.1),rgba(18,5,3,.1)),var(--tex) 40px 10px/150px auto,#7a2a1e;
- box-shadow:inset 0 0 0 1px rgba(150,113,48,.55),0 0 0 1px #2a0f0a,0 3px 0 #2a0f0a,0 5px 5px rgba(0,0,0,.35)}
-.po-b .po-go::before,.po-b .po-go::after{content:"";position:absolute;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:radial-gradient(circle at 36% 30%,#b9a884,#8f7f62 40%,#5a4c3a 80%);box-shadow:0 1px 1px rgba(0,0,0,.5)}
-.po-b .po-go::before{left:7px}.po-b .po-go::after{right:7px}
-.po-m .po-go{color:var(--rust);background:#efe0b0;box-shadow:inset 0 0 0 1px rgba(127,36,24,.75),0 0 0 1px #2a0f0a,0 3px 0 #2a0f0a,0 5px 5px rgba(0,0,0,.35)}
-.po-m.on .po-go{color:#f6ebc8;text-shadow:0 1px 0 #000;background:#2c1810;box-shadow:inset 0 0 0 1px rgba(240,216,144,.85),0 0 0 1px #2a0f0a,0 3px 0 #2a0f0a,0 5px 5px rgba(0,0,0,.35)}
-.po.off .po-go{color:#d7c9a8;text-shadow:none;background:#5b4a40;box-shadow:inset 0 0 0 1px #7a6a5c,0 0 0 1px #2a0f0a,0 3px 0 #2a0f0a}
-.po.off .po-b .po-go::before,.po.off .po-go::before,.po.off .po-go::after{background:#7a6a5c}
+/* ---- режим: одна тонкая строка ---- */
+.bb-mode{display:grid;grid-template-columns:58px minmax(0,1fr) auto minmax(150px,auto);grid-template-areas:"ic mt mp go";align-items:center;gap:6px 16px;width:min(740px,100%);padding:10px 12px 10px 10px;text-align:left;
+ border-radius:6px;background:linear-gradient(90deg,rgba(58,22,18,.92),rgba(28,11,9,.92));box-shadow:inset 0 0 0 1px rgba(201,138,44,.6),0 0 0 1px var(--edge),0 10px 20px rgba(0,0,0,.45);transition:box-shadow .2s}
+.bb-mode.on{box-shadow:inset 0 0 0 2px var(--amber),0 0 0 1px var(--edge),0 0 22px rgba(255,190,80,.22),0 10px 20px rgba(0,0,0,.45)}
+.bb-ic{grid-area:ic;display:block;width:58px;height:58px;border-radius:4px;object-fit:cover;object-position:50% 40%;box-shadow:0 0 0 1px var(--edge),0 0 0 2px rgba(201,138,44,.55)}
+.bb-mt{grid-area:mt;min-width:0}
+.bb-mn{font:400 20px/1.1 var(--boo);letter-spacing:.04em;color:var(--cream)}
+.bb-chip{display:inline-block;margin-left:10px;padding:3px 7px 2px;border-radius:3px;vertical-align:3px;font:700 11px/1 var(--ui);letter-spacing:.18em;color:#2a1405;background:var(--amber)}
+.bb-ml{margin-top:4px;font:600 15px/1.25 var(--ui);color:var(--cream2)}
+.bb-mp{grid-area:mp;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
+.bb-mp b{font:400 24px/1 var(--rus);color:var(--amber);white-space:nowrap}
+.bb-mp small{font:700 11px/1 var(--ui);letter-spacing:.22em;color:var(--dim)}
+.bb-mode .bb-go{grid-area:go}
+.bb-need{display:block;max-width:100%;font:700 12px/1.2 var(--ui);letter-spacing:.06em;color:#ffa184}
+.bb-mp .bb-need{margin-top:2px;text-align:right}
+
+/* ---- кнопки: ACTIVATE — тёмная плашка, включённый режим — янтарь; BUY — тёмно-красный металл ---- */
+.bb-go{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin:0;padding:6px 16px;border:0;border-radius:6px;cursor:pointer;
+ font:400 17px/1.1 var(--boo);letter-spacing:.08em;text-align:center;text-wrap:balance;transition:filter .15s}
+.bb-go:hover{filter:brightness(1.12)}
+.bb-go:active{transform:translateY(2px)}
+.bb-tg{color:var(--amber);background:var(--plate);box-shadow:inset 0 0 0 1.5px var(--brass),0 0 0 1px var(--edge),0 3px 0 var(--edge),0 6px 10px rgba(0,0,0,.4)}
+.bb-mode.on .bb-tg{color:#2a1405;background:linear-gradient(180deg,#ffdc97 0%,var(--amber) 48%,#f1b552 100%);box-shadow:inset 0 0 0 1.5px #5d3a0b,0 0 0 1px var(--edge),0 3px 0 var(--edge)}
+.bb-buy{width:100%;color:#fbefd0;text-shadow:0 1px 0 #2a0a06;background:linear-gradient(180deg,#b23a28 0%,#8E2F24 46%,#5e1a12 100%);
+ box-shadow:inset 0 1px 0 rgba(255,210,170,.32),inset 0 0 0 1.5px var(--brass),0 0 0 1px #1a0705,0 3px 0 #1a0705,0 6px 12px rgba(0,0,0,.45)}
 .act{cursor:pointer}.act[aria-disabled=true]{cursor:not-allowed}
-.act:focus-visible{outline:3px solid #fff3d0;outline-offset:3px;box-shadow:0 0 0 2px #120503,0 0 0 3px #120503!important}
-.tg{display:inline-block;flex:none;position:relative;width:30px;height:16px;border-radius:9px;background:#2b1710;box-shadow:inset 0 0 0 2px #120503,inset 0 2px 3px rgba(0,0,0,.7)}
-.tg::after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e2d3b8,#8a7a66);box-shadow:0 1px 1px rgba(0,0,0,.6);transition:transform .18s}
-.po.on .tg{background:#8a5a14}.po.on .tg::after{transform:translateX(14px);background:radial-gradient(circle at 35% 30%,#fffbe0,#FFC861)}
-/* штамп (каучуковый, красная краска, неравномерный оттиск: фильтр bb-ink) */
-.po-stamp{position:absolute;left:50%;bottom:-10px;z-index:4;max-width:92%;transform:translateX(-50%) rotate(-6deg);pointer-events:none;filter:url(#bb-ink)}
-.po-stamp span{display:block;padding:4px 9px 3px;border:2px solid #a2301f;outline:1px solid #a2301f;outline-offset:2px;border-radius:3px;background:rgba(238,226,182,.9);font:400 15px/1.1 var(--boo);letter-spacing:.1em;white-space:nowrap;color:#a2301f}
-.po-need{bottom:auto;top:50%;transform:translate(-50%,-50%) rotate(-5deg);width:86%}
-.po-need span{white-space:normal;text-align:center;font-size:12.5px;letter-spacing:.06em;color:#5e1a10;border-color:#5e1a10;outline-color:#5e1a10}
-/* «Камеры»: супер-версия «Кухни» — двойная рамка, чип с духовкой, красный «+» между афишами */
-.po-b.t2 .po-p{box-shadow:inset 0 0 0 1px rgba(255,248,214,.45),inset 0 0 20px rgba(130,84,30,.3),inset 0 0 0 4px var(--paper2),inset 0 0 0 5px var(--red),inset 0 0 0 7px var(--paper2),inset 0 0 0 8px var(--red)}
-.po-b.t2 .po-p{padding-left:12px;padding-right:12px}.po-b.t2 .po-st{margin:0 -12px;padding-left:12px;padding-right:12px}
-.po-mini{position:absolute;left:5px;bottom:5px;z-index:3;display:flex;align-items:center;gap:5px;padding:2px 7px 2px 3px;border-radius:2px;background:#eadcb4;box-shadow:0 0 0 1px #2a0f0a,1px 2px 2px rgba(0,0,0,.5);font:400 11px/1 var(--rus);letter-spacing:.08em;color:var(--rust)}
-.po-mini img{display:block;width:30px;height:22px;object-fit:cover;border-radius:1px}
-.po-plus{position:absolute;left:-23px;top:44%;z-index:6;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;font:400 24px/1 var(--boo);color:#f6ebc8;padding-bottom:2px;pointer-events:none;
- background:radial-gradient(circle at 36% 30%,#cf5a42,#8E2F24 60%,#5a1a12);box-shadow:inset 0 0 0 1.5px #F0D890,0 0 0 1.5px #1a0705,2px 4px 4px rgba(0,0,0,.55)}
-/* второй шаг покупки */
-.bb.bb-sm{width:min(520px,96%)}
-.bb-conf{display:flex;flex-direction:column;align-items:center;gap:16px;padding:22px 20px 22px;grid-template-columns:none}
-.bb-conf .po{width:min(280px,100%)}
-.bb-back{min-height:44px;margin:0;padding:6px 18px;border:0;border-radius:3px;background:rgba(14,6,2,.55);cursor:pointer;color:#ecd7ae;font:700 14px/1 var(--ui);letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 0 #000;box-shadow:inset 0 0 0 1px rgba(201,138,44,.55)}
-.bb-back:hover{color:#fff6dc}
-.bb-back:focus-visible{outline:3px solid #fff3d0;outline-offset:2px}
+.off .bb-go{filter:saturate(.45) brightness(.82)}
+.off .bb-go:hover{filter:saturate(.45) brightness(.9)}
+/* янтарное кольцо фокуса — как на пульте */
+.bb .bb-go:focus-visible,.bb .bb-key:focus-visible,.bb .bb-back:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.bb .bu-x:focus-visible .bu-screw{outline:3px solid var(--amber);outline-offset:3px}
 
-/* ---- планшет и телефон стоя: шапка в две строки, режимы — афиши-полосы, покупки — две афиши ---- */
-@media (max-width:900px) and (min-height:521px){
- .bb{--bw:12px;--stub:108px}
- .bb-top{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h h" "bal bet";justify-content:space-between;row-gap:8px;min-height:0;padding:9px 12px 11px}
- .bb-h{grid-area:h;font-size:26px;padding-right:34px}
- .bb-bal{grid-area:bal;width:min(150px,100%)}.bb-bet{grid-area:bet;gap:8px}
- .bb-ro{min-width:0;padding:4px 10px 3px}.bb-rbet b{font-size:25px}.bb-bal{--fs:25px}
- .bb-rbet{min-width:98px}
- .bb .bb-x{right:3px;top:3px;margin-top:0}
- .bb-body{grid-template-columns:minmax(0,1fr);gap:14px 0;padding:14px 10px 18px}
- .bb-div{height:9px;width:auto;align-self:auto;box-shadow:0 0 0 1px #0a0302,inset 0 1px 0 rgba(150,113,48,.4),0 3px 6px rgba(0,0,0,.5)}
- .bb-lab{font-size:13px}.bb-sub{font-size:12px}.bb-gh{margin-bottom:14px}
- .bb-gm .bb-row{grid-template-columns:1fr;gap:16px}
- .bb-gb .bb-row{gap:16px 14px}
- /* режим — афиша-полоса: картинка слева, название и описание справа, корешок на всю ширину внизу */
- .po-m .po-p{display:grid;grid-template-columns:84px minmax(0,1fr);grid-template-areas:"il nm" "il d" "st st";column-gap:10px;row-gap:3px;align-content:start;padding:26px 9px 0}
- .po-m .po-il{grid-area:il;aspect-ratio:auto;align-self:stretch;margin:2px 0 0;min-height:84px}
- .po-m .po-nm{grid-area:nm;min-height:0;justify-items:start;text-align:left;font-size:17px;margin:0}
- .po-m .po-d{grid-area:d;text-align:left;font-size:13px;align-self:start}
- .po-m .po-st{grid-area:st;height:auto;flex-direction:row;align-items:center;gap:10px;margin:6px -9px 0;padding:10px 9px 9px}
- .po-m .po-st .po-pr{flex:none;align-items:flex-start;gap:3px}
- .po-m .po-st .po-pr b{font-size:min(22px,calc(44cqi / (var(--n,8) * .62)))}
- .po-m .po-go{flex:1;font-size:15px;letter-spacing:.05em}
- .po-m .po-p{-webkit-mask:none;mask:none}
- .po-m .po-st::before{left:0;right:0}
- .po-m .po-need{display:none}.po-m.off .po-cap{display:none}.po-m.off .po-nt{display:block;color:#5e1a10;font-size:10px;letter-spacing:.06em;text-align:left;line-height:1.1}
- .po-m .po-stamp{bottom:3px;width:80%}.po-m .po-stamp span{white-space:normal;text-align:center;font-size:10px;letter-spacing:.05em;padding:2px 3px 1px;outline-offset:1px}
- .po-m .po-p{padding-top:34px}
- .po-bar{height:30px}.bb-bulb{width:16px;height:28px}
- .po-b .po-nm{font-size:17px}.po-b .po-d{font-size:12.5px}
- .po-b .po-go{font-size:14px;letter-spacing:.03em;padding:0 4px}
- .po-b .po-pr b{font-size:min(21px,calc(80cqi / (var(--n,8) * .62)))}
- .po-b .po-il{margin:3px 1px 0}
- .po-b .po-k{font-size:10px;letter-spacing:.14em}
- .po-need span{font-size:11px}
- .po-stamp span{font-size:13px}
- .po-plus{left:-18px;width:26px;height:26px;font-size:20px}
- .po-mini{left:3px;bottom:3px;font-size:9px;padding:1px 5px 1px 2px;gap:3px}.po-mini img{width:22px;height:16px}
+/* ---- карточки покупок: в один ряд ---- */
+.bb-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,290px));justify-content:center;gap:24px 44px;width:100%}
+.bb-card{display:flex;flex-direction:column;align-items:center;gap:11px;min-width:0;container-type:inline-size}
+.bb-pl{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:min(220px,100%);max-width:100%;padding:9px 18px 8px;border-radius:6px;background:var(--plate);box-shadow:var(--plate-sh)}
+.bb-card.t2 .bb-pl{box-shadow:inset 0 0 0 1.5px var(--brass),inset 0 0 0 3.5px var(--p2),inset 0 0 0 4.5px rgba(201,138,44,.7),0 0 0 1px var(--edge),0 8px 18px rgba(0,0,0,.5)} /* «Камеры» — старшая покупка: двойной кант */
+.bb-cn{font:400 22px/1.05 var(--boo);letter-spacing:.05em;color:var(--amber);text-wrap:balance}
+.bb-cs{font:700 12px/1 var(--ui);letter-spacing:.22em;text-transform:uppercase;color:var(--cream2)}
+.bb-art{display:block;width:150px;aspect-ratio:6/5;border-radius:4px;object-fit:cover;object-position:50% 40%;box-shadow:0 0 0 1px var(--edge),0 0 0 2px rgba(201,138,44,.55),0 12px 22px rgba(0,0,0,.5)}
+.bb-card.off .bb-art{filter:grayscale(.85) brightness(.7)}
+.bb-cl{max-width:270px;font:600 15px/1.3 var(--ui);color:var(--cream2);text-wrap:balance}
+.bb-cost{font:700 13px/1 var(--ui);letter-spacing:.24em;color:var(--dim)}
+.bb-card .bb-buy{max-width:270px}
+.bb-card .bb-need{text-align:center}
+
+/* ---- подвал ---- */
+.bb-foot{margin-top:4px;font:600 12px/1.4 var(--ui);letter-spacing:.2em;text-transform:uppercase;color:rgba(233,201,142,.72);text-wrap:balance}
+
+/* ---- закрытие, «назад», подсказка «ещё бонусы» ---- */
+.bb .bb-x{position:absolute;right:max(10px,var(--sa-r,0px));top:10px;z-index:3;width:48px;height:48px}
+.bb .bu-x .bu-screw{width:34px;height:34px;margin:-17px 0 0 -17px}
+.bb-back{position:absolute;left:12px;top:12px;z-index:3;display:grid;place-items:center;width:44px;height:44px;margin:0;padding:0;border:0;border-radius:50%;cursor:pointer;color:var(--amber);
+ background:var(--plate);box-shadow:inset 0 0 0 1.5px var(--brass),0 0 0 1px var(--edge),0 4px 10px rgba(0,0,0,.5)}
+.bb-back svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;margin-left:-2px}
+.bb-back:hover{filter:brightness(1.15)}
+.bb-more{position:absolute;left:50%;bottom:10px;z-index:3;display:inline-flex;align-items:center;gap:6px;padding:7px 14px 6px;border-radius:999px;transform:translateX(-50%);pointer-events:none;white-space:nowrap;
+ font:700 12px/1 var(--ui);letter-spacing:.24em;color:var(--amber);background:rgba(12,4,3,.88);box-shadow:inset 0 0 0 1px rgba(201,138,44,.55)}
+.bb-more svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.bb-more[hidden]{display:none}
+
+/* ---- второй шаг покупки: одна большая карточка ---- */
+.bb-conf{display:flex;justify-content:center;width:100%}
+.bb-card.big{gap:14px;width:min(380px,100%)}
+.bb-card.big .bb-pl{min-width:min(300px,100%);padding:11px 24px 10px}
+.bb-card.big .bb-cn{font-size:28px}
+.bb-card.big .bb-cs{font-size:13px}
+.bb-card.big .bb-art{width:240px}
+.bb-card.big .bb-cl{max-width:340px;font-size:17px}
+.bb-tag{display:inline-flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px 10px;max-width:100%;padding:10px 20px 9px;border-radius:6px;background:var(--plate);box-shadow:var(--plate-sh)}
+.bb-tag span{font:700 14px/1 var(--ui);letter-spacing:.22em;color:var(--cream2)}
+.bb-tag i{font-style:normal;color:var(--dim)}
+.bb-tag b{font:400 23px/1 var(--rus);color:var(--amber);white-space:nowrap}
+.bb-card.big .bb-buy{max-width:320px;min-height:56px;font-size:22px;letter-spacing:.14em}
+
+/* ---- телефон стоя и узкое окно: всё в одну колонку с прокруткой ---- */
+@media (max-width:640px){
+ .bb-in{padding:12px 14px 52px}
+ .bb-col{gap:14px}
+ .bb-top{width:100%;gap:10px}
+ .bb-h{font-size:30px;padding:6px 46px 0}
+ .bb-mode{grid-template-columns:52px minmax(0,1fr) auto;grid-template-areas:"ic mt mp" "go go go";gap:10px 12px;padding:10px}
+ .bb-ic{width:52px;height:52px}
+ .bb-mn{font-size:17px}
+ .bb-chip{display:table;margin:5px 0 0}
+ .bb-ml{font-size:14px}
+ .bb-mp b{font-size:20px}
+ .bb-mode .bb-go{width:100%}
+ .bb-cards{grid-template-columns:minmax(0,320px);gap:30px}
+ .bb-card.big .bb-art{width:min(220px,70%)}
+ .bb-card.big .bb-cn{font-size:24px}
 }
-/* телефон боком и любое низкое окно: шапка в одну строку, участки рядом, режимы — строки со стойкой цены справа */
-@media (max-height:520px){
- .bb{--bw:11px;--stub:96px}
- .bb-top{grid-template-columns:auto minmax(0,1fr) auto;min-height:0;padding:6px 52px 7px 12px;gap:10px}
- .bb-h{justify-self:start;order:1;font-size:26px}
- .bb-bal{order:2;justify-self:end;width:130px}.bb-bet{order:3;gap:8px}
- .bb-ro{min-width:0;padding:3px 10px 2px}.bb-rbet b{font-size:23px}.bb-bal{--fs:23px}.bb-ro small{font-size:9.5px}.bb-rbet{min-width:92px}
- .bb .bb-x{right:3px;top:50%;margin-top:-22px}
- .bb-body{gap:0 10px;padding:10px 12px 8px;grid-template-columns:minmax(0,1fr) 8px minmax(0,1.2fr)}
- .bb-lab{font-size:11.5px;padding:4px 8px 3px}.bb-sub{display:none}.bb-gh{margin-bottom:11px}
- .bb-gm .bb-row{grid-template-columns:1fr;gap:12px}
- .bb-gb .bb-row{gap:0 12px}
- .po-p{gap:5px;padding:22px 8px 0}
- .po-b .po-p{padding-top:16px}
- .po-k{display:none}
- .po-il{margin:2px 2px 0}
- .po-nm{font-size:15px;min-height:0;margin:2px 0 0}
- .po-d{font-size:11.5px;line-height:1.18}
- .po-m .po-p{display:grid;grid-template-columns:58px minmax(0,1fr) 108px;grid-template-areas:"il nm st" "il d st";column-gap:8px;row-gap:2px;align-content:start;padding:25px 0 0 8px;-webkit-mask:none;mask:none}
- .po-m .po-il{grid-area:il;aspect-ratio:auto;align-self:stretch;min-height:0;margin:1px 0 8px}
- .po-m .po-nm{grid-area:nm;justify-items:start;text-align:left;font-size:14px;padding-top:1px}
- .po-m .po-d{grid-area:d;text-align:left;font-size:11.5px;padding-bottom:8px}
- .po-m .po-st{grid-area:st;height:auto;align-self:stretch;justify-content:center;gap:4px;margin:0;padding:5px 7px 6px;background:linear-gradient(90deg,rgba(120,70,20,.16),rgba(120,70,20,.28))}
- .po-m .po-st::before{left:0;right:auto;top:0;bottom:0;border-top:0;border-left:2px dotted rgba(110,34,22,.85)}
- .po-m .po-st::after{left:-3px;right:auto;top:0;bottom:0;width:4px;height:auto}
- .po-m .po-st .po-pr b{font-size:min(17px,calc(94px / (var(--n,8) * .62)))}
- .po-m .po-pr small{font-size:9px;letter-spacing:.08em}
- .po-m .po-go{font-size:11.5px;letter-spacing:.02em;gap:5px;padding:0 3px}
- .po-m .tg{width:22px;height:12px}.po-m .tg::after{width:8px;height:8px;left:2px;top:2px}.po-m.on .tg::after{transform:translateX(10px)}
- .po-m .po-bar{right:8px}
- .po-m .po-need{display:none}.po-m.off .po-cap{display:none}.po-m.off .po-nt{display:block;color:#5e1a10;font-size:8.5px;letter-spacing:.03em;text-align:center;line-height:1.1}
- .po-m .po-stamp{bottom:2px;width:92%}.po-m .po-stamp span{white-space:normal;text-align:center;font-size:8px;letter-spacing:.02em;padding:2px 1px 1px;border-width:1.5px;outline:0}
- .po-bar{height:24px}.bb-bulb{width:12px;height:21px}.po-bar .po-sc{width:5px;height:5px}
- .po-b .po-il{aspect-ratio:16/6.4}
- .po-b .po-st{height:auto;flex-direction:row;align-items:center;gap:8px;padding:7px 9px 8px;margin:2px -9px 0}
- .po-b .po-pr{flex:none;align-items:flex-start}
- .po-b .po-pr b{font-size:min(17px,calc(44cqi / (var(--n,8) * .62)))}
- .po-b .po-pr small{font-size:9px;letter-spacing:.1em}
- .po-b .po-go{flex:1;font-size:12px;letter-spacing:.03em;gap:6px;padding:0 4px}
- .po-b .po-go::before,.po-b .po-go::after{display:none}
- .po-b.t2 .po-p{padding-left:10px;padding-right:10px}.po-b.t2 .po-st{margin:2px -10px 0;padding-left:10px;padding-right:10px}
- .po-need{width:92%}.po-need span{font-size:10px}
- .po-stamp{bottom:5px}.po-stamp span{font-size:11px;padding:3px 6px 2px}
- .po-plus{left:-17px;width:24px;height:24px;font-size:18px}
- .po-mini{font-size:9px;padding:1px 5px 1px 2px}.po-mini img{width:20px;height:14px}
- .bb.bb-sm{width:min(640px,96%)}
- .bb-conf{display:grid;grid-template-columns:auto auto;justify-content:center;align-items:center;gap:10px 22px;padding:12px 18px 12px}
- .bb-conf .po{width:min(330px,100%)}
+/* ---- низкое окно (телефон боком): название и ставка в одну строку, карточки — картинка слева, текст справа ---- */
+@media (max-height:560px){
+ .bb-in{padding:8px 64px 10px}
+ .bb-col{gap:9px}
+ .bb-top{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+ .bb-h{font-size:28px;padding:0}
+ .bb-key{width:44px;height:40px}
+ .bb-bv{min-width:96px}.bb-bv small{font-size:10px}.bb-bv b{font-size:20px}
+ .bb-g{gap:8px}
+ .bb-lab{font-size:12px}
+ .bb-mode{grid-template-columns:44px minmax(0,1fr) auto minmax(130px,auto);grid-template-areas:"ic mt mp go";gap:4px 12px;padding:6px 8px 6px 6px}
+ .bb-ic{width:44px;height:44px}
+ .bb-mn{font-size:16px}
+ .bb-chip{display:inline-block;margin:0 0 0 8px;vertical-align:2px;font-size:10px}
+ .bb-ml{font-size:13px;margin-top:2px}
+ .bb-mp b{font-size:18px}.bb-mp small{font-size:10px}
+ .bb-go{min-height:44px;font-size:14px;padding:4px 12px}
+ .bb-mode .bb-go{width:auto}
+ .bb-cards{grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px 18px;max-width:740px} /* у auto-fit с потолком 360px помещалась одна колонка: ряд считается по потолку */
+ .bb-card{display:grid;grid-template-columns:92px minmax(0,1fr);grid-template-areas:"art pl" "art cl" "art cost" "go go" "nd nd";align-items:center;justify-items:start;gap:4px 12px;text-align:left}
+ .bb-pl{grid-area:pl;align-items:flex-start;min-width:0;padding:5px 10px 4px}
+ .bb-cn{font-size:16px}.bb-cs{font-size:10px;letter-spacing:.16em}
+ .bb-art{grid-area:art;width:92px;align-self:start}
+ .bb-cl{grid-area:cl;font-size:13px;line-height:1.2}
+ .bb-cost{grid-area:cost;font-size:11px}
+ .bb-card .bb-buy{grid-area:go;max-width:none;margin-top:2px}
+ .bb-card .bb-need{grid-area:nd;justify-self:center}
+ .bb-foot{margin-top:0;font-size:11px;letter-spacing:.14em}
+ .bb .bb-x{top:4px;width:44px;height:44px}
+ .bb .bu-x .bu-screw{width:30px;height:30px;margin:-15px 0 0 -15px}
+ .bb-back{top:6px;left:8px}
+ .bb-more{bottom:6px}
+ /* второй шаг: картинка слева, всё остальное справа */
+ .bb-card.big{width:min(560px,100%);grid-template-columns:150px minmax(0,1fr);grid-template-areas:"art pl" "art cl" "art tag" "art go";gap:8px 18px}
+ .bb-card.big .bb-art{width:150px;align-self:center}
+ .bb-card.big .bb-pl{min-width:0;padding:6px 14px 5px}
+ .bb-card.big .bb-cn{font-size:20px}.bb-card.big .bb-cs{font-size:11px}
+ .bb-card.big .bb-cl{font-size:14px}
+ .bb-card.big .bb-tag{grid-area:tag;padding:7px 14px 6px}.bb-tag b{font-size:19px}.bb-tag span{font-size:12px}
+ .bb-card.big .bb-buy{grid-area:go;min-height:48px;font-size:18px}
 }
-@media (prefers-reduced-motion:reduce){.po,.tg::after,.bb-key:active,.po-go:active{transition:none;transform:none}.po.on{transform:none}}
+/* ---- маленькое низкое окно (400×225, 320×180): одна колонка, мельче, винт и «назад» не наезжают на название ---- */
+@media (max-height:560px) and (max-width:640px){
+ .bb-in{padding:6px 10px 34px}
+ .bb-top{padding:0 44px}
+ .bb-h{font-size:21px}
+ .bb-bv b{font-size:17px}
+ .bb-mode{grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"ic mt mp" "go go go";gap:6px 10px}
+ .bb-ic{width:40px;height:40px}
+ .bb-mn{font-size:14px}.bb-ml{font-size:12px}
+ .bb-mode .bb-go{width:100%}
+ .bb-cards{grid-template-columns:minmax(0,420px)}
+ .bb-card{grid-template-columns:72px minmax(0,1fr)}
+ .bb-art{width:72px}
+ .bb-cn{font-size:14px}
+ .bb-cl{font-size:12px}
+ .bb-card.big{grid-template-columns:96px minmax(0,1fr);gap:6px 12px}
+ .bb-card.big .bb-art{width:96px}
+ .bb-card.big .bb-cn{font-size:16px}
+ .bb-card.big .bb-buy{min-height:44px;font-size:16px}
+ .bb-more{font-size:10px;padding:5px 10px 4px}
+}
+@media (prefers-reduced-motion:reduce){.bb-go,.bb-mode{transition:none}.bb-go:active,.bb-key:active{transform:none}}

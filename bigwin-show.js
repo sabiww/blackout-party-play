@@ -15,7 +15,7 @@
      на MAX WIN — BW-max (подробнее в шапке bigwin-rocco.js; ролики не ускоряются, в Turbo/Quick, при пропуске и «меньше движения» он стоит в покое); eyes — глаза в темноте; monitor — Рокко на мониторе;
    · безопасное мерцание: сбои света на 50× и 100× — по расписанию, не чаще трёх вспышек в секунду; «меньше движения» — сразу итоговый кадр.
 
-   Подключение (index.html?bpv=6c80e99c, до ui.js):   <script src="bigwin-show.js"></script>
+   Подключение (index.html?bpv=b0d45272, до ui.js):   <script src="bigwin-show.js"></script>
    API:  BigWinShow.play({amount, bet, isMax, moneyFmt, onDone, rocco}) → Promise (выполняется после закрытия)
          amount   — выигрыш в валюте (как money()), bet — ставка в валюте (пороги считаются от неё), isMax — раунд закончился максимальным выигрышем
          moneyFmt — money() игры: строка вида «$25,000.00», «25,000.00 SC» или «1,000,000.00 ARS»; префикс и код валюты разбираются сами
@@ -396,9 +396,9 @@ const CHAP=[null,
  {at:25,name:'LIGHTS FLICKER',kick:'BIG WIN',col:'#ffd98a'},
  {at:50,name:"HE'S RIGHT BEHIND YOU",kick:'BIG WIN',col:'#ff6a48'},
  {at:100,name:'CAMERAS DOWN',kick:'BIG WIN',col:'#efe4c8'},
- {at:25000,name:"PARTY'S OVER",kick:'MAX WIN',col:'#f3e6c4'}];
+ {at:5000,name:"PARTY'S OVER",kick:'MAX WIN',col:'#f3e6c4'}]; // потолок — как MAXX в ui.js (математика 2.0.0: 5 000×)
 const THRL=['10×','25×','50×','100×'];   // подписи ламп глав на табло (пятая — MAX — добавляется, если раунд закончился максимальным выигрышем)
-const MAXX=25000, T0=.62, ROCCO_T0=.5;   // ROCCO_T0 — когда Рокко начинает радоваться: счётчик вот-вот пойдёт (до этого он стоит в покое, как в зале)   // T0 — с этой секунды счётчик начинает идти (до этого вход: свет, удар плашки, голова падает)
+const MAXX=5000, T0=.62, ROCCO_T0=.5;   // ROCCO_T0 — когда Рокко начинает радоваться: счётчик вот-вот пойдёт (до этого он стоит в покое, как в зале)   // T0 — с этой секунды счётчик начинает идти (до этого вход: свет, удар плашки, голова падает)
 /* монотонная кубическая интерполяция (Fritsch–Carlson): счётчик не откатывается, в узлах скорость плавная */
 function pchip(K){ const n=K.length,h=[],d=[],m=new Array(n).fill(0);
  for(let i=0;i<n-1;i++){ h[i]=K[i+1][0]-K[i][0]; d[i]=(K[i+1][1]-K[i][1])/h[i]; }
@@ -478,7 +478,7 @@ let MCTX=null; const measureCtx=()=>MCTX||(MCTX=document.createElement('canvas')
 
 /* ---------------------------------------------------------------- шоу ---------------------------------------------------------------- */
 
-const defaultFmt=v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const defaultFmt=v=>window.bpMoney?bpMoney.win(v):'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
 const gameTime=()=>window.bpTime||null;
 const isRM=()=>{ const g=gameTime(); try{ return g&&g.RM?!!g.RM():matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
@@ -506,7 +506,7 @@ const PAL={warm:['#FFC861','#D8CBA8','#c0392b','#8E2F24','#c98a2c','#efe4c8','#F
 function play(o){
  o=o||{}; { const old=document.getElementById('bp-big'); if(old&&!old.dataset.out) return Promise.resolve(); if(old) old.remove(); }   // уходящий оверлей (data-out) не мешает: убираем его и показываем новый
  ensureCSS();
- const fmtRaw=o.moneyFmt||defaultFmt, fmt=c=>{ let s=fmtRaw(c/100); if(typeof window.bpSocialFix==='function') s=window.bpSocialFix(s); return s; };
+ const fmtRaw=o.moneyFmt||defaultFmt, fmt=c=>{ let s=fmtRaw(c===finalC&&o.amount>=0?o.amount:c/100);   /* итог — точная выплата игры, а не округлённые центы (иначе ARS и суммы с долями цента расходятся с WIN) */ if(typeof window.bpSocialFix==='function') s=window.bpSocialFix(s); return s; };
  const betC=Math.max(1,Math.round((o.bet>0?o.bet:1)*100)), finalC=Math.max(0,Math.round((o.amount||0)*100)), isMax=!!o.isMax||finalC>=MAXX*betC;
  const RMODE=roccoMode(o), SUM=o.summary&&o.summary.title?o.summary:null;   // SUM — шоу как итог бонуса (см. заголовок файла)
  const root=document.createElement('div'); const FXK=fxMode(o), CL=FXK!=='old'; root.id='bp-big'; root.className='bw-root'+(isMax?' max':'')+(CL?' cl':''); root.dataset.fx=FXK; const PLK=CL?BigWinFx.opt('pl',o):'', HTK=CL?BigWinFx.opt('hint',o):''; const NOTE=PLK==='note', DLG=PLK==='dlg', LPK=CL?(NOTE?'bulbs':BigWinFx.opt('lamp',o)):'', TPK=CL?(NOTE||DLG?'none':BigWinFx.opt('top',o)):'', PALX=NOTE?PAL3N:DLG?PAL3D:PAL3; if(CL){ root.dataset.pl=PLK; root.dataset.lamp=LPK; root.dataset.hint=HTK; root.dataset.top=TPK; } if(SUM) root.dataset.sum='1'; root.setAttribute('role','dialog'); root.setAttribute('aria-label',(isMax?'Max win ':'Big win ')+fmt(finalC));
@@ -613,7 +613,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
  const TAIL=.8;
  function colAt(tt,p){ const sc=S.sc, e=1/90, p10=Math.pow(10,p), base=colPos(vfAt(tt),p,Math.abs(vfAt(tt+e)-vfAt(tt-e))/(2*e)/p10);
   if(p>1||tt<sc.tF-TAIL) return base;
-  const t0=sc.tF-TAIL, p0=colPos(vfAt(t0),p,Math.abs(vfAt(t0+e)-vfAt(t0-e))/(2*e)/p10), tgt=Math.floor(sc.final*PQ.sc/p10+1e-9), D=p===0?58:41, T=tgt+10*Math.ceil((p0+D-tgt)/10), u=clamp((tt-t0)/TAIL), ez=1-Math.pow(1-u,3);
+  const t0=sc.tF-TAIL, p0=colPos(vfAt(t0),p,Math.abs(vfAt(t0+e)-vfAt(t0-e))/(2*e)/p10), tgt=Math.floor(Math.round(sc.final*PQ.sc)/p10+1e-9), D=p===0?58:41, T=tgt+10*Math.ceil((p0+D-tgt)/10), u=clamp((tt-t0)/TAIL), ez=1-Math.pow(1-u,3);
   return p0+(T-p0)*ez; }
  function plqState(t,st){   // положение, скорость и «зажжённость» барабанов в момент t
   const sc=S.sc, nInt=digitsOf(Math.floor(vfAt(t)+1e-6)), litN=Math.max(3,nInt), fin=t>=sc.tF-1e-6, uF=t-sc.tF;
@@ -871,13 +871,14 @@ function sumState(on){   // шоу доиграно (или перемотано
   const done=isMax?0:Math.min(hold-.5,(sc.tEnd-sc.tF)/(turbo?2.4:1));   // сколько из «удержания» уже прошло: после конца счёта идёт заключительная часть шоу
   const ms=isRM()?(hold+1)*1000:S.skipped?Math.max(1200,hold*600):Math.max(600,(hold-done)*1000);
   S.autoT=setTimeout(()=>{ S.autoT=0; if(!closed) close(); },ms); };
+ const GATE_LOCK=600;   // первые 600 мс после открытия шоу ввод игнорируется: один двойной тап не может и домотать счёт, и закрыть шоу
  root.next=()=>{
   if(closed) return; const now=performance.now();
+  if(!S.openAt||now-S.openAt<GATE_LOCK) return;
   if(S.running&&!S.warp){ S.warp={from:S.t,at:now,ms:520}; S.skipped=1; S.tapT=now; return; }
-  if(S.running&&S.warp){ if(now-(S.tapT||0)<350) { S.t=S.sc.tEnd; S.running=false; S.warp=null; S.finAt=now; render(S.t); armAuto(); return; }   // быстрый второй тап (двойной) — только к итогу, не закрывать: игрок не успел его увидеть
-   S.t=S.sc.tEnd; S.running=false; S.warp=null; render(S.t); }
-  else if(!S.sc){ return; }
-  else if(now-(S.finAt||0)<350&&!SUM) return;   // тап ровно в момент остановки счёта не закрывает шоу, пока итог не показан хотя бы треть секунды
+  if(S.running&&S.warp){ S.t=S.sc.tEnd; S.running=false; S.warp=null; S.finAt=now; render(S.t); armAuto(); return; }   // тап во время счёта — только к итогу; закрывает отдельный тап после конца
+  if(!S.sc) return;
+  if(now-(S.finAt||0)<350) return;   // тап ровно в момент остановки счёта не закрывает шоу, пока итог не показан хотя бы треть секунды (и для итога бонуса тоже)
   close();
  };
  root.info=()=>({T:S.sc.T.slice(),tF:S.sc.tF,tEnd:S.sc.tEnd,dev:S.dev});   // для проверок
@@ -895,7 +896,7 @@ function sumState(on){   // шоу доиграно (или перемотано
  IMP=[{t:.18,A:1.15},{t:.4,A:.8}]; for(let k=1;k<=5;k++) if(S.sc.T[k]<Infinity) IMP.push({t:S.sc.T[k],A:[0,.9,1.1,1.4,1.7,2.3][k]}); IMP.push({t:S.sc.tF,A:1.1}); IMP.sort((p,q)=>p.t-q.t);
  const rockoReady=()=>ROC?Promise.race([ROC.ready,new Promise(r=>setTimeout(r,500))]):Promise.resolve();   // Рокко должен стоять на месте с первого кадра шоу (а не «выскакивать»), но дольше полсекунды его не ждём
  Promise.all([fontsReady(),rockoReady()]).then(()=>{
-  if(closed) return; fit(); window.bpAudio&&(bpAudio.bigwin(isMax),bpAudio.play('bigwin.land')); // музыка сцены тише, стинг, звук открытия (audio.js)
+  if(closed) return; S.openAt=performance.now(); fit(); window.bpAudio&&(bpAudio.bigwin(isMax),bpAudio.play('bigwin.land')); // музыка сцены тише, стинг, звук открытия (audio.js)
   if(isRM()){ S.static=true; S.running=false; S.t=S.sc.tEnd; S.finAt=performance.now(); render(S.t); armAuto(); return; }
   S.running=true; S.last=performance.now(); S.t=0; render(0); S.raf=requestAnimationFrame(frame);
  });

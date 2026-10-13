@@ -9,7 +9,7 @@
      3) спин 3 (8): поле падает целиком, на тех же мониторах 8 пицц; showMath: «×32» ($0.50 → $16.00); кража; рамки растут до ×8 — янтарные с двойным кольцом; последняя пауза, затемнение в конец круга.
    Каждое повышение идёт на пустых мониторах (символы уже украдены, шум экрана кончился): видно только прежний цвет рамки и новый, с паузой на новом цвете до следующего спина.
 
-   Подключение (index.html?bpv=6c80e99c, после welcome.js; cams-rec.js — раньше):   <script src="welcome-cams.js"></script>
+   Подключение (index.html?bpv=b0d45272, после welcome.js; cams-rec.js — раньше):   <script src="welcome-cams.js"></script>
    welcome.js в D3 зовёт  WelcomeCams.d3(root, stage, KIT)  — KIT это помощники демонстраций (Board, Bracket, brState, frameStage, Amount, amtSet, Fsw, el, seg, lerp, eo, eob…).
    Возвращает {T, still, frame(t,fz), dispose()}: T — длина части B (сек); still — момент части B для статичного кадра «меньше движения» (последняя пауза: ×8); frame(t) получает время от начала части B (t<0 — идёт часть A: B прячется и гасит подсветку строки); frame(t≥0) возвращает true,
    welcome.js тогда гасит слои части A. dispose() — при закрытии приветствия (снять мониторы CamRec). Нет window.CamRec в момент показа — мониторы не ставятся (cams-rec.js подключён в index.html после этого файла, поэтому модуль ищется при вызове, а не при сборке окошка).
@@ -31,7 +31,7 @@ const GRID=[                                                  // поле каж
  ['pppppo','kppcpg','hghbgm','tmtmhk','hobkgo']];             // спин 3: 8 пицц
 const BASE=[.40,.30,.50], MARK=[2,4,8];                        // сумма выигрыша спина; значок на мониторах ПОСЛЕ кражи спина (×2 → ×4 → ×8)
 const SUMS=[0,WI.length*MARK[0],WI.length*MARK[1]];            // множитель выигрыша в спине 2 и 3 — сумма значков под ним: 8×2 = ×16, 8×4 = ×32 (спин 1 идёт без значков)
-const TXT=BASE.map(v=>'$'+v.toFixed(2)), FIN=BASE.map((v,n)=>'$'+(v*(SUMS[n]||1)).toFixed(2)); // надпись суммы: до ярлыка и после счёта ($0.30 → $4.80, $0.50 → $16.00)
+const TXT=BASE.map(v=>bpMoney.win(v)), FIN=BASE.map((v,n)=>bpMoney.win(v*(SUMS[n]||1))); // надпись суммы: до ярлыка и после счёта ($0.30 → $4.80, $0.50 → $16.00)
 
 /* ---- время части B (сек от её начала) ---- */
 const T_IN=.15, T_LATE=.45, T_LOCK=1.0;                        // зал: символы падают, приглашения загораются
@@ -51,7 +51,7 @@ const REFILL=['bctgmopk','tmcgbpoh','gcbmtkho'], RF0=.28, RF_DUR=.3, REF_S=.72, 
 const OUT=.26, OUTY=5.6, IN_D=.06, IN_DUR=.36, IN_Y=5;           // старые символы уходят вниз за 0,26 с; новые падают с высоты 5 рядов (0,38 с)
 
 function d3(root,st,K){
- const {el,seg,clamp,lerp,eo,ei,eio,eob,A,SYMU,RM,Board,Bracket,brState,frameStage,Amount,amtSet,Fsw}=K, CR=()=>window.CamRec; // CamRec грузится после этого файла (index.html?bpv=6c80e99c), а приветствие строится при первой отрисовке — ищем модуль в момент вызова
+ const {el,seg,clamp,lerp,eo,ei,eio,eob,A,SYMU,RM,Board,Bracket,brState,frameStage,Amount,amtSet,Fsw}=K, CR=()=>window.CamRec; // CamRec грузится после этого файла (index.html?bpv=b0d45272), а приветствие строится при первой отрисовке — ищем модуль в момент вызова
  if(!Board||!Amount||!Fsw) return null;
  const bay=root.closest('.bay'), cap=bay&&bay.querySelector('.cap'), hd=root.querySelector('.camhd>span');
  const k=(root.clientWidth/240)||1;                                  // во сколько раз экран растянут (меняется только перерисовкой приветствия)
@@ -126,7 +126,7 @@ function d3(root,st,K){
   if(mounted){
    if(fz){ const a=new Array(30).fill(0), v=t>=TK[2]+.3?MARK[2]:t>=TK[1]+.3?MARK[1]:t>=TK[0]+.25?MARK[0]:0; if(v) WI.forEach(i=>{ a[i]=v; }); const key=a.join(); if(key!==recKey){ recKey=key; CR().recAll(a); } }
    else for(let n=0;n<3;n++){
-    if(n) fire('m'+n,TM[n],t,late=>CR().showMath(WI,SUMS[n],{...OPT,fast:late,target:amtB,amount:{el:amtB,from:BASE[n],to:BASE[n]*SUMS[n],fmt:v=>'$'+v.toFixed(2)}}));
+    if(n) fire('m'+n,TM[n],t,late=>CR().showMath(WI,SUMS[n],{...OPT,fast:late,target:amtB,amount:{el:amtB,from:BASE[n],to:BASE[n]*SUMS[n],fmt:v=>bpMoney.win(v)}}));
     fire('s'+n,TS[n],t,late=>CR().steal(WI,{onTake:()=>{ took[n]=true; }},{...OPT,fast:late}));
     WI.forEach((i,j)=>fire('r'+n+j,TK[n]+j*.015,t,late=>CR().rec(i,MARK[n],{...OPT,fast:late}))); } }
 

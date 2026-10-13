@@ -8,7 +8,7 @@
 (()=>{
 'use strict';
 const SS={get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} },del(k){ try{ sessionStorage.removeItem(k); }catch(e){} }};
-const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=6c80e99c)
+const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=b0d45272)
 const NAVS=['top','side'], DEF_NAV='top';
 const pick=(name,list,def)=>{ const v=QQ().get(name)||SS.get('bp-'+name); return list.includes(v)?v:def; };
 const cfg=()=>({old:(QQ().get('dlg')||SS.get('bp-dlg'))==='old',nav:pick('dlgnav',NAVS,DEF_NAV)});
@@ -60,16 +60,18 @@ const IC={
  full:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
  chevd:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'};
 // суммы: число и код валюты («1,000.00 ARS») — код мельче; в социальном режиме текст правит bpSocialFix ($ → SC)
-function moneyH(C,v){ const s=C.money(v), m=/^(.*?)\s+([A-Z]{2,4})$/.exec(s); return m?`<span class="m">${esc(m[1])} <small>${m[2]}</small></span>`:`<span class="m">${esc(s)}</span>`; }
+function moneyH(C,v,win){ const s=(win&&C.moneyW||C.money)(v), m=/^(.*?)\s+([A-Z]{2,4})$/.exec(s); return m?`<span class="m">${esc(m[1])} <small>${m[2]}</small></span>`:`<span class="m">${esc(s)}</span>`; }
 // социальный режим stake.us: правила замены слов и сумм из ui.js (window.bpSocialFix) не видят shadow DOM — применяем сами
 function socialize(root){
  if(!(window.bpSocial&&window.bpSocialFix)) return; const fix=window.bpSocialFix;
  const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n; while((n=tw.nextNode())){ if(n.parentElement&&n.parentElement.tagName==='STYLE') continue; const v=fix(n.nodeValue); if(v!==n.nodeValue) n.nodeValue=v; }
  root.querySelectorAll('[aria-label],[title],[alt]').forEach(e=>['aria-label','title','alt'].forEach(a=>{ const v=e.getAttribute(a); if(v){ const f=fix(v); if(f!==v) e.setAttribute(a,f); } })); }
 // shadow-корень окна: стили + сцена; возвращает {sh,stage,layer}
+// кольцо фокуса ползунков громкости: у самого <input> оно было выключено, виден был только бегунок
+const A11Y_CSS='.dlg .vol input[type=range]:focus-visible{outline:3px solid var(--pn-red,#fff4c4);outline-offset:0;border-radius:6px}';
 function shell(host,popup,extraCss){
  const c=cfg(), sh=host.attachShadow({mode:'open'});
- sh.innerHTML=`${styleHTML()}${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
+ sh.innerHTML=`${styleHTML()}<style>${A11Y_CSS}</style>${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
  return {sh,stage:sh.getElementById?sh.getElementById('stage'):sh.querySelector('#stage'),layer:sh.querySelector('.layer')};
 }
 const frame=(s,title,body,foot)=>`<div class="dlg dlg-${s}" tabindex="-1"><div class="face"><header class="hd"><button type="button" class="x" aria-label="Close">${screw()}</button></header>
@@ -84,7 +86,7 @@ function follow(host,stage){ const f=()=>{ if(!host.isConnected){ removeEventLis
 
 // ---------- меню: выезжает из кнопки ≡ на пульте (место, направление и время — как в игре) ----------
 function menu(C,b){
- const GS=C.GS, c=cfg(), m=document.createElement('div'); m.id='bp-menu'; m.setAttribute('role','dialog'); m.setAttribute('aria-label','Menu'); m._ret=b; m.dataset.f='1';
+ const GS=C.GS, c=cfg(), m=document.createElement('div'); m.id='bp-menu'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true'); m.setAttribute('aria-label','Menu'); m._ret=b; m.dataset.f='1';
  Object.assign(m.style,{background:'none',boxShadow:'none',padding:'0',borderRadius:'0',width:'auto',maxHeight:'none',overflow:'visible',border:'0',color:'inherit'});
  const {sh,stage,layer}=shell(m,true);
  const vol=(k,lab)=>`<div class="row vol"><label class="lb" for="v-${k}">${lab}</label><input type="range" id="v-${k}" data-k="${k}" min="0" max="100" step="10" value="${GS[k]}" style="--n:${GS[k]}"><output for="v-${k}">${GS[k]}%</output></div>`;
@@ -99,7 +101,7 @@ function menu(C,b){
  layer.innerHTML=frame('menu','Menu',body).replace('<div class="dlg dlg-menu"','<div class="dlg dlg-menu'+(GS.mute?' muted':'')+'"');
  socialize(sh); document.body.append(m);
  const dlg=layer.querySelector('.dlg'), mw=m.offsetWidth, mode=stage.dataset.mode; let mh=m.offsetHeight;
- const pod=document.getElementById('pod').getBoundingClientRect(), W=innerWidth, H=innerHeight, E=C.popEdge?C.popEdge():{t:8,r:8,b:8,l:8}; // выдвигается из верхнего края пульта; E — край экрана не ближе выреза, углов и полосы «домой» (ui.js popEdge)
+ const pod=window.bpPodRect(), W=innerWidth, H=innerHeight, E=C.popEdge?C.popEdge():{t:8,r:8,b:8,l:8}; // выдвигается из верхнего края пульта; E — край экрана не ближе выреза, углов и полосы «домой» (ui.js popEdge)
  if(mh>H-E.t-E.b){ dlg.style.maxHeight=(H-E.t-E.b)+'px'; mh=m.offsetHeight; } // меню выше безопасной области (маленький телефон боком): тело меню листается, а не уходит под полосу «домой»
  if(mode==='land'){ const br=b.getBoundingClientRect(); m.style.left=Math.max(E.l,pod.left-mw+6)+'px'; m.style.top=Math.max(E.t,Math.min(H-mh-E.b,br.bottom-mh))+'px'; } // лёжа пульт — колонка справа: меню выезжает влево из-под него
  else { m.style.left=Math.max(E.l,Math.min(W-mw-E.r,pod.left+8))+'px'; m.style.top=Math.max(E.t,pod.top-mh+6)+'px'; }
@@ -113,7 +115,7 @@ function menu(C,b){
  m.style.zIndex=50; document.getElementById('pod').style.zIndex=60; // пульт поверх — окно будто выезжает из него
  const setMute=off=>{ GS.mute=off; const tg=sh.querySelector('.tg'); tg.setAttribute('aria-checked',String(!off)); tg.querySelector('.tgt').textContent=window.bpSocialFix&&window.bpSocial?window.bpSocialFix(off?'Off':'On'):(off?'Off':'On'); dlg.classList.toggle('muted',off); }; // при OFF громкости серые (main d3ea8af)
  sh.addEventListener('click',e=>{ const t=e.target;
-  if(t.closest('.x')){ C.popOut(m); C.syncHUD(); b.focus(); return; }
+  if(t.closest('.x')){ C.popOut(m); C.syncHUD(); if(e.detail===0) b.focus(); return; } // фокус на кнопку Menu — только после клавиатуры (мышью закрыли — пробел крутит спин)
   const sp=t.closest('[data-spd]'); if(sp){ GS.speed=sp.dataset.spd; sh.querySelectorAll('[data-spd]').forEach(x=>x.setAttribute('aria-pressed',String(x===sp))); C.syncHUD(); return; }
   if(t.closest('.tg')){ setMute(!GS.mute); C.save(); return; }
   const g=t.closest('[data-go]'); if(g){ const k=g.dataset.go;
@@ -166,7 +168,7 @@ function rules(C,start){
 function history(C){
  const H=C.GS.hist, w=C.el('div','bp-wrap'); w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-label','History'); C.takeRet(w);
  const {sh,stage,layer}=shell(w,false);
- const rows=H.map((h,n)=>`<li class="hr${h.win>0?' win':''}"><span class="tm">${esc(h.t)}</span><span class="mo">${esc(h.mode)}</span><span class="nums"><span class="bt" data-l="Bet">${moneyH(C,h.cost)}</span><span class="wn" data-l="Win">${moneyH(C,h.win)}</span></span>
+ const rows=H.map((h,n)=>`<li class="hr${h.win>0?' win':''}"><span class="tm">${esc(h.t)}</span><span class="mo">${esc(h.mode)}</span><span class="nums"><span class="bt" data-l="Bet">${moneyH(C,h.cost)}</span><span class="wn" data-l="Win">${moneyH(C,h.win,1)}</span></span>
   ${h.norep?'<span class="rp none" aria-hidden="true">—</span>':`<button type="button" class="rp" data-r="${n}" aria-label="Replay round of ${esc(h.t)}">${IC.play}<span>Replay</span></button>`}</li>`).join('');
  const body=H.length?`<div class="h-wrap"><div class="hh" aria-hidden="true"><span>Time</span><span>Mode</span><span>Bet</span><span>Win</span><span></span></div><ol class="hl" tabindex="0" aria-label="Last rounds">${rows}</ol></div>`:`<div class="h-wrap"><p class="empty">No rounds yet. Press Play.</p></div>`;
  layer.innerHTML=frame('hist','History',body,`<footer class="ft"><span>Last ${H.length} rounds</span></footer>`);

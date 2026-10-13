@@ -1,6 +1,7 @@
 // Blackout Party — окно «Autoplay» в стиле F (владелец 2026-10-11: «сделай нормальный дизайн для автоигры»).
 // Подключается после dialogs-f.js и до ui.js. ui.js autoplay() зовёт DlgF.auto(ctx), если DlgF.on() (то есть без ?dlg=old); логика старта автоигры остаётся в ui.js (ctx.setAuto, ctx.spin).
-// Оболочка (рама, лента, винт, плита, заголовок, разделители) — общая, из dialogs-f.css/js. Свои стили окна — dialogs-f-auto.css; их текст берём так же, как у общих:
+// Оболочка (рама, лента, винт, плита, заголовок, разделители) — общая, из dialogs-f.css/js; с 2026-10-13 окно в чистом виде, как Buy bonus: раму, ленту и плиту снимает dialogs-f-auto.css, затемнение ставим здесь (фон хоста).
+// Свои стили окна — dialogs-f-auto.css; их текст берём так же, как у общих:
 // локально это <link id="bp-dlgauto" media="not all"> (читаем fetch-ем при загрузке страницы), в сборке артефакта — <style id="bp-dlgauto" media="not all">.
 // Шрифты и разделители у этого окна зафиксированы по выбору владельца: набор 2 (Black Ops One мелко для подписей, кнопок, пунктов и чисел; Barlow — только длинная фраза) и разделитель 2 (латунная линейка с заклёпками).
 (()=>{
@@ -24,6 +25,7 @@ const IC={
 function auto(C){
  const GS=C.GS; let n=DEF_N;
  const w=C.el('div','bp-wrap'); w.setAttribute('role','dialog'); w.setAttribute('aria-modal','true'); w.setAttribute('aria-label','Autoplay'); C.takeRet(w);
+ Object.assign(w.style,{background:'radial-gradient(ellipse 72% 66% at 50% 46%,rgba(14,5,4,.8) 0%,rgba(9,3,3,.88) 58%,rgba(3,1,1,.95) 100%)',backdropFilter:'none',webkitBackdropFilter:'none'}); // затемнение как у Buy bonus (#fmenu): окно без панели, без размытия
  const {sh,stage,layer}=D.shell(w,false,cssText());
  stage.dataset.type='2'; stage.dataset.line='2'; // выбор владельца: набор шрифтов 2 и разделитель 2 (переключатели ?dlgtype / ?dlgline этого окна не меняют)
  const tiles=COUNTS.map(v=>`<button type="button" class="a-n" role="radio" aria-checked="${v===n}" aria-label="${v} spins" data-n="${v}" tabindex="${v===n?0:-1}">${v}</button>`).join('');

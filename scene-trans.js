@@ -138,7 +138,9 @@ function enter(){
  if(v){ const [k,ts]=v.split(':'); if(KINDS[k]&&(Date.now()-(+ts)<TTL)) kind=k; }
  if(!kind){ kind='fade'; boot=true; } // холодный запуск: тёмный экран и проявление
  const c=mount(kind,true), guard=setTimeout(()=>unmount(c),9000); flag(true);
- ready(kind,boot).then(()=>{ if(cur!==c) return; c.R.style.pointerEvents='none'; const k=boot?(reduced()?1:1.6):speedK();
+ const underBoot=boot&&!!document.getElementById('boot'); // холодный старт под экраном загрузки (#boot в index.html): он уже закрывает страницу — второй проявки не нужно
+ ready(kind,boot).then(()=>{ if(cur!==c) return; if(underBoot){ flag(false); unmount(c); return; } // шторка просто снимается, дальше загрузчик сам тает над готовой сценой: одно непрерывное проявление
+  c.R.style.pointerEvents='none'; const k=boot?(reduced()?1:1.6):speedK();
   setTimeout(()=>{ if(cur===c) flag(false); },REVEAL[kind]*k); // окна новой страницы (ворота бонуса) начинают появляться, когда шторка приоткрыла сцену, а не раньше: иначе они успевают выехать под закрытой шторкой
   return Promise.race([c.t.lift(k),wait(3000)]); }).catch(()=>{}).then(()=>{ clearTimeout(guard); unmount(c); }); }
 

@@ -1,61 +1,59 @@
-// Blackout Party — окно Buy bonus «Афиши на доске» (владелец 2026-10-12, вариант 1 из feature-cards.html: «мне нравится, но доработай картинки и плашку»).
-// Разметка окна одним местом: её зовут и игра (index.html?bpv=6c80e99c: fmenuHTML, ui.js: fpick — второй шаг покупки), и эскиз feature-cards.html. Стили — buy-board.css (префикс bb-/po-).
-// Окно — доска объявлений в пиццерии из потёртой красной стали (рама как у поля слота; раньше орех и пробка), планка-шапка (название, баланс, ставка, крестовой винт закрытия),
-// афиши на магнитах-«булавках» (режимы: ряд ламп накаливания, штамп NOW PLAYING) и на скотче (покупки: «Камеры» — SUPER SHOW, двойная рамка и красный «+»).
+// Blackout Party — окно Buy bonus в чистом виде, как в эталоне berserk-mode (2026-10-13): без доски, рамы и афиш — содержимое стоит прямо на затемнённой игре.
+// Разметка окна одним местом: её зовут игра (index.html?bpv=b0d45272: fmenuHTML, ui.js: fpick — второй шаг покупки) и эскиз feature-cards.html. Стили — buy-board.css (префикс bb-).
+// Сверху название и ставка ‹ ›, крестовой винт закрытия в углу; раздел SPIN MODE — по строке на режим; раздел BUY BONUS — карточки в ряд; внизу RTP и максимальный выигрыш.
+// Всё строится из данных (MODES в index.html, цена = ставка × m.x): цены и тексты здесь не записаны.
 // Логика не здесь: BuyBoard.window(o) / BuyBoard.confirm(o,m) только возвращают HTML.
-// o: { modes:[{k,nm,img,d,x,kind:'mode'|'buy',tier}], bet, bal, on (ключ включённого режима или null), money(v), A (папка assets, с «/» на конце), screw() — SVG винта, inline:{pick,bet,close} — готовые строки onclick (в эскизе не нужны), mini — картинка чипа «KITCHEN +» }
+// o: { modes:[{k,nm,img,d,x,kind:'mode'|'buy',tier}], bet, bal, on (ключ включённого режима или null), money(v), A (папка assets, с «/» на конце), screw() — SVG винта,
+//      inline:{pick,bet,close} — готовые строки onclick (в эскизе не нужны), rtp (строка, '96.00%'), prov (true — значения черновые), maxx (максимальный выигрыш, × ставки) }
 (()=>{
  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
- const GROUPS={m:['SPIN MODES','Stay on until turned off'],b:['BONUS BUYS','One purchase · starts at once']};
- // лампа накаливания: латунный цоколь с резьбой, стеклянная колба, вольфрамовая нить на двух стойках (SVG 16×28; градиент bb-gl лежит в defs окна)
- const bulb=`<span class="bb-bulb" aria-hidden="true"><svg viewBox="0 0 16 28" focusable="false"><rect x="5" y="0" width="6" height="7.4" rx="1" class="cap"/><path d="M5 2.4h6M5 4h6M5 5.6h6" class="thr"/>
-  <path d="M5.3 7.2C5.3 9.4 1.4 11 1.4 16.4c0 5 3.1 8.8 6.6 8.8s6.6-3.8 6.6-8.8c0-5.4-3.9-7-3.9-9.2z" class="gl"/>
-  <path d="M6.6 7.6l-.3 5.6M9.4 7.6l.3 5.6" class="pst"/><path d="M6.3 13.2l.9-1.5.9 2.6.9-2.6.9 2.6.8-1.1" class="fil"/><path d="M3.6 13.4c.1-1.8 1-3 2.1-3.7" class="hi"/></svg></span>`;
- const pin=`<i class="po-pin" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><ellipse cx="14" cy="16" rx="8" ry="4.6" fill="#000" opacity=".42"/><circle cx="11" cy="11.4" r="8" fill="#2a0a06"/><circle cx="11" cy="10.4" r="6.8" fill="#8a2a1e"/><circle cx="11" cy="10.4" r="3.6" fill="#6c1f16"/></svg></i>`;
- const defs=`<svg class="bb-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
-  <radialGradient id="bb-gl" cx="46%" cy="42%" r="62%"><stop offset="0" stop-color="#fffbe6"/><stop offset=".45" stop-color="#ffd985"/><stop offset="1" stop-color="#e8962a"/></radialGradient>
-  <filter id="bb-ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".95" numOctaves="2" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 3.35" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter></defs></svg>`;
+ const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+ // описание «10 free spins · counter grows…»: до точки — подзаголовок на плашке названия, после — строка под картинкой
+ const split=d=>{ const p=String(d||'').split(' · '); return p.length>1?{sub:p[0],line:cap(p.slice(1).join(' · '))}:{sub:'',line:cap(p[0])}; };
+ const chev=d=>`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d<0?'M15 5l-7 7 7 7':'M9 5l7 7-7 7'}"/></svg>`;
+ const xstr=o=>Number(o.maxx||0).toLocaleString('en-US');
 
- function poster(o,m,conf){
-  const mode=m.kind==='mode', t2=m.tier===2, on=o.on===m.k, pr=o.bet*m.x, off=!on&&o.bal<pr, mn=o.money;
-  const nd=String(mn(pr)).replace(/\s+[A-Z]{2,4}$/,'').length; // число знаков суммы без кода валюты — подгонка размера цены под ширину афиши (CSS, --n)
-  const need=Math.max(0,pr-o.bal), I=o.inline;
-  const kick=mode?'EVERY SPIN':(t2?'SUPER SHOW':'THE SHOW');
-  const pips=mode?'':`<span class="po-pips" aria-hidden="true"><i class="on"></i><i${t2?' class="on"':''}></i></span><span class="po-sr">Tier ${m.tier} of 2</span>`;
-  const deco=mode?`<div class="po-bar" aria-hidden="true"><i class="po-sc l"></i>${bulb.repeat(4)}<i class="po-sc r"></i></div>${pin}`:`<i class="po-tape l" aria-hidden="true"></i><i class="po-tape r" aria-hidden="true"></i>`;
-  const stamp=on?`<span class="po-stamp"><span>NOW PLAYING</span></span>`:'';
-  const slip=off?`<span class="po-stamp po-need" id="need-${m.k}"><span>NEED ${mn(need)} MORE</span></span>`:'';
-  const mini=t2&&o.mini?`<span class="po-mini"><img src="${o.A}${o.mini}" alt="">KITCHEN +</span>`:'';
-  const plus=t2?`<i class="po-plus" aria-hidden="true">+</i>`:'';
-  const lab=mode?(on?'TURN OFF':'TURN ON'):(conf?'BUY':'BUY BONUS');
-  const sw=mode?`<i class="tg" aria-hidden="true"></i>`:'';
-  const idg=conf?'bp-buy':'bu-go-'+m.k;
-  const click=conf?'':(I?` onclick="${I.pick(m.k)}"`:'');
-  const dis=off?` aria-disabled="true" aria-describedby="need-${m.k}"`:'';
-  return `<article class="po ${mode?'po-m':'po-b'}${t2?' t2':''}${on?' on':''}${off?' off':''}">${plus}${deco}<div class="po-p">
-   <div class="po-k">${pips}<span>${kick}</span></div>
-   <div class="po-il"><img src="${o.A}${m.img}" alt="">${mini}${stamp}${slip}</div>
-   <h3 class="po-nm" id="nm-${m.k}">${esc(m.nm)}</h3><p class="po-d">${esc(m.d)}</p>
-   <div class="po-st"><div class="po-pr" style="--n:${nd}"><b>${mn(pr)}</b><small class="po-cap">${mode?'per spin':m.x+'× bet'}</small>${off?`<small class="po-nt" aria-hidden="true">NEED ${mn(need)} MORE</small>`:''}</div>
-   <button class="act po-go" id="${idg}" data-k="${m.k}" aria-labelledby="${idg} nm-${m.k}"${dis}${click}>${sw}<span>${lab}</span></button></div></div></article>`; }
+ function close(o){ const I=o.inline||{}; return `<button class="bu-x bb-x" aria-label="Close"${I.close?` onclick="${I.close}"`:''}>${o.screw()}</button>`; }
 
- function rail(o,title,withBet){
+ function top(o,title,withBet){
   const I=o.inline||{}, mn=o.money;
-  const bet=withBet?`<div class="bb-bet"><button class="bb-key" aria-label="Bet down" data-bd${I.bet?` onclick="${I.bet(-1)}"`:''}><span aria-hidden="true">−</span></button><div class="bb-ro bb-rbet"><small>BET</small><b>${mn(o.bet)}</b></div><button class="bb-key" aria-label="Bet up" data-bu${I.bet?` onclick="${I.bet(1)}"`:''}><span aria-hidden="true">+</span></button></div>`:'<span></span>';
-  return `<header class="bb-top"><div class="bb-ro bb-bal"><small>BALANCE</small><b style="--n:${String(mn(o.bal)).length}">${mn(o.bal)}</b></div><div class="bb-h" role="heading" aria-level="2">${esc(title)}</div>${bet}
-   <button class="bu-x bb-x" aria-label="Close"${I.close?` onclick="${I.close}"`:''}>${o.screw()}</button></header>`; }
+  const bet=withBet?`<div class="bb-bet"><button class="bb-key" aria-label="Bet down" data-bd${I.bet?` onclick="${I.bet(-1)}"`:''}>${chev(-1)}</button>
+   <div class="bb-bv"><small>BET</small><b aria-live="polite">${mn(o.bet)}</b></div><button class="bb-key" aria-label="Bet up" data-bu${I.bet?` onclick="${I.bet(1)}"`:''}>${chev(1)}</button></div>`:'';
+  return `<header class="bb-top"><h2 class="bb-h" id="bb-t">${esc(title)}</h2>${bet}</header>`; }
 
- function group(o,g,list){ const [t,sub]=GROUPS[g]; const id='gh-'+g;
-  return `<section class="bb-g bb-g${g}" aria-labelledby="${id}"><div class="bb-gh"><h3 class="bb-lab" id="${id}">${t}</h3><p class="bb-sub">${sub}</p></div><div class="bb-row">${list.map(m=>poster(o,m)).join('')}</div></section>`; }
+ // режим: строка — значок, название и строка, цена за спин, кнопка
+ function modeRow(o,m){
+  const on=o.on===m.k, pr=o.bet*m.x, off=!on&&o.bal<pr, mn=o.money, I=o.inline, t=split(m.d), id='bu-go-'+m.k;
+  const need=off?`<small class="bb-need" id="need-${m.k}">NEED ${mn(pr-o.bal)} MORE</small>`:'';
+  return `<article class="bb-mode${on?' on':''}${off?' off':''}">
+   <img class="bb-ic" src="${o.A}${m.img}" alt="">
+   <div class="bb-mt"><h4 class="bb-mn" id="nm-${m.k}">${esc(m.nm)}${on?'<span class="bb-chip">ACTIVE</span>':''}</h4><p class="bb-ml">${esc(t.line)}</p></div>
+   <div class="bb-mp"><b>${mn(pr)}</b><small>PER SPIN</small>${need}</div>
+   <button class="act bb-go bb-tg" id="${id}" data-k="${m.k}" aria-pressed="${on}" aria-labelledby="${id} nm-${m.k}"${off?` aria-disabled="true" aria-describedby="need-${m.k}"`:''}${I?` onclick="${I.pick(m.k)}"`:''}><span>${on?'TURN OFF':'ACTIVATE'}</span></button></article>`; }
+
+ // покупка: плашка названия, картинка, строка, цена в ставках, красная кнопка с суммой; conf — второй шаг (одна большая карточка, кнопка без суммы)
+ function card(o,m,conf){
+  const pr=o.bet*m.x, off=o.bal<pr, mn=o.money, I=o.inline, t=split(m.d), id=conf?'bp-buy':'bu-go-'+m.k;
+  const need=off?`<small class="bb-need" id="need-${m.k}">NEED ${mn(pr-o.bal)} MORE</small>`:'';
+  const price=conf?`<p class="bb-tag"><span>${m.x}× BET</span><i aria-hidden="true">·</i><b>${mn(pr)}</b></p>`:`<p class="bb-cost">${m.x}× BET</p>`;
+  return `<article class="bb-card${m.tier===2?' t2':''}${off?' off':''}${conf?' big':''}">
+   <div class="bb-pl"><h4 class="bb-cn" id="nm-${m.k}">${esc(m.nm)}</h4>${t.sub?`<span class="bb-cs">${esc(t.sub)}</span>`:''}</div>
+   <img class="bb-art" src="${o.A}${m.img}" alt="">
+   <p class="bb-cl">${esc(t.line)}</p>${price}
+   <button class="act bb-go bb-buy" id="${id}" data-k="${m.k}" aria-labelledby="${id} nm-${m.k}"${off?` aria-disabled="true" aria-describedby="need-${m.k}"`:''}${!conf&&I?` onclick="${I.pick(m.k)}"`:''}><span>${conf?'BUY':'BUY '+mn(pr)}</span></button>${need}</article>`; }
+
+ const foot=o=>`<p class="bb-foot">RTP ${esc(o.rtp||'96.00%')}${o.prov===false?'':' (provisional)'}${o.maxx?` · MAX WIN ${xstr(o)}× THE BET`:''}</p>`;
 
  window.BuyBoard={
-  // всё окно (список режимов и покупок)
+  // всё окно: режимы и покупки
   window(o){ const M=o.modes.filter(m=>m.kind==='mode'), B=o.modes.filter(m=>m.kind==='buy');
-   return `<div class="bb bu-buy" role="dialog" aria-modal="true" aria-label="Buy bonus">${defs}<div class="bb-in">${rail(o,'BUY BONUS',true)}
-    <div class="bb-body">${group(o,'m',M)}<i class="bb-div" aria-hidden="true"></i>${group(o,'b',B)}</div></div></div>`; },
-  // второй шаг покупки: одна афиша, кнопка BUY и тихая «Back»; внутренность окна (корень .bb.bb-sm создаёт ui.js)
-  confirm(o,m){ const c={...o,on:null};
-   return `${defs}<div class="bb-in">${rail(c,m.nm,false)}<div class="bb-body bb-conf">${poster(c,m,true)}<button class="bb-back" id="bp-back">Back</button></div></div>`; },
-  defs
+   const gm=M.length?`<section class="bb-g bb-gm" aria-labelledby="gh-m"><h3 class="bb-lab" id="gh-m"><span>SPIN MODE</span></h3>${M.map(m=>modeRow(o,m)).join('')}</section>`:'';
+   const gb=B.length?`<section class="bb-g bb-gb" aria-labelledby="gh-b"><h3 class="bb-lab" id="gh-b"><span>BUY BONUS</span></h3><div class="bb-cards">${B.map(m=>card(o,m)).join('')}</div></section>`:'';
+   return `<div class="bb" role="dialog" aria-modal="true" aria-labelledby="bb-t"><div class="bb-in"><div class="bb-col">${top(o,'FEATURES',true)}${gm}${gb}${foot(o)}</div></div>
+    ${close(o)}<span class="bb-more" aria-hidden="true" hidden>MORE BONUSES <svg viewBox="0 0 24 24" focusable="false"><path d="M6 9l6 6 6-6"/></svg></span></div>`; },
+  // второй шаг покупки: та же сцена, одна большая карточка, «200× BET · $200.00», BUY без суммы; стрелка назад слева сверху; ставка здесь не меняется. Внутренность окна (корень .bb.bb-sm создаёт ui.js)
+  confirm(o,m){
+   return `<div class="bb-in"><div class="bb-col">${top(o,m.nm,false)}<div class="bb-conf">${card(o,m,true)}</div></div></div>
+    <button class="bb-back" id="bp-back" aria-label="Back to features">${chev(-1)}</button>${close(o)}`; }
  };
 })();

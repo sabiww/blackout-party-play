@@ -29,7 +29,7 @@ function hold(){ // зовёт ui.js ПЕРЕД тем, как поменять 
  clearTimeout(watch); watch=setTimeout(()=>{ if(!pending&&!busy) release(); },25000); } // страховка: если раунд оборвали, окошко не застревает на старом числе
 function release(){ SKV.on=false; X.hudUpdate(); }
 function refresh(){ X.hudUpdate(); }
-function setVV(v){ const e=vv(); if(e) e.textContent=money(v); }
+function setVV(v){ const e=vv(); if(e) e.textContent=money.win(v); }
 function flashLamp(i){ window.bpAudio&&bpAudio.play('sack.lamp_on'); const h=hw(), l=h&&h.querySelectorAll('.lp')[i]; if(!l||RM()) return; l.classList.remove('fl'); void l.offsetWidth; l.classList.add('fl'); setTimeout(()=>l.classList.remove('fl'),700); }
 const winPt=()=>{ const e=vv(); if(!e) return null; const b=e.getBoundingClientRect(); return [b.left+b.width/2,b.top+b.height/2]; };
 // soft(kf): гладкая кривая через ключевые кадры (smoothKF, ui.js) + копия первого кадра на .001 — ход стартует с нулевой скоростью и набирает её плавно, без «выстрела» с места;
@@ -185,7 +185,7 @@ function maybePeek(from,ps){
  setTimeout(()=>{ if(box.isConnected) box.remove(); },3500); }
 
 function mkLabel(amount){ const f=$('field'), F=f.getBoundingClientRect(), cw=Math.min(F.width/6,F.height/5), e=el('div','wl sk'); e.style.setProperty('--amt',(cw*.5).toFixed(1)+'px'); e.style.setProperty('--fm',Math.max(11,cw*.2).toFixed(1)+'px');
- e.innerHTML=`<div class="amt">${money(amount)}</div><div class="fm">SACK — PAID AGAIN</div>`; X.wlLayer().append(e); return {e,k:Math.min(1,F.width*.9/e.offsetWidth),cx:F.left+F.width/2,cy:F.top+F.height/2,cw}; }
+ e.innerHTML=`<div class="amt">${money.win(amount)}</div><div class="fm">SACK — PAID AGAIN</div>`; X.wlLayer().append(e); return {e,k:Math.min(1,F.width*.9/e.offsetWidth),cx:F.left+F.width/2,cy:F.top+F.height/2,cw}; }
 // ---------- четвёртая кража: три варианта высыпания (владелец 2026-10-11: «давай 1, 2 вариант и ещё доработай вариант как сейчас, но естественный, с плавными анимациями через OpenRouter») ----------
 // Всё движение — в роликах (Kling через OpenRouter, ключ с синего фона в WebM/HEVC с альфой, tools/clip_sack_build.py); код только ставит ролик, плавно двигает его по прямой (въезд/уход лапы), считает число и летит монетами в строку WIN.
 //  ?sackfx=pawempty (по умолчанию, 2026-10-12) — та же лапа, мешок пустеет и обмякает (ролик KS-pawempty, версия 1, 6,2 с); лапу уводит код;
@@ -348,9 +348,9 @@ async function dump(amount,o){
  try{
   SKV.on=true; SKV.v=amount; SKV.n=SN; refresh();
   const h=hw(), f=$('field'), res=document.querySelector('#result b');
-  if(window.__sim||!h||!f||(fast()&&!RM())){ SKV.v=0; SKV.n=0; SKV.on=false; refresh(); if(o.to!=null) X.setResult(o.to); if(!window.__sim&&f&&fast()){ try{ X.special(money(amount),'SACK — PAID AGAIN'); }catch(e){} } if(o.lift) await o.lift(); return; }
+  if(window.__sim||!h||!f||(fast()&&!RM())){ SKV.v=0; SKV.n=0; SKV.on=false; refresh(); if(o.to!=null) X.setResult(o.to); if(!window.__sim&&f&&fast()){ try{ X.special(money.win(amount),'SACK — PAID AGAIN'); }catch(e){} } if(o.lift) await o.lift(); return; }
   if(RM()){ // «меньше движения»: короткая смена состояния — надпись, окошко $0.00, строка WIN
-   window.bpAudio&&bpAudio.play('sack.paid_again'); SKV.v=0; SKV.n=0; SKV.on=false; refresh(); X.setResult(o.to); const e=X.special(money(amount),'SACK — PAID AGAIN'); await real(1000); if(o.lift) await o.lift(); return; }
+   window.bpAudio&&bpAudio.play('sack.paid_again'); SKV.v=0; SKV.n=0; SKV.on=false; refresh(); X.setResult(o.to); const e=X.special(money.win(amount),'SACK — PAID AGAIN'); await real(1000); if(o.lift) await o.lift(); return; }
   const F=f.getBoundingClientRect(), ps=X.pitch()||90, c={h,f,res,F,ps}; pay=c.pay=mkPay(amount,o,c);
   // 1) 4/4: окошко «готово» — читается, что мешок полон
   h.classList.add('ready'); bump(1); window.bpAudio&&bpAudio.play('sack.dump',{delay:350}); await X.sleep(300);

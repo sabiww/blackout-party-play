@@ -3,7 +3,7 @@
 // Макет, не игра. Подключается ПЕРВЫМ в <head> (до всех стилей игры): ставит <html data-plates="note|old"> — весь вид записок включается только под этим атрибутом (plates-note.css, dialogs-f-note.css).
 // Выбор: адрес ?plates=dark|note|old (главнее), sessionStorage 'bp-plates' (тест-панель, раздел «Плашки»), по умолчанию dark. «old» — прежний вид всех плашек без изменений.
 // API: bpPlates.mode() → 'note'|'old'; bpPlates.on(); bpPlates.set('old'|'note') — запоминает выбор и перезагружает страницу (окна F живут в shadow DOM и читают стиль при создании);
-//      bpPlates.toast(text[, ms]) — записка-уведомление у нижнего края поля («NOT ENOUGH BALANCE» и др.), в режиме old ничего не рисует.
+//      bpPlates.toast(text[, ms]) — записка-уведомление у нижнего края поля («Not enough balance» и др.), в режиме old ничего не рисует. ms<0 — висит, пока её не уберут: bpPlates.hide([text]).
 (()=>{
 'use strict';
 const KEY='bp-plates';
@@ -18,14 +18,17 @@ function toast(text,ms){
  if(mode()==='old'||!document.body) return;
  let t=document.getElementById('pn-toast');
  if(!t){ t=document.createElement('div'); t.id='pn-toast'; t.setAttribute('role','status'); t.setAttribute('aria-live','polite'); document.body.append(t); }
- t.innerHTML='<span class="pn-t-in"></span>'; t.firstChild.textContent=text;
- const pod=document.getElementById('pod'), r=pod&&pod.getBoundingClientRect(); // записка стоит над пультом, по его центру (нет пульта — по центру экрана)
+ const keep=t.classList.contains('on')&&t.dataset.keep==='1'&&ms<0&&t.textContent===text; // та же висящая записка: только переставляем, без новой вспышки
+ if(!keep){ t.innerHTML='<span class="pn-t-in"></span>'; t.firstChild.textContent=text; }
+ t.dataset.keep=ms<0?'1':'';
+ const pod=document.getElementById('pod'), r=pod&&window.bpPodRect&&window.bpPodRect(); // записка стоит над пультом, по его центру (нет пульта — по центру экрана)
  if(r&&r.width){ t.style.left=Math.max(8,Math.min(innerWidth-8,r.left+r.width/2))+'px'; t.style.top=Math.max(60,r.top-12)+'px'; } else { t.style.left='50%'; t.style.top=(innerHeight*.8)+'px'; }
- t.classList.remove('on'); void t.offsetWidth; t.classList.add('on');
- clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('on'),ms||2600);
+ if(!keep){ t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
+ clearTimeout(tT); if(!(ms<0)) tT=setTimeout(()=>t.classList.remove('on'),ms||2600);
 }
-window.bpPlates={mode,on:()=>mode()==='note',dark:()=>mode()==='dark',apply,toast,
+function hide(text){ const t=document.getElementById('pn-toast'); if(!t||!t.classList.contains('on')||(text&&t.textContent!==text)) return; clearTimeout(tT); t.dataset.keep=''; t.classList.remove('on'); }
+window.bpPlates={mode,on:()=>mode()==='note',dark:()=>mode()==='dark',apply,toast,hide,
  set(v){ if(!OK.includes(v)) return; ss.set(KEY,v); let u=null; try{ u=new URL(location.href); u.searchParams.delete('plates'); }catch(e){} if(u) location.replace(u.toString()); else location.reload(); }};
-// страница могла открыться без запроса, а q (index.html?bpv=6c80e99c) прочитать адрес позже — подстрахуемся после загрузки
+// страница могла открыться без запроса, а q (index.html?bpv=b0d45272) прочитать адрес позже — подстрахуемся после загрузки
 document.addEventListener('DOMContentLoaded',apply);
 })();

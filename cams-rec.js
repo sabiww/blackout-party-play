@@ -38,6 +38,8 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const idx=x=>Array.isArray(x)?x[0]*COLS+x[1]:+x;
 const uniq=a=>[...new Set([].concat(a==null?[]:a).map(idx))].filter(i=>Number.isInteger(i)&&i>=0&&i<N);
 const fmt=m=>m>=10000?Math.round(m/1000)+'K':String(m);
+const REC_ONLY=()=>window.CamRecLabel==='rec'; // математика 2.0.0 (2026-10-13): метки только показывают кражу и не умножают выигрыш — вместо «×N» надпись REC (цвет ступени остаётся: чем чаще кражи на клетке, тем горячее)
+const lab=m=>REC_ONLY()?'<em>REC</em>':'<em>'+fmt(m)+'</em>';
 const tierOf=m=>m>=64?5:m>=16?4:m>=8?3:m>=4?2:1; // ступени: 1 ×2–3 крем, 2 ×4–7 янтарь, 3 ×8–15 янтарь с кольцом, 4 ×16–63 красный, 5 ×64+ красный с пульсацией
 const jit=i=>(((i+3)*2654435761)>>>0)%100/100; // постоянный «случайный» сдвиг клетки 0..1: одинаковые экраны не двигаются в унисон
 const RMq=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
@@ -207,14 +209,14 @@ addEventListener('resize',()=>{ if(S.field) layout(); });
 /* ---------- метки на мониторах: рамка + подкраска экрана + число ---------- */
 const roOf=i=>S.c[i]&&S.c[i].querySelector(':scope>.cr-b');
 const cancelAll=e=>e&&e.getAnimations({subtree:true}).forEach(a=>{ try{ a.cancel(); }catch(x){} });
-const digits=m=>fmt(m).length>2?3:1;
-function roEl(m){ const b=mk('div','cr-b','<span class="cr-x"><b>×</b><span class="cr-n"><em>'+fmt(m)+'</em></span></span>'); b.dataset.t=tierOf(m); b.dataset.d=digits(m); b.dataset.m=m; return b; }
+const digits=m=>REC_ONLY()||fmt(m).length>2?3:1;
+function roEl(m){ const b=mk('div','cr-b','<span class="cr-x">'+(REC_ONLY()?'':'<b>×</b>')+'<span class="cr-n">'+lab(m)+'</span></span>'); b.dataset.t=tierOf(m); b.dataset.d=digits(m); b.dataset.m=m; return b; }
 const peakK=(i,b,max)=>{ const R=S.R[i]; if(!R) return max; const fz=parseFloat(getComputedStyle(b).fontSize)||16, avail=R[2]*(1-INS/100)-R[2]*.09-fz*.07-1, w=b.offsetWidth||1; return clamp(avail/w,1.04,max); }; // пик пульса числа: растёт от левого-нижнего угла и не должен уйти за правый край экрана (×128 на телефоне)
 function tierSet(i,t){ const m=S.m[i], c=S.c[i], b=roOf(i); if(!m||!c) return; m.dataset.t=t; c.dataset.t=t; if(b) b.dataset.t=t; }
 function stillSync(o){ if(!S.skin) return; const bt=window.bpTime, rm=o&&o.rmRaw!=null?o.rmRaw:(bt&&bt.RM?!!bt.RM():RMq()); S.skin.classList.toggle('cr-still',!!rm); } // «меньше движения»: пульсация ×64+ стоит
 function setMark(i,m){ // без анимации
  const c=S.c[i], mon=S.m[i]; if(!c) return; let b=roOf(i); cancelAll(b); cancelAll(mon);
- if(m>0){ if(!b){ b=roEl(m); c.append(b); } else { b.querySelector('.cr-n').innerHTML='<em>'+fmt(m)+'</em>'; b.dataset.d=digits(m); b.dataset.m=m; b.classList.remove('hot'); } tierSet(i,tierOf(m)); }
+ if(m>0){ if(!b){ b=roEl(m); c.append(b); } else { b.querySelector('.cr-n').innerHTML=lab(m); b.dataset.d=digits(m); b.dataset.m=m; b.classList.remove('hot'); } tierSet(i,tierOf(m)); }
  else { if(b) b.remove(); delete mon.dataset.t; delete c.dataset.t; }
  mon.classList.remove('hot'); mon.classList.toggle('on',m>0); S.st[i]=m>0?m:0; }
 async function rec(i,mult,opts){
@@ -357,10 +359,10 @@ function targetOf(op,list){
  if(t&&typeof t.x==='number') return {el:null,x:t.x,y:t.y,w:t.w||0,h:t.h||0};
  const p=list.map(cellCenter); return {el:null,x:p.reduce((a,v)=>a+v[0],0)/p.length,y:p.reduce((a,v)=>a+v[1],0)/p.length,w:0,h:0}; }
 function tween(o,a,ms){ // счёт числа в надписи суммы
- if(!a||!a.el) return Promise.resolve(); const f=a.fmt||(v=>'$'+v.toFixed(2)), from=+a.from, to=+a.to; if(!(isFinite(from)&&isFinite(to))) return Promise.resolve();
+ if(!a||!a.el) return Promise.resolve(); const f=a.fmt||(v=>window.bpMoney?bpMoney.win(v):'$'+v.toFixed(2)), from=+a.from, to=+a.to; if(!(isFinite(from)&&isFinite(to))) return Promise.resolve();
  if(o.fast||o.rm||o.K<=0){ a.el.textContent=f(to); return Promise.resolve(); }
  return new Promise(res=>{ const d=ms*o.K, t0=performance.now(); const st=n=>{ const k=clamp((n-t0)/d,0,1); a.el.textContent=f(from+(to-from)*(1-Math.pow(1-k,3))); if(k<1&&!o.fast) requestAnimationFrame(st); else { a.el.textContent=f(to); res(); } }; requestAnimationFrame(st); }); }
-const amtFinal=a=>{ if(a&&a.el&&isFinite(+a.to)) a.el.textContent=(a.fmt||(v=>'$'+v.toFixed(2)))(+a.to); };
+const amtFinal=a=>{ if(a&&a.el&&isFinite(+a.to)) a.el.textContent=(a.fmt||(v=>window.bpMoney?bpMoney.win(v):'$'+v.toFixed(2)))(+a.to); };
 async function showMath(cells,factor,opts){
  const op=opts&&typeof opts==='object'?opts:{}, o=norm(op), list=uniq(cells).filter(i=>S.st[i]>0&&S.c[i]);
  let landed=false; const land=()=>{ if(landed) return; landed=true; try{ op.onLand&&op.onLand(total); }catch(e){ console.error(e); } };

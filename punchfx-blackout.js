@@ -41,7 +41,7 @@ window.bpPunchFx.blackout=async ctx=>{
  const dark=add(document.body,mk('div','pbo-dark')), glow=add(document.body,mk('div','pbo-glow')); let live=true;
  try{
   // плашки интерфейса: свет на них приподнят, чтобы пульт и множитель читались и в темноте
-  [...document.querySelectorAll('#pod,#alt>*,#hud>*,#sign,#features')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>10&&r.height>10&&r.width*r.height<innerWidth*innerHeight*.2&&r.bottom>0&&r.top<innerHeight).forEach(r=>{ const n=mk('i',null,'lift'); n.style.cssText=bpvT`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`; dark.append(n); });
+  [...document.querySelectorAll('#pod:not(.scat),#pod.scat>.grp,#alt>*,#hud>*,#sign,#features')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>10&&r.height>10&&r.width*r.height<innerWidth*innerHeight*.2&&r.bottom>0&&r.top<innerHeight).forEach(r=>{ const n=mk('i',null,'lift'); n.style.cssText=bpvT`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`; dark.append(n); });
   const lit=cone(yT-18*u,yB+18*u,yaL,yT,.55*cw,Math.max(.11*cw,6),1,22*u,22*u,.93,'255,255,255'), rl=rig(dark,yaL); rl.append(lit);
   const hz=cone(-30,yB+8*u,yaH,yT,.6*cw,.35*cw,.17,50,90,.4,'255,206,128'), rh=rig(glow,yaH); rh.append(hz);
   A(dark,[...DOWN.map(([t,v])=>[t,{opacity:v},'ease-in-out']),...UP.map(([t,v])=>[Tup+t,{opacity:v},'ease-in-out'])]);

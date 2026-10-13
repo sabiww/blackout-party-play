@@ -1,7 +1,7 @@
 /* Blackout Party — экран приветствия W2 (владелец 2026-10-10: «пульт охраны с янтарной линзой PLAY»).
    Источник эскиза: mockup/welcome-v2.html?v=2 (там же старые W1/W3 — в игру не переносились). Стили — ui.css, раздел «экран приветствия W2».
 
-   Подключение (index.html?bpv=6c80e99c, до ui.js):   <script src="welcome.js"></script>
+   Подключение (index.html?bpv=b0d45272, до ui.js):   <script src="welcome.js"></script>
    API:  Welcome.open(root, onPlay) — заполняет #wel (разметка, размеры по окну, три демонстрации) и ждёт PLAY; onPlay вызывается один раз
                                       по кнопке PLAY, по клику мимо пульта и (через Welcome.play()) по пробелу
          Welcome.play()            — то же, что нажать PLAY (пробел в ui.js)
@@ -64,8 +64,8 @@ function brState(b,t,t0,t1){ // замок: появление t0, пропаж�
 function Amount(hud,x,y,sum){ const e=el('div','amt',`<b>${sum}</b>`); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0`; hud.append(e); return e; }
 const amtSet=(e,op,sc)=>{ e.style.opacity=op.toFixed(3); e.style.transform=`translate(-50%,-50%) scale(${sc.toFixed(3)})`; };
 /* строка WIN: «WIN $0.50», крем + янтарь, Black Ops One, без коробки */
-function WinLine(hud,x,y,align){ const e=el('div','winl','WIN <b>$0.00</b>'); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0;${align==='l'?'transform:none':'transform:translateX(-50%)'}`; hud.append(e); e._b=e.querySelector('b'); e._v=-1; return e; }
-const winSet=(e,op,v)=>{ e.style.opacity=op.toFixed(3); const s='$'+v.toFixed(2); if(e._v!==s){ e._v=s; e._b.textContent=s; } };
+function WinLine(hud,x,y,align){ const e=el('div','winl','WIN <b>'+bpMoney.win(0)+'</b>'); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0;${align==='l'?'transform:none':'transform:translateX(-50%)'}`; hud.append(e); e._b=e.querySelector('b'); e._v=-1; return e; }
+const winSet=(e,op,v)=>{ e.style.opacity=op.toFixed(3); const s=bpMoney.win(v); if(e._v!==s){ e._v=s; e._b.textContent=s; } };
 /* множитель — вариант H (hud-light.html): тонкая красная стальная плашка, внутри стекло с тонкой латунной линией, «×1 ▸ ×2» */
 function Mult(hud,x,y,a,b,c){ const e=el('div','mp',`<div class="g"><span class="x">×</span><span class="v"><i><em>${a}</em><em>${b}</em></i></span><i class="ar"></i><span class="nx">×<span class="nv"><i><em>${b}</em><em>${c}</em></i></span></span></div>`);
  e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0`; hud.append(e); e._v=e.querySelector('.v i'); e._n=e.querySelector('.nv i'); return e; }
@@ -73,7 +73,7 @@ const multSet=(e,op,roll,bump)=>{ e.style.opacity=op.toFixed(3); e._v.style.tran
 /* окошко FREE SPINS: тёмное стекло, янтарь, тонкая красная обводка */
 function Fsw(hud,x,y){ const e=el('div','fsw','<span class="lb">FREE SPINS</span><span class="vv">0</span>'); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0`; hud.append(e); e._v=e.querySelector('.vv'); e._n=-1; return e; }
 /* окошко SACK (как hudItems в ui.js, мельче): подпись, 4 лампы (пустые — мешок спрятан под столом и появится только при высыпании), сумма $0.00 */
-function Sackw(hud,x,y){ const e=el('div','fsw sk',`<span class="lb">SACK<span class="lamps">${'<i class="lp"></i>'.repeat(4)}</span></span><span class="vv">$0.00</span>`); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0`; hud.append(e); e._l=[...e.querySelectorAll('.lp')]; e._f=[0,0,0,0]; return e; }
+function Sackw(hud,x,y){ const e=el('div','fsw sk',`<span class="lb">SACK<span class="lamps">${'<i class="lp"></i>'.repeat(4)}</span></span><span class="vv">${bpMoney.win(0)}</span>`); e.style.cssText=bpvT`left:${x}px;top:${y}px;opacity:0`; hud.append(e); e._l=[...e.querySelectorAll('.lp')]; e._f=[0,0,0,0]; return e; }
 
 /* ---------- каркас экрана ---------- */
 function frameStage(stage,bg,cls){ // слои: cctv (фон, поле, Рокко) — под фильтром; hud — сумма, уголки, множитель — поверх, без фильтра
@@ -93,7 +93,7 @@ function D1(root){
  const L=['chmbho','gkhcbo','htwbkh','ocghpk','kbcbth']; B.fill(L);
  const W=B.S.filter(s=>s.id==='sym-low-hat'||s.id==='sym-wild'), brs=W.map(s=>Bracket(hud,B,s.r,s.c));
  const mx=W.reduce((a,s)=>a+s.c,0)/W.length, my=W.reduce((a,s)=>a+s.r,0)/W.length;
- const amt=Amount(hud,B.sx(mx+.1),B.sy(1.05),'$0.50'), wl=WinLine(hud,120,132); // надпись сдвинута вверх: WILD не закрываем (как wlAnchor в игре)
+ const amt=Amount(hud,B.sx(mx+.1),B.sy(1.05),bpMoney.win(.5)), wl=WinLine(hud,120,132); // надпись сдвинута вверх: WILD не закрываем (как wlAnchor в игре)
  const tIn=.3, tLock=1.75, tAmt=2.12, tWin=2.5, tFade=4.8, tEx=5.05;
  W.forEach((s,i)=>{ s.wi=i; });
  let dim=null;
@@ -122,7 +122,7 @@ function D2(root){
   col.forEach((s,i)=>{ s.rf=4-i; });
   for(let j=0;j<rem;j++){ const rf=rem-1-j, s=B.spr(NEWS[ni++%NEWS.length],c,rf); s.isNew=true; s.rf=rf; s.r0=rf-rem-1; } }
  const wx=W.reduce((a,s)=>a+s.c,0)/W.length, wy=W.reduce((a,s)=>a+s.r,0)/W.length;
- const amt=Amount(hud,B.sx(wx+.1),B.sy(1.05),'$0.50'), wl=WinLine(hud,6,129,'l');
+ const amt=Amount(hud,B.sx(wx+.1),B.sy(1.05),bpMoney.win(.5)), wl=WinLine(hud,6,129,'l');
  const mp=Mult(hud,66,19,1,2,3);
  // Рокко: прозрачный ролик «подзывает и глотает»
  const R=ROCCO, rk=el('div','rk'); rk.style.cssText=bpvT`left:${R.left}px;top:${R.top}px;width:${1280*R.s}px;height:${720*R.s}px`;
@@ -207,7 +207,7 @@ function D3(root){
     Время — секунды части A; всё считается как функция t (стоп-кадр и «меньше движения» берут любой момент). */
  const tIn=.25, tLate=.95, tLock=1.55, S0=1.95, SD=.95, tHold=S0+SD, L0=3.5, LD=.9, tK=3.8, tOut=7.05;
  const tToss=4.75, TOSS=[[1,4],[3,2]], TDUR=.44;                       // [ряд, столбец] клеток, куда ляжет WILD; перелёт 0,44 с, второй билет на 0,12 с позже
- const tCoin=[5.45,5.61,5.77,5.93], CDUR=.32, CSRC=[[1,0],[3,0],[2,1],[4,1]], CSUM=['$0.40','$0.70','$1.20','$1.60']; // четыре кражи: монетка летит из клетки в окошко SACK, на её прилёте загорается лампа
+ const tCoin=[5.45,5.61,5.77,5.93], CDUR=.32, CSRC=[[1,0],[3,0],[2,1],[4,1]], CSUM=[.4,.7,1.2,1.6].map(bpMoney.win); // четыре кражи: монетка летит из клетки в окошко SACK, на её прилёте загорается лампа
  const tFull=tCoin[3]+CDUR;                                            // мешок полон (6,25 с): вспышка окошка, ступень счётчика, FREE SPINS 10 → 13
  const HAND=[193.5,110];                                               // свободная рука Рокко (кадр зеркальный, рука со стороны поля): к ней привязан вылет билетов
  const wt=TOSS.map(([r,c])=>{ const s=BK.spr('w',c,r); s.base=BK.S.find(x=>x!==s&&x.r===r&&x.c===c); return s; });
@@ -258,7 +258,7 @@ function D3(root){
   { const fl=clamp(1-seg(t,tFull,tFull+.5),0,1)*(t>=tFull?1:0); sw.style.transform=`scale(${(lerp(.7,1,clamp(eob(seg(t,tK+.45,tK+.8)),0,1.1))*(1+.07*Math.sin(Math.PI*seg(t,tFull,tFull+.4)))).toFixed(3)})`; sw.classList.toggle('full',t>=tFull); sw.style.setProperty('--fl',fl.toFixed(3)); }
   const sum=tCoin.reduce((n,c,i)=>t>=c+CDUR?i:n,-1); // сколько монеток уже в мешке
   sw._l.forEach((l,i)=>{ const f=t>=tCoin[i]+CDUR?1:0; if(sw._f[i]!==f){ sw._f[i]=f; l.classList.toggle('fl',!!f); } });
-  { const txt=sum<0?'$0.00':CSUM[sum], vv=sw.querySelector('.vv'); if(sw._s!==txt){ sw._s=txt; vv.textContent=txt; } }
+  { const txt=sum<0?bpMoney.win(0):CSUM[sum], vv=sw.querySelector('.vv'); if(sw._s!==txt){ sw._s=txt; vv.textContent=txt; } }
   if(!SC&&inKit) SC=sackC(); // слои кухни показаны только после ставня: размеры окошка читаем, когда они видны
   coins.forEach((e,i)=>{ const p=seg(t,tCoin[i],tCoin[i]+CDUR);
    if(p<=0||p>=1){ e.style.opacity=0; return; }
@@ -291,14 +291,14 @@ return {markup,mount,stop,freeze,unfreeze,now,INST,poster:null};
 /* ---------- разметка ---------- */
 const RTP='RTP 96.0%'; // как в правилах (ui.js RULES, dialogs-f.js, index.html): общей константы пока нет — при смене RTP поправить везде
 const CAM=[['CAM 01','HALL'],['CAM 02','HALL'],['CAM 03','KITCHEN']];
-const CAPS=['<b>8+</b> same symbols anywhere — win','Rocco steals the win — <b>multiplier</b> grows','<span class="cl"><b>3</b> invitations — Kitchen: free spins</span> <span class="cl"><b>4+</b> invitations — Cameras: ×2 ×4 ×8</span>'];
+const CAPS=['<b>8+</b> same symbols anywhere — win','Rocco steals the win — <b>multiplier</b> grows','<span class="cl"><b>3</b> invitations — Kitchen: free spins</span> <span class="cl"><b>4+</b> invitations — Cameras: counter from ×5</span>'];
 const rv=(x,y)=>`<i class="rv" style="left:${x};top:${y}"></i>`;
 const corners=(o='.22em')=>[[o,o],[`calc(100% - ${o} - .42em)`,o],[o,`calc(100% - ${o} - .42em)`],[`calc(100% - ${o} - .42em)`,`calc(100% - ${o} - .42em)`]].map(([x,y])=>rv(x,y)).join('');
 const scr=n=>`<div class="scr" data-dm="${n}" role="img" aria-label="${CAPS[n].replace(/<[^>]+>/g,'')}">${Demos.markup(n)}<div class="camhd"><span>${CAM[n][0]} · <span class="cr">${CAM[n][1]}</span></span></div><div class="glass"></div></div>`;
 function html(){
  return `<div class="wbg"></div><div class="wvig"></div><div class="col">
   <div class="logo"><div class="glow"></div><img class="base" src="${A}ui/logo-base.webp" alt="Blackout Party"><img class="y" src="${A}ui/logo-y.webp" alt=""></div>
-  <div class="wmax"><span class="a">MAX WIN</span><span class="b">25,000×</span></div>
+  <div class="wmax"><span class="a">MAX WIN</span><span class="b">5,000×</span></div>
   <div class="console">${[0,1,2].map(n=>`${n?`<i class="sep">${rv('0','.5em')}<i class="rv" style="bottom:.5em"></i></i>`:''}<div class="bay"><div class="bezel">${corners()}${scr(n)}</div><div class="label"><i class="led"></i><div class="cap">${CAPS[n]}</div></div></div>`).join('')}
    <div class="deck"><button class="plbtn" aria-label="Play"><span class="lens"><i></i></span><span class="engr">${rv('.38em','')}PLAY${rv('calc(100% - .8em)','')}</span></button></div></div>
   <div class="rtp">${RTP}</div></div>`;
@@ -306,7 +306,7 @@ function html(){
 
 /* ---------- размер: одна единица --u на всё окно; режимы wide / short / tall (ширина W2: 1130 — wide, 905 — short) ---------- */
 function fit(wel){
- const S=typeof readSafe==='function'?readSafe({t:0,r:0,b:0,l:0}):{t:0,r:0,b:0,l:0}, W=innerWidth-S.l-S.r, H=innerHeight-S.t-S.b; let mode,u; // без выреза/углов/«домой» (index.html?bpv=6c80e99c readSafe; без выреза 0 — как было)
+ const S=typeof readSafe==='function'?readSafe({t:0,r:0,b:0,l:0}):{t:0,r:0,b:0,l:0}, W=innerWidth-S.l-S.r, H=innerHeight-S.t-S.b; let mode,u; // без выреза/углов/«домой» (index.html?bpv=b0d45272 readSafe; без выреза 0 — как было)
  if(W<H*.9){ mode='tall'; u=Math.min(W/390,H/885,1.25); } // высота: 850 → 885 (2026-10-12: подпись окошка 3 стала в две строки — «Кухня» и «Камеры»)
  else if(H<=520){ mode='short'; u=Math.min(H/465,W/905,1.1); } // 345 → 465: раньше высота почти не ограничивала (ширина была уже), теперь окошко 3 выше на 2–3 строки подписи
  else { mode='wide'; u=Math.min(H/820,W/1130,1.15); }

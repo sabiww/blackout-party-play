@@ -5,7 +5,7 @@
 //
 // Звук включается на первый жест игрока (PLAY на приветствии, любой клик, любая клавиша); до него ничего не играет и AudioContext не создаётся.
 // Меню игры: SOUND ON/OFF = GS.mute, MUSIC % = GS.music, EFFECTS % = GS.sfx (ui.js, window.bpTime.GS); движок следит за ними сам (ui.js save() + опрос раз в 250 мс).
-// SOUND OFF: звук гаснет за ~0,1 с, контекст приостанавливается, файлы не качаются. Вкладка скрыта: контекст приостановлен (музыка продолжится с того же места).
+// SOUND OFF: звук гаснет за ~0,1 с, контекст приостанавливается, файлы не качаются; музыка (манифест и файлы) не качается и до первого жеста. Вкладка скрыта: контекст приостановлен (музыка продолжится с того же места).
 //
 // API (window.bpAudio):
 //   play(событие, {flavour, i, pan, db, delay, force, jitter})  — эффект; true, если поставлен в очередь звучать. Событие вида spin.start (список — EVENTS ниже и в манифесте).
@@ -13,7 +13,7 @@
 //   Музыка — «одна механика» (владелец 2026-10-12): категории манифеста hall (зал и приветствие — одна общая спокойная дорожка), bonus (Кухня и Камеры — одна общая дорожка бонуса),
 //   camlayer (необязательный тихий слой напряжения: играет поверх дорожки бонуса ТОЛЬКО в Камерах, свой уровень, по умолчанию −8 дБ к музыке), bigwin и maxwin (стинги). Старые ключи манифеста
 //   welcome / kitchen / cameras сливаются в hall / bonus при загрузке. Переход Кухня → Камеры с той же дорожкой не перезапускает её.
-//   bigwin(isMax) / bigwinEnd() — музыка сцены тише на 12 дБ (слой вместе с ней), играет стинг bigwin / maxwin; потом громкость возвращается.
+//   bigwin(isMax) / bigwinEnd() — музыка сцены тише на 8 дБ (слой вместе с ней), играет стинг bigwin / maxwin; потом громкость возвращается.
 //   tracks(сцена или категория) / pickMusic(сцена или категория,id) / pickLayer(id|'off') / flavour() / flavourKeys() / setFlavour(ключ вкуса | null — вернуть умолчания) / setEventFlavours({событие:вкус}) — выбор владельца. Умолчания (нет сохранённого выбора): manifest-music.json → default {категория:id}, manifest-sfx.json → defaultFlavour + defaultFlavours {событие:вкус}; выбор владельца (sessionStorage 'bp-snd'; старые выборы по сценам переносятся).
 //   preview.* и state() — для звуковой доски (sound-board.html?bpv=abe1725e) и проверок.
 // Журнал вызовов для проверок: window.__bpAudioTrace = [] до загрузки страницы — каждый play() допишет [событие, результат, мс].
@@ -108,13 +108,19 @@ const EVENTS={
 const PFX_DESC={ui:'Интерфейс',spin:'Спин',scatter:'Приглашения',win:'Выигрыш',rocco:'Рокко',counter:'Счётчик множителя',toss:'Подброс WILD',wild:'WILD',punch:'Удар',lever:'Рубильник',kitchen:'Кухня',freespins:'Бесплатные спины',sack:'Мешок',cams:'Камеры',bigwin:'Большой выигрыш',maxwin:'Максимальный выигрыш'};
 // Если нужного события нет в манифесте, берём ближайшее по смыслу (только когда точного нет)
 const ALIAS={'ui.confirm':'ui.click','ui.start':'ui.click','ui.buy':'ui.click','ui.bet_up':'ui.click','ui.bet_down':'ui.click','ui.toggle':'ui.click','ui.close':'ui.open','win.big':'win.medium','win.medium':'win.small','win.end':'win.small',
- 'bigwin.end':'win.end','maxwin.hit':'bigwin.land','bigwin.tier_up':'bigwin.land','cams.land':'spin.land','rocco.huge':'rocco.cheer','rocco.steal_whoosh':'rocco.grab'};
+ 'bigwin.end':'win.end','maxwin.hit':'bigwin.land','bigwin.tier_up':'bigwin.land','cams.land':'spin.land','rocco.steal_whoosh':'rocco.grab'};
+// Временно, до выбора владельца: события без своего звука играют ближайший по смыслу ГОТОВЫЙ звук (есть во всех наборах A–F). [звук, {db, delay, i}]; настоящий звук в манифесте с тем же id заменит подмену сам.
+// Предел частоты и голоса считаются по самому событию (LIM[событие]), а не по звуку-подмене: win.amount не мешает sack.coin_in.
+const PLACE={'win.cluster':['cams.monitor_lock',{db:-2}],'win.amount':['sack.coin_in',{db:-3}],'rocco.cheer':['bigwin.lamp.1',{db:-3}],'rocco.huge':['bigwin.lamp.4',{db:-3}],'rocco.giggle':['toss.ticket',{db:-4}],'rocco.idle':['cams.rocco_step',{db:-8}],
+ 'scatter.trigger':['freespins.add',{delay:250}],'counter.trick':['bigwin.tier_up',{db:-4,delay:150}],'freespins.start':['ui.buy',{}],'freespins.last':['sack.lamp_on',{i:1}],'kitchen.end':['cams.full',{}],
+ 'sack.intro':['sack.lamp_on',{i:0}],'cams.restart':['lever.blackout',{db:-4}],'cams.total':['sack.coins_pour',{}],'lever.on':['wild.frame_on',{db:-3}],'lever.flip':['ui.toggle',{db:-8}],'wild.land':['punch.hit',{db:-6}],'spin.skip':['ui.toggle',{}]};   // временно, до выбора владельца
+const DUCK_EV={'kitchen.end':2.4,'cams.total':2.4};   // итог бонуса без шоу: музыка тише на это время, с
 const FREQ=new Set(Object.keys(EVENTS).filter(k=>EVENTS[k][1]==='f'));
 // Один и тот же эффект: не чаще cd мс и не больше voices голосов сразу (лишний голос вытесняет самый старый)
 const LIM={'spin.land':{cd:40,voices:3},'spin.drop':{cd:40,voices:3},'spin.start':{cd:80,voices:1},'sack.coin_in':{cd:45,voices:4},'cams.monitor_lock':{cd:60,voices:3},'cams.respin_tick':{cd:80,voices:2},
  'win.cluster':{cd:140,voices:2},'win.amount':{cd:140,voices:2},'win.count_tick':{cd:55,voices:2},'win.end':{cd:200,voices:1},'ui.click':{cd:40,voices:2},'ui.bet_up':{cd:35,voices:2},'ui.bet_down':{cd:35,voices:2},
  'rocco.idle':{cd:4000,voices:1},'counter.step':{cd:140,voices:2},'toss.ticket':{cd:70,voices:3},'bigwin.drum_tick':{cd:70,voices:2},'bigwin.lamp':{cd:300,voices:2},'bigwin.tier_up':{cd:400,voices:1},'bigwin.land':{cd:800,voices:1},'maxwin.hit':{cd:800,voices:1},
- 'sack.coins_pour':{cd:1500,voices:1},'sack.paid_again':{cd:800,voices:1}};
+ 'sack.coins_pour':{cd:1500,voices:1},'sack.paid_again':{cd:800,voices:1},'lever.flip':{cd:60,voices:3},'wild.land':{cd:80,voices:3},'spin.skip':{cd:120,voices:1},'scatter.trigger':{cd:800,voices:1},'kitchen.end':{cd:800,voices:1},'cams.total':{cd:800,voices:1},'rocco.cheer':{cd:600,voices:1},'rocco.huge':{cd:800,voices:1},'rocco.giggle':{cd:600,voices:1}};
 const LIM0={cd:30,voices:3,late:700};
 // Что подгружаем заранее для сцены (все варианты выбранного набора)
 const PRE_ALL=['ui.click','ui.open','ui.close','ui.bet_up','ui.bet_down','spin.start','spin.drop','spin.land','spin.stop','win.cluster','win.amount','win.small','win.medium','counter.step','rocco.swallow','rocco.grab'];
@@ -131,7 +137,7 @@ const OLD_CAT={welcome:'hall',kitchen:'bonus',cameras:'bonus'};   // стары�
 const catOf=x=>SCENE_CAT[x]||x;                                   // сцена или категория → категория
 const LAYER_DB=-8, LAYER_DBS=[-8,-5,-3,-11,-14];                  // слой Камер: уровень относительно музыки, дБ (по умолчанию и шаги кнопки «Уровень слоя»)
 const XF_SCENE=2, XF_PICK=.8;     // кроссфейд при смене сцены / при выборе дорожки вручную, с
-const DUCK_DB=-12;                 // музыка под стингом, дБ
+const DUCK_DB=-8, DUCK_ATK=.02, DUCK_REL=.4;   // музыка под стингом и итогом бонуса: −8 дБ; постоянные времени setTargetAtTime: 95% за ~60 мс вниз (3·0,02) и за ~1,2 с вверх (3·0,4)
 const TARGET_LUFS=-23;             // до этой громкости подтягиваем (или опускаем) каждую дорожку по полю lufs манифеста; ползунок MUSIC 100% = эта громкость (дорожки сделаны с −23, поэтому почти без изменений). Эффекты уже выровнены в файлах по категориям (ui −30 … стинг −20 LUFS): 100% = как в файле
 const AMB_DB=-6;
 const SFX_TRIM_DB=0;                // ОДИН общий подъём всех эффектов и атмосферы, дБ (поверх громкости в файлах и ползунка EFFECTS): короткие звуки сделаны на 4–10 дБ тише цели; игра кажется тихой — поднять здесь или ползунком «Подъём эффектов» (звуковая доска, «Экраны макета», тест-панель; запоминается в sessionStorage). Пики держит ограничитель
@@ -183,13 +189,18 @@ function normMusic(src){ const out={};
  Object.keys(src).forEach(k=>{ if(!OLD_CAT[k]) add(k,src[k]); });
  Object.keys(OLD_CAT).forEach(k=>{ if(k in src) add(OLD_CAT[k],src[k]); });
  return out; }
+const getJSON=name=>fetch(abs(AB+name),{cache:'no-cache'}).then(okJSON).catch(()=>null);
+const setMusic=m=>{ if(m&&m.music&&typeof m.music==='object') MM=Object.assign({},m,{music:normMusic(m.music)}); };
+// Музыку (манифест и файлы) не трогаем до первого жеста и пока SOUND OFF: список дорожек читаем, когда игрок нажал и звук включён (звуковая доска — сразу, ей нужен весь список)
+let mmState=0;
+function wantMusicManifest(){ if(mmState||MM) return; if(!window.__bpBoard&&(!unlocked||muted())) return; mmState=1;
+ getJSON('manifest-music.json').then(m=>{ mmState=2; setMusic(m); if(MM){ renderNav(); preload(); if(live()) startScene(); } }); }
 function loadManifests(){
- const one=name=>fetch(abs(AB+name),{cache:'no-cache'}).then(okJSON).catch(()=>null);
- return Promise.all([one('manifest-music.json'),one('manifest-sfx.json')]).then(([m,s])=>{
-  if(m&&m.music&&typeof m.music==='object') MM=Object.assign({},m,{music:normMusic(m.music)});
+ return Promise.all([window.__bpBoard?getJSON('manifest-music.json'):null,getJSON('manifest-sfx.json')]).then(([m,s])=>{
+  setMusic(m); if(m) mmState=2;
   if(s&&s.sfx&&typeof s.sfx==='object'){ MS=s; if(s.packs) Object.keys(s.packs).forEach(f=>{ const pk=s.packs[f]; if(pk&&pk.file&&pk.clips) Object.keys(pk.clips).forEach(c=>{ packIdx[c]=[pk.file,+pk.clips[c][0],+pk.clips[c][1]]; }); }); }
   manifestsDone=true; readyCbs.splice(0).forEach(f=>{ try{ f(api); }catch(e){} }); flushPending(1500);
-  preload(); if(live()) startScene(); }); }
+  preload(); wantMusicManifest(); if(live()) startScene(); }); }
 function onReady(f){ if(manifestsDone){ try{ f(api); }catch(e){} } else readyCbs.push(f); }
 
 // ---------- контекст и шины ----------
@@ -209,12 +220,12 @@ function mkCtx(){
  return true; }
 function unlock(){
  if(!ctx&&!mkCtx()) return; if(!unlocked){ unlocked=true; unlockT=performance.now(); ss.set('bp-snd-u','1'); try{ const b=ctx.createBuffer(1,1,22050), s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); s.start(0); }catch(e){} }
- reconcile(); }
+ reconcile(); wantMusicManifest(); }
 // Жесты, которые браузер считает «пользователь нажал»: пока контекст не пошёл, пробуем снова на каждом
 ['pointerdown','mousedown','pointerup','touchend','keydown','click'].forEach(n=>addEventListener(n,()=>{ if(!muted()||!unlocked) unlock(); },{capture:true,passive:true}));
 // Страница открыта переходом внутри игры (занавес): если игрок уже нажимал, браузер часто разрешает звук сразу — пробуем без ожидания жеста (получится — музыка новой сцены входит сама)
 function tryEarly(){ if(unlocked||ss.get('bp-snd-u')!=='1'||muted()) return; if(!ctx&&!mkCtx()) return;
- ctx.resume().then(()=>{ if(ctx&&ctx.state==='running'&&!unlocked){ unlocked=true; unlockT=performance.now(); reconcile(); startScene(); preload(); flushPending(); } }).catch(()=>{}); }
+ ctx.resume().then(()=>{ if(ctx&&ctx.state==='running'&&!unlocked){ unlocked=true; unlockT=performance.now(); reconcile(); wantMusicManifest(); startScene(); preload(); flushPending(); } }).catch(()=>{}); }
 addEventListener('DOMContentLoaded',()=>{ tryEarly(); setTimeout(tryEarly,800); setTimeout(tryEarly,2000); });
 function reconcile(){
  if(!ctx) return; const want=unlocked&&!hidden&&!muted();
@@ -229,7 +240,8 @@ function sync(){
  if(pv.mute!==v.mute||pv.music!==v.music||pv.sfx!==v.sfx){
   const t=ctx.currentTime, to=(p,x,tc)=>{ try{ p.cancelScheduledValues(t); p.setTargetAtTime(x,t,tc); }catch(e){ p.value=x; } };
   to(master.gain,v.mute?0:1,.035); to(musicBus.gain,curveM(v.music),.05); to(sfxBus.gain,curveS(v.sfx)*sfxMul(),.05); }
- reconcile();
+
+ reconcile(); if(!v.mute) wantMusicManifest(); // SOUND ON после загрузки с выключенным звуком: список дорожек читаем только теперь
  if(live()&&((pv.music<=0&&v.music>0)||(pv.sfx<=0&&v.sfx>0))) startScene(); } // ползунок поднят с нуля — музыка и атмосфера включаются
 setInterval(()=>{ if(!hidden) sync(); },250);
 
@@ -249,6 +261,7 @@ let dctx=null; // до первого жеста AudioContext создавать
 const decoder=()=>{ if(ctx) return ctx; if(!dctx){ try{ const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext; dctx=new OC(1,1,48000); }catch(e){ dctx=false; } } return dctx||null; };
 function decode(ab){ return new Promise((res,rej)=>{ try{ const d=decoder(); if(!d) return rej(0); const p=d.decodeAudioData(ab,res,rej); if(p&&p.catch) p.catch(rej); }catch(e){ rej(e); } }); }
 function fetchDecode(path){
+ if(muted()) return Promise.resolve(null);   // SOUND OFF: больше ничего не качаем (не считается «нет файла»: после включения звука загрузится)
  const ex=['.aac.mp4','.ogg'];
  const at=i=>{ if(i>=ex.length){ missing.add(path); return Promise.resolve(null); }
   return fetch(abs(AB+path+ex[i])).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(decode).catch(()=>at(i+1)); };
@@ -324,11 +337,15 @@ function resume(){ LY.pre=false; LY.over=null; startScene(XF_PICK); }   // «в�
 // Дорожка в петле: позиция воспроизведения (для звуковой доски)
 function pos(){ const tr=M.cur; if(!tr||!ctx) return null; let t=tr.off+Math.max(0,ctx.currentTime-tr.t0);
  if(tr.lp&&t>tr.lp[1]){ const len=tr.lp[1]-tr.lp[0]; t=tr.lp[0]+((t-tr.lp[0])%len); } else if(!tr.lp&&!tr.once) t%=tr.dur; return {id:tr.it.id,t,dur:tr.dur,loop:tr.lp,scene:tr.scene}; }
-function duck(on){ if(!ctx) return; const t=ctx.currentTime; const f=p=>{ try{ p.cancelScheduledValues(t); p.setTargetAtTime(on?dB(DUCK_DB):1,t,on?.12:.45); }catch(e){} }; f(musicDuck.gain); f(ambDuck.gain); }
-// Большой / максимальный выигрыш: стинг поверх, музыка сцены тише на 12 дБ; потом возвращается
+// Причины приглушения (стинг шоу 'bw', итог бонуса 'ev'): музыка и атмосфера тихи, пока висит хоть одна; hold — сколько секунд держать (потом отпускаем сами)
+const duckBy=new Set(), duckT={};
+function duck(on,key,hold){ key=key||'bw'; clearTimeout(duckT[key]); delete duckT[key];
+ if(on){ duckBy.add(key); if(hold>0) duckT[key]=setTimeout(()=>duck(false,key),hold*1000); } else duckBy.delete(key);
+ if(!ctx) return; const d=duckBy.size>0, t=ctx.currentTime; const f=p=>{ try{ p.cancelScheduledValues(t); p.setTargetAtTime(d?dB(DUCK_DB):1,t,d?DUCK_ATK:DUCK_REL); }catch(e){} }; f(musicDuck.gain); f(ambDuck.gain); }
+// Большой / максимальный выигрыш: стинг поверх, музыка сцены тише на 8 дБ; потом возвращается
 function bigwin(isMax){
- if(!MM||!ctx) return; const kind=isMax?'maxwin':'bigwin', it=trackFor(kind); if(!it||vol().music<=0||muted()) return;
- const my=++M.sgen; duck(true);
+ if(!ctx||muted()) return; const kind=isMax?'maxwin':'bigwin', it=trackFor(kind);
+ const my=++M.sgen; duck(true); if(!it||vol().music<=0){ return; } // музыка сцены приглушается под шоу и без файла стинга
  whenLive().then(ok=>ok&&getBuf(it.file,true)).then(buf=>{ if(!buf||my!==M.sgen||!live()){ if(my===M.sgen) duck(false); return; }
   if(M.sting) fadeOut(M.sting,.15);
   const L=it.loop, loops=!!(L&&+L.start>.3&&+L.end-+L.start>=3); // стинг играет один раз; в петле — только если в манифесте есть настоящая петля после вступления
@@ -383,16 +400,18 @@ function _play(ev,o){
  if(ev==='spin.start'||ev==='cams.restart') seq++; ev=ordered(ev,o); o.__ev=ev; if(SYN[ev]) return synth(ev,o); // новый спин / перезапуск «Камер»: сброс счёта частых звуков
  if(!manifestsDone){ pendQ.push([ev,o,performance.now()]); return 'queued'; }
  if(!MS) return 'nomanifest';
- const id=resolve(ev); if(!id) return 'noevent';
+ const pl=PLACE[ev]; if(pl&&!firstOf(MS.sfx[ev])){ o.__key=ev; o.db=(+pl[1].db||0)+(+o.db||0); o.delay=(+pl[1].delay||0)+(+o.delay||0); if(pl[1].i!=null&&o.i==null) o.i=pl[1].i; ev=pl[0]; } // событие без своего звука (временно, до выбора владельца)
+ const id=resolve(ev); if(!id) return 'noevent'; const ck=o.__key||id;   // ck — ключ предела частоты и голосов
  if(!ctx||!unlocked){ if(ss.get('bp-snd-u')==='1'&&performance.now()<3500&&!muted()){ pendQ.push([ev,o,performance.now()]); return 'queued'; } return 'locked'; } // страница только открылась после перехода: контекст вот-вот стартует сам
  if(hidden) return 'hidden'; if(muted()) return 'muted';
  if(vol().sfx<=0) return 'sfx0'; if(o.loop&&loops[ev]) return 'running';
  if(ctx.state!=='running'){ if(ctx.state==='suspended'&&performance.now()-unlockT<500){ pendQ.push([ev,o,performance.now()]); return 'queued'; } return 'suspended'; }
- const L=LIM[id]||LIM0, now=performance.now(); let delay=Math.max(0,+o.delay||0);
+ const L=LIM[ck]||LIM[id]||LIM0, now=performance.now(); let delay=Math.max(0,+o.delay||0);
  if(!o.force){
-  const v=vol(); if((v.speed!=='normal'||v.hold||v.auto>0)&&FREQ.has(id)){ if(played[id]===seq) return 'turbo'; played[id]=seq; } // Turbo, Quick, автоигра: частые звуки — один за спин
-  const want=now+delay, early=(lastW[id]||0)+L.cd; if(want<early){ const sh=early-want; if(sh>(L.shift==null?70:L.shift)) return 'cooldown'; delay+=sh; } // слишком часто: сдвигаем на следующий «такт» (не больше чем на 70 мс), иначе пропускаем
-  lastW[id]=now+delay; }
+  const v=vol(); if((v.speed!=='normal'||v.hold||v.auto>0)&&(FREQ.has(id)||FREQ.has(ck))){ if(played[ck]===seq) return 'turbo'; played[ck]=seq; } // Turbo, Quick, автоигра: частые звуки — один за спин
+  const want=now+delay, early=(lastW[ck]||0)+L.cd; if(want<early){ const sh=early-want; if(sh>(L.shift==null?70:L.shift)) return 'cooldown'; delay+=sh; } // слишком часто: сдвигаем на следующий «такт» (не больше чем на 70 мс), иначе пропускаем
+  lastW[ck]=now+delay; }
+ { const dh=DUCK_EV[o.__key||ev]; if(dh) duck(true,'ev',dh); } // итог бонуса: музыка тише на время звука
  const ent=MS.sfx[id], fl=o.flavour||flFor(id); let list=ent[fl]; if(!Array.isArray(list)||!list.length) list=ent[defFl()]; if(!Array.isArray(list)||!list.length) list=firstOf(ent); if(!Array.isArray(list)||!list.length) return 'novariant';
  let i; if(o.i!=null) i=((o.i%list.length)+list.length)%list.length; else { i=(Math.random()*list.length)|0; const k=id+fl; if(list.length>1&&i===lastI[k]) i=(i+1+((Math.random()*(list.length-1))|0))%list.length; lastI[k]=i; }
  const file=list[i]; if(!o.force&&Math.abs(now+delay-(fileT[file]||-1e9))<35) return 'dup'; // одинаковые звуки друг на друга не кладём
@@ -411,13 +430,13 @@ function start(id,buf,file,o,delay){
  const db=((MS.gain&&+MS.gain[id])||0)+(+o.db||0)+(Math.random()*2-1)*.7; g.gain.value=dB(db);
  let out=g; if(o.pan!=null&&ctx.createStereoPanner){ try{ const p=ctx.createStereoPanner(); p.pan.value=clamp(+o.pan,-1,1); g.connect(p); out=p; }catch(e){} }
  s.connect(g); out.connect(sfxBus);
- const vs=voices[id]||(voices[id]=[]), L=LIM[id]||LIM0; while(vs.length>=L.voices){ const v=vs.shift(); try{ const t=ctx.currentTime; v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0,t,.012); v.s.stop(t+.07); }catch(e){} } // лишний голос: самый старый быстро затихает
+ const ck=o.__key||id, vs=voices[ck]||(voices[ck]=[]), L=LIM[ck]||LIM[id]||LIM0; while(vs.length>=L.voices){ const v=vs.shift(); try{ const t=ctx.currentTime; v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0,t,.012); v.s.stop(t+.07); }catch(e){} } // лишний голос: самый старый быстро затихает
  const rec={s,g}; vs.push(rec); s.onended=()=>{ const k=vs.indexOf(rec); if(k>=0) vs.splice(k,1); try{ s.disconnect(); g.disconnect(); out!==g&&out.disconnect(); }catch(e){} };
  s.start(ctx.currentTime+Math.max(0,(delay||0)/1000)); }
 // Подгрузка набора текущей сцены (можно и до первого жеста: декодирует автономный контекст): по три файла, без звука ничего не качаем
 let preKey='';
 function preload(){
- if((!MS&&!MM)||window.__bpBoard) return; const v=vol(); if(v.mute||hidden||!decoder()) return; const sc=scn||'hall', key=sc+curFl()+JSON.stringify(pref.fe||{}).length; if(key===preKey) return; preKey=key;
+ if((!MS&&!MM)||window.__bpBoard) return; const v=vol(); if(v.mute||hidden||!decoder()) return; const sc=scn||'hall', key=sc+curFl()+JSON.stringify(pref.fe||{}).length+(MM?'m':'')+(unlocked?'u':''); if(key===preKey) return; preKey=key;
  const files=[];
  if(v.sfx>0){ [...PRE_ALL,...(PRE[sc]||[])].forEach(ev=>{ const id=resolve(ev); if(!id) return; const e=MS.sfx[id], l=e[flFor(id)]||e[defFl()]||firstOf(e)||[]; l.forEach(f=>{ if(!files.includes(f)) files.push(f); }); }); }
  // fb/perf 2026-10-12: звуки качаются ПОСЛЕ роликов Рокко первого спина (loadgate.js: BPLoad.whenOpen('rocco')) и входят в ворота первого спина (need('audio')): раньше 3 потока звука делили канал
@@ -428,9 +447,9 @@ function preload(){
  if(L&&!window.__audNeed){ window.__audNeed=1; if(files.length){ L.need('audio',allDone); L.seal('audio'); } else { L.need('audio',Promise.resolve()); L.seal('audio'); } }
  later('rocco',()=>(window.requestIdleCallback?requestIdleCallback(pump,{timeout:300}):setTimeout(pump,60)));
  if(!files.length) fin();
- later('rocco',()=>{ const v2=vol(); if(v2.music>0){ const it=trackFor(scn); if(it) getBuf(it.file,true); if(scn==='cameras'){ const l=trackFor('camlayer'); if(l) getBuf(l.file,true); } } // музыка сцены (в Камерах и слой): сразу после эффектов (игра их ждёт раньше)
-  if(v2.sfx>0){ const af=ambFile(sc); if(af) setTimeout(()=>getBuf(af),400); } },200);
- later('audio',()=>{ const st=trackFor('bigwin'); if(st&&!muted()&&vol().music>0) getBuf(st.file,true); },3000); }
+ later('rocco',()=>{ const v2=vol(); if(v2.music>0&&unlocked){ const it=trackFor(scn); if(it) getBuf(it.file,true); if(scn==='cameras'){ const l=trackFor('camlayer'); if(l) getBuf(l.file,true); } } // музыка сцены (в Камерах и слой): сразу после эффектов (игра их ждёт раньше)
+  if(v2.sfx>0){ const af=ambFile(sc); if(af) setTimeout(()=>{ if(!muted()&&!hidden) getBuf(af); },400); } },200);
+ later('audio',()=>{ const st=trackFor('bigwin'); if(st&&unlocked&&!muted()&&!hidden&&vol().music>0) getBuf(st.file,true); },6000); }
 
 // ---------- выбор владельца ----------
 // x — сцена (welcome, hall, kitchen, cameras) или категория (hall, bonus, camlayer, bigwin, maxwin). Дорожка играет сразу; слой Камер — поверх выбранной дорожки бонуса (pickLayer)
@@ -448,7 +467,7 @@ function pickLayer(id){
 function setLayerDb(db){ pref.layerDb=clamp(Math.round(+db||0),-24,0); savePref(); const l=LY.cur; if(l&&ctx&&!l.dying){ const t=ctx.currentTime, k=normOf(l.it)*dB(pref.layerDb); try{ l.g.gain.cancelScheduledValues(t); l.g.gain.setValueAtTime(l.g.gain.value,t); l.g.gain.linearRampToValueAtTime(k,t+.15); l.norm=k; }catch(e){} } return pref.layerDb; }
 function cycleLayerDb(){ const i=LAYER_DBS.indexOf(pref.layerDb); return setLayerDb(LAYER_DBS[(i+1)%LAYER_DBS.length]); }
 // звуковая доска: заранее скачать и декодировать все файлы события (всех наборов) / дорожку
-function warm(ev){ const id=resolve(ev); if(!id) return; const e=MS.sfx[id]; flavKeys().forEach(f=>(e[f]||[]).forEach(x=>getBuf(x))); }
+function warm(ev){ const id=resolveP(ev); if(!id) return; const e=MS.sfx[id]; flavKeys().forEach(f=>(e[f]||[]).forEach(x=>getBuf(x))); }
 function warmTrack(it){ if(it) getBuf(it.file,true); }
 function setPick(x,id){ const c=catOf(x); if(c==='camlayer'&&id==='off'){ pref.music.camlayer='off'; savePref(); return true; } if(!listFor(c).some(t=>t.id===id)) return false; pref.music[c]=id; savePref(); return true; }
 function setSfxTrim(db){ pref.trim=clamp(Math.round(+db||0),-12,12); savePref(); lastV.sfx=-1; sync(); return pref.trim; } // подъём всех эффектов, дБ
@@ -468,6 +487,7 @@ const preview={
  amb(sc,fl){ unlock(); const e=MS&&MS.amb&&MS.amb[sc], f=e&&e[fl]; if(!f) return false; if(AMB.cur&&AMB.cur.path===f&&!AMB.cur.dying){ AMB.gen++; fadeOut(AMB.cur,.4); AMB.cur=null; return true; } ambStart(f,sc); return true; }, // послушать атмосферу; ещё раз — стоп
  sfx(ev,fl,n,gap){ unlock(); n=n||1; gap=gap||520; let k=0; const one=()=>{ play(ev,{flavour:fl,force:true,jitter:.02}); if(++k<n) setTimeout(one,gap); }; one(); return n; }
 };
+const resolveP=ev=>{ const p=PLACE[ev]; return resolve(p&&!(MS&&MS.sfx&&firstOf(MS.sfx[ev]))?p[0]:ev); };   // событие → id звука, который реально сыграет (с подменой)
 function describe(ev){ const e=EVENTS[ev]; return e?e[0]:(PFX_DESC[ev.split('.')[0]]?PFX_DESC[ev.split('.')[0]]+': '+ev:ev); }
 function state(){ const v=vol(); const g=p=>p?+p.value.toFixed(4):null;
  return {unlocked,ctx:ctx?ctx.state:'none',hidden,muted:v.mute,hasMusic:!!MM,hasSfx:!!MS,scene:scn,flavour:curFl(),flavours:flavKeys(),master:ctx?g(master.gain):null,music:ctx?g(musicBus.gain):null,sfx:ctx?g(sfxBus.gain):null,duck:ctx?g(musicDuck.gain):null,
@@ -505,8 +525,8 @@ onReady(renderNav); document.addEventListener('DOMContentLoaded',renderNav);
 
 // ---------- запуск ----------
 const api=window.bpAudio={setSfxTrim,cycleSfxTrim,sfxTrim:()=>(pref.trim||0)+SFX_TRIM_DB,buf:bufNow,resume,play,stopLoop,setPick,warm,warmTrack,scene:setScene,leave,bigwin,bigwinEnd,sync,unlock,pickMusic,pickLayer,setLayerDb,cycleLayerDb,layerDb:()=>pref.layerDb,setFlavour,setEventFlavours,toggleMute,setVol,vol,
- tracks:sc=>listFor(sc), flavour:curFl, flavourFor:ev=>{ const id=resolve(ev)||ev; return flFor(id); }, flavourDefault:ev=>{ const id=resolve(ev)||ev, d=MS&&MS.defaultFlavours&&MS.defaultFlavours[id]; return flavKeys().includes(d)?d:defFl(); }, flavourExplicit:()=>okFl(pref.fl)||Object.keys(pref.fe||{}).length>0, flavourKeys:flavKeys, flavours:()=>{ const o={}; flavKeys().forEach(k=>{ o[k]=flavName(k)||k; }); return o; }, events:()=>MS?Object.keys(MS.sfx):[], variants:(ev,f)=>{ const e=MS&&MS.sfx[ev]; return (e&&e[f||curFl()])||[]; },
- amb:()=>(MS&&MS.amb)||{}, gains:()=>(MS&&MS.gain)||{}, manifest:()=>({music:MM,sfx:MS}), describe,hasEvent:ev=>!!SYN[ev]||!!resolve(ev),catalog:EVENTS,sceneNames:SCENE_NAME,
+ tracks:sc=>listFor(sc), flavour:curFl, flavourFor:ev=>{ const id=resolveP(ev)||ev; return flFor(id); }, flavourDefault:ev=>{ const id=resolveP(ev)||ev, d=MS&&MS.defaultFlavours&&MS.defaultFlavours[id]; return flavKeys().includes(d)?d:defFl(); }, flavourExplicit:()=>okFl(pref.fl)||Object.keys(pref.fe||{}).length>0, flavourKeys:flavKeys, flavours:()=>{ const o={}; flavKeys().forEach(k=>{ o[k]=flavName(k)||k; }); return o; }, events:()=>MS?Object.keys(MS.sfx):[], variants:(ev,f)=>{ const e=MS&&MS.sfx[ev]; return (e&&e[f||curFl()])||[]; },
+ amb:()=>(MS&&MS.amb)||{}, gains:()=>(MS&&MS.gain)||{}, manifest:()=>({music:MM,sfx:MS}), describe,hasEvent:ev=>!!SYN[ev]||!!resolveP(ev),catalog:EVENTS,sceneNames:SCENE_NAME,
  selected:x=>trackFor(x), defaultTrack:x=>defTrack(x), onReady, renderNav, preview, state, stop:stopMusic, path:AB, ogg:OGG, scenes:SCENES, stings:STINGS, cats:CATS, catNames:CAT_NAME, catOf, layerOn:()=>!!(LY.cur&&!LY.cur.dying)};
 // сцена: приветствие, зал, кухня или камеры — по адресу страницы (ui.js переключает приветствие → зал сам: bpAudio.scene('hall'))
 function detect(){ try{ const Q=typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); const sc=(typeof scene==='string'&&scene)||Q.get('scene')||'hall'; return Q.get('screen')==='welcome'?'welcome':(SCENES.includes(sc)?sc:'hall'); }catch(e){ return 'hall'; } }
