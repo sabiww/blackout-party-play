@@ -40,6 +40,12 @@ Object.assign(BORED,GEST.bored);
 delete AMB.kitchen.rub; delete SMALLWIN.kitchen.rub; delete GLANCE.kitchen.rub; // KS-rub — см. выше
 // H-lean «подаётся к полю» убран из режиссёра (владелец: резкий наклон вдвое быстрее остальных и потом долгая замёрзшая поза = «слайдшоу»; перегенерировать не вышло — бюджет $7 кончился). Файл остался; вернуть — убрать 'lean' из HID.
 const HID=new Set(['lean']);
+// fb/bowtie3 2026-10-13: «поправляет бант» (зал), три принятых ролика — H-bowslide (тянет вбок и выравнивает, по умолчанию), H-bowtips (двумя пальцами за кончики), H-bowdust (бант и отряхивает грудь). Вес как у H-rock (амб 1,1, малый выигрыш .8).
+// ?bow=slide|tips|dust|all|0 (все три делят вес поровну / ни одного); sessionStorage bp-bow (тест-панель «Бант»), адрес главнее.
+const BOWNAMES={slide:'bowslide',tips:'bowtips',dust:'bowdust'};
+{ let b=Q.get('bow'); if(b==null){ try{ b=sessionStorage.getItem('bp-bow'); }catch(e){} } if(b!=='all'&&b!=='0'&&!BOWNAMES[b]) b='slide';
+  const names=b==='0'?[]:b==='all'?Object.values(BOWNAMES):[BOWNAMES[b]];
+  for(const n of names){ AMB.hall[n]=1.1/names.length; SMALLWIN.hall[n]=.8/names.length; } }
 // ---- /GESTURES
 
 let S=null, DBG=[];

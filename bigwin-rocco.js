@@ -25,13 +25,18 @@ const SLOW=()=>Math.max(1,window.__slow||1), FD=()=>2*FR*SLOW();               /
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), sm=u=>{ u=clamp(u); return u*u*(3-2*u); }, lerp=(a,b,u)=>a+(b-a)*u;
 /* Ролики (assets/rocco): idle — покой зала (играет зеркально, как в игре); BW-* сняты с кадра покоя base-rest-mirror.png и играют без отражения (unm: сдвиг на (SW−2·TX)·s).
    dur — запасная длина, пока видео не сообщило свою. */
+/* Радость на Big Win (2026-10-13, fb/bw-cheer2): ?bwcheer=yes|dance|jump|old (в артефакте — sessionStorage 'bp-bwcheer', тест-панель). Новые ролики (BW-cheer-<имя>, 5,0 с) начинаются и кончаются в позе покоя (хвост и голова подведены rocco_seam_fix --motion),
+   поэтому играют кругом сквозь покой без входа и выхода; old — прежний BW-cheer с металлической рукой + BW-cheer-in/out. */
+const BWC_LIST=['yes','dance','jump','old'], BWC_DEF='yes';   // умолчание yes: обе руки мохнатые кулаки, лицо чёткое; jump — кончики пальцев левой руки синеватые (кадры 40–80), оставлен вариантом
+const bwcMode=()=>{ let m=null; try{ m=new URLSearchParams(location.search).get('bwcheer'); }catch(e){} if(!m){ try{ m=sessionStorage.getItem('bp-bwcheer'); }catch(e){} } m=String(m||BWC_DEF).toLowerCase(); return BWC_LIST.includes(m)?m:BWC_DEF; };
+const BWC=bwcMode(), NEWC=BWC!=='old';
 const CLIPS={
  idle:{file:'BW-idle',unm:false},    // BW-idle = hall-idle.mp4 с чистым ключом (KEY=auto): у H-idle фон держит дымку 5–10 % прозрачности, на тёмной сцене шоу она видна светлым прямоугольником
  idle2:{file:'BW-idle',unm:false,of:'idle'},   // второй экземпляр покоя: меняется с первым без перемотки на виду (idleStep)
- cheer:{file:'BW-cheer',unm:true,dur:4.38},    // 4,38 с, покой → радость → покой, петля; собран из частей Kling (tools/clip_bw_build.py, asset-source/openrouter/bigwin-rocco/BW-cheer.provenance.txt)
- cheer2:{file:'BW-cheer',unm:true,dur:4.38,of:'cheer'},   // второй экземпляр того же ролика: петля идёт по очереди то на одном, то на другом (перемотка в 0 — пока другой играет), потому что перемотка под нагрузкой тянется и «loop» встаёт
- cheerIn:{file:'BW-cheer-in',unm:true,dur:.42},    // вход: покой → первый кадр петли за 10 кадров (tools/bw_cheer_inout.py), первый кадр ≡ покой, последний ≡ первый кадр BW-cheer; смена в обе стороны жёсткая
- cheerOut:{file:'BW-cheer-out',unm:true,dur:.42},  // выход: последний кадр петли → покой за 10 кадров, последний кадр ≡ покой
+ cheer:{file:NEWC?'BW-cheer-'+BWC:'BW-cheer',unm:true,dur:NEWC?5:4.38},    // 4,38 с, покой → радость → покой, петля; собран из частей Kling (tools/clip_bw_build.py, asset-source/openrouter/bigwin-rocco/BW-cheer.provenance.txt)
+ cheer2:{file:NEWC?'BW-cheer-'+BWC:'BW-cheer',unm:true,dur:NEWC?5:4.38,of:'cheer'},   // второй экземпляр того же ролика: петля идёт по очереди то на одном, то на другом (перемотка в 0 — пока другой играет), потому что перемотка под нагрузкой тянется и «loop» встаёт
+ cheerIn:{file:'BW-cheer-in',unm:true,dur:.42,old:true},    // вход: покой → первый кадр петли за 10 кадров (tools/bw_cheer_inout.py), первый кадр ≡ покой, последний ≡ первый кадр BW-cheer; смена в обе стороны жёсткая
+ cheerOut:{file:'BW-cheer-out',unm:true,dur:.42,old:true},  // выход: последний кадр петли → покой за 10 кадров, последний кадр ≡ покой
  max:{file:'BW-max',unm:true,dur:5.54}};     // 5,54 с, покой → оборот на месте и танец → покой, один проход (MAX WIN) 
 const CSS=`
 .bw-rk{position:absolute;pointer-events:none;opacity:var(--rkop,1)}
@@ -57,7 +62,7 @@ function create(o){
  light.style.visibility=el.style.visibility='hidden';
  const body=el.querySelector('.bw-rk-body'), cone=light.querySelector('.bw-rl-cone'), pool=light.querySelector('.bw-rl-pool'), sh=el.querySelector('.bw-rk-sh');
  const useIdle2=!RM()&&new URLSearchParams(location.search).get('idle2')!=='0';   // «меньше движения» — покой стоит на первом кадре, второй не нужен
- const V={}; for(const n of Object.keys(CLIPS)){ if(n==='idle2'&&!useIdle2) continue; const v=document.createElement('video'); v.className=CLIPS[n].unm?'um':'fl'; v.muted=true; v.setAttribute('muted',''); v.setAttribute('playsinline',''); v.preload='auto'; v.loop=(n==='idle'||n==='idle2'); v.dataset.n=n; if(n==='idle2') v.style.opacity='0'; body.append(v); V[n]=v; }   // loop у покоя — запасной путь, если второй не завёлся
+ const V={}; for(const n of Object.keys(CLIPS)){ if(n==='idle2'&&!useIdle2) continue; if(CLIPS[n].old&&NEWC) continue; const v=document.createElement('video'); v.className=CLIPS[n].unm?'um':'fl'; v.muted=true; v.setAttribute('muted',''); v.setAttribute('playsinline',''); v.preload='auto'; v.loop=(n==='idle'||n==='idle2'); v.dataset.n=n; if(n==='idle2') v.style.opacity='0'; body.append(v); V[n]=v; }   // loop у покоя — запасной путь, если второй не завёлся
  if(o.before&&o.before.parentNode===stage){ stage.insertBefore(light,o.before); stage.insertBefore(el,o.before); } else { stage.append(light); stage.append(el); }
  const S={box:null,fit:false,fallback:false,cur:null,z:1,dead:false,cheerOn:false,cheerEnd:false,maxOn:false,maxArm:null,swapT:0,mon:0,warping:false,loaded:false,starting:false,retryAt:0};
  let F=V.idle, Bk=V.idle2||null;   // F — покой, который сейчас играет (виден, когда над ним нет ролика), Bk — второй, скрытый на кадре 0
@@ -142,6 +147,7 @@ function create(o){
  function watch(P){   // конец ролика — в покой; петля — за 0,2 с до конца второй экземпляр уже стартует и встаёт на место (оба кадра — поза покоя); ролик встал — тоже в покой
   const v=P.v; v.onended=()=>{ if(S.cur!==P) return;
    if(P.n==='cheerIn'){ start('cheer',{loop:!S.cheerEnd,instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // вход кончился (его последний кадр ≡ первый кадр петли) — петля жёстко
+   if(P.n==='cheer'&&!P.loop&&NEWC){ leave(P,0); return; }   // новая радость: последний кадр ≡ покой — жёсткая смена
    if(P.n==='cheer'&&!P.loop){ start('cheerOut',{instant:true}).then(Q=>{ if(!Q&&S.cur===P) leave(P,FD()); }); return; }   // последний круг кончился — выход в покой роликом, а не наплывом
    leave(P,P.n==='cheerOut'?0:FD()); };   // выход кончился: его последний кадр ≡ покой — жёсткая смена
   let lt=-1, lw=performance.now(); clearInterval(S.mon);
@@ -171,7 +177,7 @@ function create(o){
    return; }
   if(!c.live){ if(S.cheerOn&&!S.cheerEnd){ S.cheerEnd=true; finishLoop(); } return; }   // часы шоу встали (конец): круг доигрывается сам
   /* радость нужна с tC до tF: нет ролика (ещё не стартовал, не успел загрузиться, ролик встал и ушёл в покой) — запускаем заново, не чаще раза в 0,6 с; после tF новых кругов нет, текущий доигрывается */
-  if(!S.cheerEnd&&t>=c.tC&&!S.cur&&!S.starting&&performance.now()>=S.retryAt){ S.cheerOn=true; S.starting=true; start('cheerIn',{instant:true}).then(P=>{ S.starting=false; if(!P){ S.retryAt=performance.now()+600; } }); }
+  if(!S.cheerEnd&&t>=c.tC&&!S.cur&&!S.starting&&performance.now()>=S.retryAt){ S.cheerOn=true; S.starting=true; (NEWC?start('cheer',{loop:true,instant:true}):start('cheerIn',{instant:true})).then(P=>{ S.starting=false; if(!P){ S.retryAt=performance.now()+600; } }); }
   if(S.cheerOn&&!S.cheerEnd&&t>=c.tF){ S.cheerEnd=true; finishLoop(); } }
  /* раскадровка и запись: ролики не играют, а ставятся на кадр по расписанию (то же расписание, как функция времени) */
  const seekTo=(v,t)=>new Promise(res=>{ if(v.readyState<1||Math.abs(v.currentTime-t)<.01) return res(); let d=false; const f=()=>{ if(d) return; d=true; v.removeEventListener('seeked',f); res(); }; v.addEventListener('seeked',f); setTimeout(f,900); try{ v.currentTime=Math.max(0,Math.min(t,(v.duration||t)-.001)); }catch(e){ f(); } });
@@ -205,6 +211,6 @@ function create(o){
 
 /* прогрев: ролики лежат в кэше игры к моменту шоу (что не успело — пропускается, Рокко стоит в покое) */
 let warmed=false;
-function warm(a,ext){ if(warmed) return; warmed=true; try{ Object.keys(CLIPS).filter(n=>!CLIPS[n].of).forEach((n,i)=>setTimeout(()=>{ try{ const v=document.createElement('video'); v.muted=true; v.preload='auto'; wake(v,urlOf(a,ext,n)); }catch(e){} },n==='max'?12000:i*1500)); }catch(e){} } // fb/perf: по одному (покой, радость, потом MAX через 12 с), а не три файла разом
-window.BigWinRocco={create,warm,CLIPS};
+function warm(a,ext){ if(warmed) return; warmed=true; try{ Object.keys(CLIPS).filter(n=>!CLIPS[n].of&&!(CLIPS[n].old&&NEWC)).forEach((n,i)=>setTimeout(()=>{ try{ const v=document.createElement('video'); v.muted=true; v.preload='auto'; wake(v,urlOf(a,ext,n)); }catch(e){} },n==='max'?12000:i*1500)); }catch(e){} } // fb/perf: по одному (покой, радость, потом MAX через 12 с), а не три файла разом
+window.BigWinRocco={create,warm,CLIPS,BWC_LIST,BWC_DEF,mode:BWC};
 })();
