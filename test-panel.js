@@ -199,6 +199,9 @@ function mount(){
  { const PL=()=>window.BigWinShow&&window.BigWinShow.plates, cur=()=>PL().opt(), lab=()=>{ const l=PL().list.find(x=>x[0]===cur()); return l?l[1]:cur(); };
   const bb=btn('tt-b','Плашка: …',()=>{ if(!PL()) return no(); const L=PL().list, i=(L.findIndex(x=>x[0]===cur())+1)%L.length, u=new URL(location.href); ss.set('bp-bwplate',L[i][0]); u.searchParams.delete('bwplate'); u.searchParams.set('state','idle'); u.searchParams.set('screen','bigwin'); location.replace(u.toString()); }); box.appendChild(bb);
   const upd=()=>{ if(PL()) bb.textContent='Плашка (?bwplate=): '+lab(); else setTimeout(upd,400); }; upd(); }
+ { const MT=()=>window.BigWinShow&&window.BigWinShow.mwtop, cur=()=>MT().opt(), lab=()=>{ const l=MT().list.find(x=>x[0]===cur()); return l?l[1]:cur(); };
+  const mb=btn('tt-b','Верх MAX WIN: …',()=>{ if(!MT()) return no(); const L=MT().list, i=(L.findIndex(x=>x[0]===cur())+1)%L.length, u=new URL(location.href); ss.set('bp-mwtop',L[i][0]); u.searchParams.delete('mwtop'); u.searchParams.set('state','idle'); u.searchParams.set('screen','maxwin'); location.replace(u.toString()); }); box.appendChild(mb);
+  const upd=()=>{ if(MT()) mb.textContent='Верх MAX WIN (?mwtop=): '+lab(); else setTimeout(upd,400); }; upd(); }
  for(const g of ['fx','hint']){ const F=()=>window.BigWinFx, G=()=>F()&&F().groups[g];
   const cur=()=>F().opt(g), lab=()=>{ const l=G().list.find(x=>x[0]===cur()); return l?l[1]:cur(); };
   const bb=btn('tt-b','',()=>{ if(!F()) return no(); const L=G().list, i=(L.findIndex(x=>x[0]===cur())+1)%L.length, u=new URL(location.href); ss.set('bp-'+F().keys[g],L[i][0]); ['bwfx','bwpl','bwlamp','bwtop','bwhint','bwplate'].forEach(k=>u.searchParams.delete(k)); u.searchParams.set('state','idle'); u.searchParams.set('screen','bigwin'); location.replace(u.toString()); });

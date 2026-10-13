@@ -8,16 +8,17 @@
 (()=>{
 'use strict';
 const SS={get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } },set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} },del(k){ try{ sessionStorage.removeItem(k); }catch(e){} }};
-const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=52316320)
+const QQ=()=>typeof q!=='undefined'&&q&&q.get?q:new URLSearchParams(location.search); // в артефакте адрес приходит через q (index.html?bpv=9c2f67a3)
 const NAVS=['top','side'], DEF_NAV='top';
 const pick=(name,list,def)=>{ const v=QQ().get(name)||SS.get('bp-'+name); return list.includes(v)?v:def; };
-const DLGS=['old','plate','clean']; // ?dlg=old — окна-мониторы; ?dlg=plate — окна F на плите (рама, лента); по умолчанию clean — чистый вид на затемнении (как Buy bonus и Autoplay, 2026-10-13)
-const dlgMode=()=>{ const v=QQ().get('dlg')||SS.get('bp-dlg'); return DLGS.includes(v)?v:'clean'; };
+const DLGS=['old','plate','clean','framed']; // ?dlg=framed (умолчание, 2026-10-13) — плашка F с чистым содержимым; ?dlg=clean — чистый вид без рамы; ?dlg=old — окна-мониторы; ?dlg=plate — окна F на плите (рама, лента); по умолчанию clean — чистый вид на затемнении (как Buy bonus и Autoplay, 2026-10-13)
+const dlgMode=()=>{ const v=QQ().get('dlg')||SS.get('bp-dlg'); return DLGS.includes(v)?v:'framed'; };
 const cfg=()=>({old:dlgMode()==='old',nav:pick('dlgnav',NAVS,DEF_NAV)});
 const on=()=>!cfg().old;
 // чистый вид — только на тёмных плашках (?plates=dark, по умолчанию): «Записка» и прежний красный вид плашек остаются как были
-const clean=()=>dlgMode()==='clean'&&!(window.bpPlates&&window.bpPlates.mode()!=='dark');
-const markDlg=()=>{ try{ document.documentElement.setAttribute('data-dlg',clean()?'clean':dlgMode()); }catch(e){} }; // <html data-dlg>: по нему dialogs-clean-doc.css красит ворота и итог бонуса, записку, строку реплея
+const framed=()=>dlgMode()==='framed'&&!(window.bpPlates&&window.bpPlates.mode()!=='dark');
+const clean=()=>(dlgMode()==='clean'||dlgMode()==='framed')&&!(window.bpPlates&&window.bpPlates.mode()!=='dark');
+const markDlg=()=>{ try{ document.documentElement.setAttribute('data-dlg',clean()?(framed()?'framed':'clean'):dlgMode()); }catch(e){} }; // <html data-dlg>: по нему dialogs-clean-doc.css красит ворота и итог бонуса, записку, строку реплея
 markDlg(); document.addEventListener('DOMContentLoaded',markDlg);
 const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -40,6 +41,10 @@ let NCSS=null;
 let CLCSS=null;
 (()=>{ const l=document.getElementById('bp-dlgclean'); if(l&&l.tagName==='LINK'&&l.href) fetch(l.href).then(r=>r.ok?r.text():null).then(t=>{ if(t) CLCSS=t; }).catch(()=>{}); })();
 const cleanHTML=()=>{ if(!clean()) return ''; let t=CLCSS; if(!t){ const l=document.getElementById('bp-dlgclean'); if(l&&l.tagName==='STYLE'&&l.textContent.trim()){ t=CLCSS=l.textContent; } } return t?`<style>${t}</style>`:`<link rel="stylesheet" href="dialogs-clean.css">`; };
+// «Плашка с чистым содержимым» (dialogs-framed.css): после dialogs-clean.css возвращает раму, ленту и плиту
+let FRCSS=null;
+(()=>{ const l=document.getElementById('bp-dlgframed'); if(l&&l.tagName==='LINK'&&l.href) fetch(l.href).then(r=>r.ok?r.text():null).then(t=>{ if(t) FRCSS=t; }).catch(()=>{}); })();
+const framedHTML=()=>{ if(!framed()) return ''; let t=FRCSS; if(!t){ const l=document.getElementById('bp-dlgframed'); if(l&&l.tagName==='STYLE'&&l.textContent.trim()){ t=FRCSS=l.textContent; } } return t?`<style>${t}</style>`:`<link rel="stylesheet" href="dialogs-framed.css">`; };
 const noteHTML=()=>{ if(!(window.bpPlates&&window.bpPlates.on())) return ''; let t=NCSS; if(!t){ const l=document.getElementById('bp-dlgnote'); if(l&&l.tagName==='STYLE'&&l.textContent.trim()){ t=NCSS=l.textContent; } } return t?`<style>${t}</style>`:`<link rel="stylesheet" href="dialogs-f-note.css">`; };
 
 // ---------- мелочи ----------
@@ -81,7 +86,7 @@ function socialize(root){
 const A11Y_CSS='.dlg .vol input[type=range]:focus-visible{outline:3px solid var(--pn-red,#fff4c4);outline-offset:0;border-radius:6px}';
 function shell(host,popup,extraCss){
  const c=cfg(), sh=host.attachShadow({mode:'open'});
- sh.innerHTML=`${styleHTML()}${cleanHTML()}<style>${A11Y_CSS}</style>${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
+ sh.innerHTML=`${styleHTML()}${cleanHTML()}${framedHTML()}<style>${A11Y_CSS}</style>${extraCss?`<style>${extraCss}</style>`:''}${noteHTML()}<div id="stage" class="${popup?'pop':''}" data-mode="${modeNow()}" data-nav="${navNow(c)}" ${LONG()?' data-long="1"':''}><div class="layer"></div></div>`;
  return {sh,stage:sh.getElementById?sh.getElementById('stage'):sh.querySelector('#stage'),layer:sh.querySelector('.layer')};
 }
 const frame=(s,title,body,foot)=>`<div class="dlg dlg-${s}" tabindex="-1"><div class="face"><header class="hd"><button type="button" class="x" aria-label="Close">${screw()}</button></header>
@@ -195,6 +200,6 @@ function history(C){
 function setPick(k,v){ const name={dlg:'bp-dlg',nav:'bp-dlgnav'}[k]; if(!name) return; if(v==null||v==='') SS.del(name); else SS.set(name,v); }
 window.bpDlgPick=(k,v)=>{ setPick(k,v); const u=new URL(location.href); ['dlg','dlgnav'].forEach(n=>u.searchParams.delete(n)); const p='?state=idle&screen=rules'; // адрес с параметрами главнее запомненного — убираем
  if(typeof goQ==='function') goQ(p); else { u.search=p; location.href=u.toString(); } };
-window.DlgF={on,cfg,clean,menu,rules,history,pick:setPick,NAVS,DEF_NAV,
+window.DlgF={on,cfg,clean,framed,menu,rules,history,pick:setPick,NAVS,DEF_NAV,
  shell,frame,trap,rise,follow,socialize,screw,moneyH,modeNow,esc,IC}; // shell, frame, trap, … — оболочка для других окон F (описание — в начале dialogs-f.css)
 })();

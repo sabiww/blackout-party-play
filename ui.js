@@ -734,12 +734,12 @@ function hudBuild(){
  document.getElementById('hud')?.remove();
  const fe=document.getElementById('field'), app=document.getElementById('app'); if(!fe||!app||document.getElementById('wel')) return;
  const W=innerWidth, H=innerHeight, land=W>H, f=fe.getBoundingClientRect(), sg=document.getElementById('sign'), sb=sg?sg.getBoundingClientRect().bottom:0; let u=hudU(f.width);
- const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=52316320 readSafe): окошки не уходят под него слева
+ const sa=typeof SA!=='undefined'?SA:{t:0,r:0,b:0,l:0}; // вырез экрана (index.html?bpv=9c2f67a3 readSafe): окошки не уходят под него слева
  let edge=f.left-12*u, avail=Math.max(60,edge-Math.max(8,sa.l)), right=false;
  if(scene==='cameras'&&land&&!(window.BPL&&window.BPL.nl&&window.BPL.mode!=='desk')){ edge=f.left-.063*f.width-10; u=Math.min(u,Math.max(.78,(edge-Math.max(8,sa.l)-4)/152)); avail=Math.max(60,edge-Math.max(8,sa.l)-30*u); } // «Камеры», компьютер: рамка стойки (≈6,3% ширины проёма) шире проёма — плашки стоят левее её внешней кромки (на 10 px), а не на рамке; плашка уже — масштаб u меньше (SACK шире на значок мешка ≈30u слева)
  const pr=document.getElementById('pod')?.getBoundingClientRect(); // телефон боком (844×390): слева от поля всего ~80 px (логотип и «Функции»), а между полем и пультом справа пусто — столбик встаёт туда
  if(land&&H<=500&&scene!=='cameras'&&pr&&pr.left>f.right-10&&pr.left-f.right-16>=100){ right=true; avail=pr.left-f.right-16; }
- const BL=window.BPL||{}, lm=BL.nl&&BL.mode!=='desk'?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=52316320 render, ветка NL)
+ const BL=window.BPL||{}, lm=BL.nl&&BL.mode!=='desk'?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=9c2f67a3 render, ветка NL)
  const ff=document.getElementById('features'); if(ff) ff.style.visibility=lm==='port'&&scene==='hall'&&modeOn?'hidden':''; // телефон стоя: включённый режим встаёт на место Buy bonus (шаблон «Mode button · active»), сама плашка MODE открывает Функции
  if(lm==='tiny'||(lm==='cmp'&&!bonusScene())) return; // крошечное окно — только поле; мини-окно в зале — без плашки режима (места нет)
  if(lm==='cmp') u=NG.u||.56;
@@ -1716,7 +1716,7 @@ document.addEventListener('mousedown',e=>{ const a=document.activeElement; if(a&
     return {bh:sc*P.bodyH,Sb:fx+P.reach*sc,feetY,shadow:true,lim:g1}; }
    const sc=Math.min(V.h*H/P.bodyH,(g1-g0)/ext,(feetY-topL)/P.bodyH);
    return {bh:sc*P.bodyH,Sb:g0+P.lExt*sc+((g1-g0)-ext*sc)/2,feetY,shadow:true,lim:g1}; }
-  const BL=window.BPL||{}, lm=BL.nl?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=52316320 render, ветка NL)
+  const BL=window.BPL||{}, lm=BL.nl?BL.mode:null, NG=BL.g||{}; // раскладка по шаблону (index.html?bpv=9c2f67a3 render, ветка NL)
   if(lm==='cmp'||lm==='tiny') return {bh:0,Sb:0,feetY:0,shadow:false,lim:0}; // мини-окно и крошечное: Рокко нет (шаблон: только столбики и поле)
   if(lm==='port'&&NG.rs){ // fb/small-layout (владелец 2026-10-13: «на маленьком экране Рокко справа, а не сверху»): Рокко стоит справа от поля, как на компьютере; кулак с места ложится на середину правой рамки (H-punch5, P.fixed), торс на «длине руки» от неё. Не влезает по ширине — хвост уходит за правый край экрана (window.bpRoccoOv, до ≈80 px ролика), потом Рокко меньше. Ноги — на нижней кромке поля (NG.rFeet), голова не выше плашки множителя (NG.rTop)
    const fx=fistRail(f), m=Math.max(10,V.m*W), ov=window.bpRoccoOv||0, rIn=P.rExt*(1-(P.rOff||0)), feetY=NG.rFeet;

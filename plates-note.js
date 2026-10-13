@@ -30,6 +30,6 @@ function toast(text,ms){
 function hide(text){ const t=document.getElementById('pn-toast'); if(!t||!t.classList.contains('on')||(text&&t.textContent!==text)) return; clearTimeout(tT); t.dataset.keep=''; t.classList.remove('on'); }
 window.bpPlates={mode,on:()=>mode()==='note',dark:()=>mode()==='dark',apply,toast,hide,
  set(v){ if(!OK.includes(v)) return; ss.set(KEY,v); let u=null; try{ u=new URL(location.href); u.searchParams.delete('plates'); }catch(e){} if(u) location.replace(u.toString()); else location.reload(); }};
-// страница могла открыться без запроса, а q (index.html?bpv=52316320) прочитать адрес позже — подстрахуемся после загрузки
+// страница могла открыться без запроса, а q (index.html?bpv=9c2f67a3) прочитать адрес позже — подстрахуемся после загрузки
 document.addEventListener('DOMContentLoaded',apply);
 })();

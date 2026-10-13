@@ -15,7 +15,7 @@
      на MAX WIN — BW-max (подробнее в шапке bigwin-rocco.js; ролики не ускоряются, в Turbo/Quick, при пропуске и «меньше движения» он стоит в покое); eyes — глаза в темноте; monitor — Рокко на мониторе;
    · безопасное мерцание: сбои света на 50× и 100× — по расписанию, не чаще трёх вспышек в секунду; «меньше движения» — сразу итоговый кадр.
 
-   Подключение (index.html?bpv=52316320, до ui.js):   <script src="bigwin-show.js"></script>
+   Подключение (index.html?bpv=9c2f67a3, до ui.js):   <script src="bigwin-show.js"></script>
    API:  BigWinShow.play({amount, bet, isMax, moneyFmt, onDone, rocco}) → Promise (выполняется после закрытия)
          amount   — выигрыш в валюте (как money()), bet — ставка в валюте (пороги считаются от неё), isMax — раунд закончился максимальным выигрышем
          moneyFmt — money() игры: строка вида «$25,000.00», «25,000.00 SC» или «1,000,000.00 ARS»; префикс и код валюты разбираются сами
@@ -83,10 +83,6 @@ const CSS=`
 @ .bw-drop{inset:0;background:#040504;opacity:var(--drop,0)}
 @ .bw-noise{inset:-10%;opacity:calc(var(--drop,0)*.7);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .8 0 0 0 0 .9 0 0 0 0 .85 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");background-position:var(--nx,0) var(--ny,0)}
 @ .bw-vig{inset:0;background:radial-gradient(ellipse 80% 78% at 50% 46%,transparent var(--vs,60%),rgba(0,0,0,.86) 100%)}
-@ .bw-cur{top:0;bottom:0;width:19cqw;opacity:min(1,calc(var(--cur,0)*1000));   /* занавес въезжает целиком (transform), а не растёт по ширине: раскладка не пересчитывается; при --cur=0 он за краем и прозрачен (тень не торчит) */
- background:repeating-linear-gradient(90deg,#2a0908 0 1.2cqw,#170403 1.2cqw 2.2cqw);box-shadow:0 0 3cqw rgba(0,0,0,.9);z-index:3}
-@[data-dev=phone] .bw-cur{width:14cqw}
-@ .bw-cur.l{left:0;transform:translateX(calc((1 - var(--cur,0))*-100%));box-shadow:inset -.4cqw 0 0 #120303,3cqw 0 3cqw rgba(0,0,0,.8)}@ .bw-cur.r{right:0;transform:translateX(calc((1 - var(--cur,0))*100%));box-shadow:inset .4cqw 0 0 #120303,-3cqw 0 3cqw rgba(0,0,0,.8)}
 @ .bw-ui{inset:0 16CQW 0 0;inset:0 calc(16*var(--bw-u)) 0 0;z-index:4}
 @[data-dev=phone] .bw-ui{inset:0}
 @ .bw-ui>*{position:absolute}
@@ -384,21 +380,23 @@ const CSS=`
 @keyframes bw-cur{50%{opacity:0}}
 @.bw-rm .bw-hint::after{animation:none}
 `;
-/* ---------------------------------------------------------------- плашки Big Win: ?bwplate=0|a|b|c|d (владелец 2026-10-13: «убрать снизу лампочки с иксами, изменить внешний вид плашки») ----------------------------------------------------------------
+/* ---------------------------------------------------------------- плашки Big Win: ?bwplate=0|a|b|b2|b3|c|d (владелец 2026-10-13: «убрать снизу лампочки с иксами, изменить внешний вид плашки») ----------------------------------------------------------------
    Ряд ламп 10× 25× 50× 100× убран везде; уровень (глава) виден строкой названия под суммой, заголовок — BIG WIN (MAX WIN на максимуме). Всё плоское: без свечений, ореолов и глянца.
    0 — прежняя тёмная плашка (как окна F) без ряда ламп;  a — вывеска-шатёр: лампы по раме, кремовая эмаль, красная лента с названием;  b — табло автомата: красная жестяная рама на заклёпках, охристая табличка;
    c — кассовая лента: бумага с зубчатым краем на стальном зажиме, чернила;  d — минимум: заголовок и сумма прямо на затемнении, жестяная табличка с названием. */
-const PLATES=[['0','0 · Прежняя тёмная, без ламп'],['a','a · Вывеска-шатёр: лампы по раме'],['b','b · Табло автомата: жесть и заклёпки'],['c','c · Кассовая лента'],['d','d · Минимум: заголовок и сумма на затемнении']];
-const PLATE_DEF='a';
+const PLATES=[['0','0 · Прежняя тёмная, без ламп'],['a','a · Вывеска-шатёр: лампы по раме'],['b','b · Табло автомата: жесть и заклёпки'],['b2','b2 · Табло автомата, счётчик жёлто-бежевый'],['b3','b3 · Табло автомата, потёртые сколотые края'],['c','c · Кассовая лента'],['d','d · Минимум: заголовок и сумма на затемнении']];
+const PLATE_DEF='b';
+const MWTOPS=[['1','1 · Эмаль, золотые выбитые буквы, латунные уголки'],['2','2 · То же и лампы-шатёр по краям']], MW_DEF='2';
+function mwOpt(o){ let m=o&&o.mwtop; if(!m){ try{ m=new URLSearchParams(location.search).get('mwtop'); }catch(e){} } if(!m){ try{ m=sessionStorage.getItem('bp-mwtop'); }catch(e){} } m=String(m||MW_DEF); return MWTOPS.some(p=>p[0]===m)?m:MW_DEF; }
 function plateOpt(o){ let m=o&&o.plate; if(!m){ try{ m=new URLSearchParams(location.search).get('bwplate'); }catch(e){} } if(!m){ try{ m=sessionStorage.getItem('bp-bwplate'); }catch(e){} } m=String(m||PLATE_DEF).toLowerCase(); return PLATES.some(p=>p[0]===m)?m:PLATE_DEF; }
 const CSS2=(()=>{ const Q=n=>`calc(${n}*var(--q))`, P=k=>`@.cl[data-bwp=${k}]`, out=[];
  const r=(k,sel,d)=>out.push(sel.split(',').map(s=>P(k)+' '+s.trim()).join(',')+'{'+d+'}');
  const RUST=`background-image:var(--bw-chips),var(--bw-wear),linear-gradient(rgba(150,44,28,.38),rgba(96,24,14,.5)),var(--bw-rust);background-blend-mode:normal,soft-light,normal,normal;background-size:${Q(70)} ${Q(70)},auto,auto,${Q(70)} auto;background-color:#4a1810`;
  const LAMP='radial-gradient(circle closest-side,#f4e6b4 0 26%,#c9a24c 28% 46%,#2a0f0a 48% 66%,transparent 68%)';
- const RIV='radial-gradient(circle closest-side,#dcb877 0 14%,#b08436 16% 26%,#2a0f0a 28% 31%,transparent 33%)';
+ const RIV='radial-gradient(circle closest-side,#93402f 0 20%,#3a100a 22% 38%,transparent 40%)';   /* заклёпка: плоский купол цвета жести в тёмной выемке, без охры и блика (раньше выглядела лампочкой) */
  const ring=(g,t,pad)=>`content:'';position:absolute;inset:${pad};z-index:2;pointer-events:none;background-image:${g},${g},${g},${g};background-size:${t} ${t};background-position:0 0,0 100%,0 0,100% 0;background-repeat:space no-repeat,space no-repeat,no-repeat space,no-repeat space`;
  /* общее для a b c d: ни винтов, ни стекла, ни бликов; тень — только тёмная, без ореола */
- for(const k of ['a','b','c','d']){
+ for(const k of ['a','b','b2','b3','c','d']){
   r(k,'.bw3-scr,.bw3-rail,.bw3-glass,.bw3-sweep,.bw3-fl,.bw3-foot','display:none');
   r(k,'.bw3',`padding-top:0;filter:drop-shadow(0 ${Q(1)} ${Q(1.6)} rgba(0,0,0,.6))`);
   r(k,'.bw3-body>*','position:relative;z-index:1');
@@ -416,12 +414,44 @@ const CSS2=(()=>{ const Q=n=>`calc(${n}*var(--q))`, P=k=>`@.cl[data-bwp=${k}]`, 
  r('a','.bw3-win canvas,.bw3-tit canvas','border-radius:0;box-shadow:none');
  r('a','.bw3-tit',`width:100%;padding:${Q(.9)} ${Q(1)};border-radius:0;${RUST};box-shadow:0 0 0 ${Q(.3)} #2a0f0a`);
  /* b — табло автомата */
- r('b','.bw3-body',`border-radius:${Q(.8)};padding:${Q(6.6)} ${Q(6.6)} ${Q(6.2)};gap:${Q(2)};${RUST};box-shadow:inset 0 0 0 ${Q(.5)} rgba(18,4,2,.85),0 0 0 ${Q(.3)} #190704`);
- r('b','.bw3-body::before',ring(RIV,Q(7),Q(1.2)));
- r('b','.bw3-body::after',`content:'';position:absolute;z-index:0;inset:${Q(3.7)};pointer-events:none;border:${Q(.3)} solid rgba(18,4,2,.7);box-shadow:0 ${Q(.3)} 0 rgba(255,200,140,.14)`);
- r('b','.bw3-win,.bw3-tit','border-radius:0');
- r('b','.bw3-win canvas,.bw3-tit canvas','border-radius:0');
- r('b','.bw3-sign',`border-radius:${Q(.3)}`);
+ const rb=(sel,d)=>{ for(const k of ['b','b2','b3']) r(k,sel,d); };
+ /* b — металлический обод из рамы поля (владелец 2026-10-13: «убери ровные обводки вообще, сделай неровными, добавь металлическую обводку как у пульта»): тонкой серой рамки-линии и скругления нет;
+    вместо неё border-image bw-rim.png (кромка и угловые кронштейны ui2/frame1.webp без заклёпок вдоль сторон, потёртая краска). Табличка и окна — с рваной маской (bw-ragged.png, -webkit-mask-box-image): края неровные, места отбитой краски,
+    ровной тени по периметру нет (только тень сверху внутри окон). Сетчатое светлое пятно на раме (текстура chips) убрано: краска без неё. b3 — те же материалы, но по краю шире и гуще сколы до стали. */
+ const RUSTB=`background-image:var(--bw-wear),linear-gradient(rgba(150,44,28,.38),rgba(96,24,14,.5)),var(--bw-rust);background-blend-mode:soft-light,normal,normal;background-size:auto,auto,${Q(70)} auto;background-color:#4a1810`;
+ const BAND=(w,o)=>`content:'';position:absolute;inset:${Q(-o)};z-index:2;pointer-events:none;padding:${Q(w)};background-image:var(--bw-edge),var(--bw-edge),var(--bw-edge);background-repeat:repeat;-webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude`;
+ const RAG=`-webkit-mask-box-image:var(--bw-rag) 40 / ${Q(1.5)} round;-webkit-mask-image:linear-gradient(#000 0 0);-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;-webkit-mask-size:calc(100% - ${Q(2.4)}) calc(100% - ${Q(2.4)})`;   /* сплошной слой под срезами закрывает тонкую линию на их стыке */
+ rb('.bw3-body',`border-radius:0;border:solid transparent;border-width:${Q(6.6)} ${Q(6.6)} ${Q(6.2)};border-image:var(--bw-rim) 175 round;padding:0;gap:${Q(2)};${RUSTB};box-shadow:none`);
+ rb('.bw3-body::after','display:none');
+ for(const k of ['b','b2']) r(k,'.bw3-body::before',`${BAND(1.2,6.6)};background-size:${Q(34)} ${Q(34)},${Q(47)} ${Q(47)},${Q(61)} ${Q(61)};background-position:0 0,${Q(11)} ${Q(7)},${Q(23)} ${Q(29)};opacity:.85`);
+ r('b3','.bw3-body::before',`${BAND(3.6,6.6)};background-size:${Q(22)} ${Q(22)},${Q(31)} ${Q(31)},${Q(43)} ${Q(43)};background-position:${Q(9)} ${Q(5)},${Q(3)} ${Q(17)},${Q(27)} ${Q(11)};opacity:.95`);
+ r('b3','.bw3-body::after',`${BAND(2)};background-size:${Q(26)} ${Q(26)},${Q(53)} ${Q(53)},${Q(71)} ${Q(71)};background-position:${Q(31)} ${Q(17)},${Q(5)} ${Q(40)},${Q(13)} ${Q(2)};opacity:1`);
+ rb('.bw3-win,.bw3-tit',`border-radius:0;box-shadow:inset 0 ${Q(.5)} ${Q(.4)} rgba(0,0,0,.5);${RAG}`);
+ rb('.bw3-win canvas,.bw3-tit canvas','border-radius:0;box-shadow:none');
+ rb('.bw3-sign',`border-radius:0;box-shadow:none;${RAG}`);
+ rb('.bw3-sign::after','display:none');
+ /* b2 — то же табло, окно счётчика светлое: старая эмаль цвета слоновой кости, цифры тёмно-бордовые; тёмным остаётся только узкий кант окна */
+ r('b2','.bw3-win canvas',`box-shadow:inset 0 0 ${Q(.8)} rgba(74,44,16,.5)`);
+ out.push(`${P('b2')} .bw3-win::after{content:'';position:absolute;inset:${Q(1.5)};pointer-events:none;background:var(--bw-wear);mix-blend-mode:multiply;opacity:.16}`);
+ /* MAX WIN, верх плашки (владелец 2026-10-13: «дешевле, чем Big Win»): табличка богаче — тёмно-красная эмаль с золотыми выбитыми буквами, шире и толще обычной (выходит за края ряда на кромку рамы), двойная латунная рамка, латунные уголки-накладки.
+    ?mwtop=1 — без ламп; ?mwtop=2 — то же и две полосы плоских ламп-«шатра» (мигают по очереди, без ореолов). Только для b-семейства и только на MAX WIN; на Big Win таблички прежние. Всё плоское: без свечений и глянца. */
+ const MWK=['b','b2','b3'], mw=(v,sel,d)=>out.push(MWK.map(k=>`${P(k)}[data-mw="${v}"] ${sel}`).join(',')+'{'+d+'}'), mwA=(sel,d)=>{ mw(1,sel,d); mw(2,sel,d); };
+ const EX={1:[1.7,2],2:[3.1,2]};   // на сколько табличка выходит за свой ряд: вверх/вниз и вправо/влево, в q
+ const CAP=(a,pos)=>`linear-gradient(${a}deg,#c9a24c 0 44%,#6b5326 44% 52%,transparent 52%) ${pos}/${Q(3.4)} ${Q(3.4)} no-repeat`;
+ mwA('.bw3[data-mx="1"] .bw3-sign','-webkit-mask-box-image:none;-webkit-mask-image:none;overflow:visible;z-index:3');
+ mwA('.bw3-sign span',`position:relative;z-index:2;letter-spacing:.16em;padding-left:.16em`);
+ mwA('.bw3[data-mx="1"] .bw3-sign span',`background:none;filter:none;color:#e9c96c;text-shadow:${Q(-.16)} ${Q(-.16)} 0 #fff0b4,${Q(.18)} ${Q(.24)} 0 #230604`);   // выбитые буквы: светлая кромка сверху-слева, тёмная снизу-справа, без размытия
+ for(const v of [1,2]){ const [ey,ex]=EX[v];
+  mw(v,'.bw3-sign::before',`inset:${Q(-ey)} ${Q(-ex)};border-radius:0;z-index:0;background-image:var(--bw-wear),linear-gradient(180deg,#6a1812,#541009 52%,#430e08);background-blend-mode:soft-light,normal;background-size:auto,auto;box-shadow:inset 0 0 0 ${Q(.45)} #190604,inset 0 0 0 ${Q(.95)} #b38d3e,inset 0 0 0 ${Q(1.5)} #3a0c08,inset 0 0 0 ${Q(1.8)} #8e6c2c,inset 0 ${Q(2.1)} ${Q(.5)} ${Q(-.3)} rgba(0,0,0,.35)`);
+  mw(v,'.bw3-sign::after',`display:block;content:'';position:absolute;inset:${Q(-ey)} ${Q(-ex)};z-index:1;pointer-events:none;opacity:var(--mxm,0);border-radius:0;background:${CAP(135,'left top')},${CAP(225,'right top')},${CAP(45,'left bottom')},${CAP(315,'right bottom')};mix-blend-mode:normal`); }
+ /* лампы шатра (mwtop=2): плоские диски одного размера, одинаковый шаг, горит каждая третья, бегут по кругу */
+ mw(2,'.mwl',`position:absolute;left:${Q(.2)};right:${Q(.2)};display:flex;justify-content:space-between;z-index:2;pointer-events:none;opacity:var(--mxm,0)`);
+ mw(2,'.mwl.t',`top:${Q(-.95)}`); mw(2,'.mwl.b',`bottom:${Q(-.95)}`);
+ mw(2,'.mwl b',`display:block;width:${Q(1.5)};height:${Q(1.5)};border-radius:50%;background:#4a160d;box-shadow:inset 0 0 0 ${Q(.14)} #1b0704;animation:bw-mwl .72s steps(1) infinite`);
+ for(let i=0;i<3;i++) mw(2,`.mwl b:nth-child(3n+${i+1})`,`animation-delay:-${(i*.24).toFixed(2)}s`);
+ mw(2,'.mwl.b b',`animation-direction:reverse`);
+ out.push(`@keyframes bw-mwl{0%{background:#f0d27e}34%{background:#4a160d}}`);
+ out.push(`@.bw-rm .mwl b{animation:none}@.bw-rm .mwl b:nth-child(3n+1){background:#f0d27e}`);
  /* c — кассовая лента */
  r('c','.bw3',`padding-top:${Q(2.4)}`);
  r('c','.bw3-body',`width:80%;margin:0 auto;border-radius:0;padding:${Q(6.2)} ${Q(5.4)} ${Q(7)};gap:${Q(1.8)};background:var(--bw-paper) 0 0/${Q(40)} auto,#ddd0a8;box-shadow:none;
@@ -456,7 +486,7 @@ const CSS2=(()=>{ const Q=n=>`calc(${n}*var(--q))`, P=k=>`@.cl[data-bwp=${k}]`, 
  return out.join('\n'); })();
 const SCOPE='#bp-big.bw-root';
 const CQ_OK=(()=>{ try{ return !!(window.CSS&&CSS.supports&&CSS.supports('width','1cqw')); }catch(e){ return true; } })(); // Safari <16: нет единиц контейнера — сцена на vw/vh (оверлей fixed inset:0)
-function buildCSS(){ texBuild(); return (CSS+CSS2).replace(/(-?\d*\.?\d+)cqw/g,(m,n)=>`calc(${n}*var(--bw-u))`).replace(/CQW/g,CQ_OK?'cqw':'vw').replace(/CQH/g,CQ_OK?'cqh':'vh').replace(/@(?=[\s\[.>{:])/g,SCOPE).replace(/var\(--bw-(chips|wear|grain)\)/g,(m,k)=>bpvT`url(${TEX[k]})`).replace(/var\(--bw-paper\)/g,()=>bpvT`url(${A_BASE()}plates-note/paper.webp)`).replace(/var\(--bw-tape([ABC])\)/g,(m,k)=>bpvT`url(${A_BASE()}plates-note/tape-${k.toLowerCase()}.webp)`).replace(/var\(--bw-rust\)/g,()=>bpvT`url(${A_BASE()}uikit/hud-m1-rust.webp)`).replace(/var\(--bw-dframe\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-frame.webp)`).replace(/var\(--bw-dband\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-band.webp)`).replace(/var\(--bw-dscrew\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-screw.svg)`).replace(/var\(--bw-gun\)/g,()=>bpvT`url(${A_BASE()}uikit/steel-gun.webp)`).replace(/var\(--bw-wood\)/g,()=>bpvT`url(${A_BASE()}uikit/wood-oxblood.webp)`); }   // текстуры подставляются ПОСЛЕДНИМ шагом: в base64 встречаются «CQW», «5cqw» и подобное, прежние замены испортили бы картинку
+function buildCSS(){ texBuild(); return (CSS+CSS2).replace(/(-?\d*\.?\d+)cqw/g,(m,n)=>`calc(${n}*var(--bw-u))`).replace(/CQW/g,CQ_OK?'cqw':'vw').replace(/CQH/g,CQ_OK?'cqh':'vh').replace(/@(?=[\s\[.>{:])/g,SCOPE).replace(/var\(--bw-(chips|wear|grain)\)/g,(m,k)=>bpvT`url(${TEX[k]})`).replace(/var\(--bw-paper\)/g,()=>bpvT`url(${A_BASE()}plates-note/paper.webp)`).replace(/var\(--bw-tape([ABC])\)/g,(m,k)=>bpvT`url(${A_BASE()}plates-note/tape-${k.toLowerCase()}.webp)`).replace(/var\(--bw-rim\)/g,()=>bpvT`url(${A_BASE()}bigwin/bw-rim.png)`).replace(/var\(--bw-rag\)/g,()=>bpvT`url(${A_BASE()}bigwin/bw-ragged.png)`).replace(/var\(--bw-edge\)/g,()=>bpvT`url(${A_BASE()}bigwin/edge-chips.png)`).replace(/var\(--bw-rust\)/g,()=>bpvT`url(${A_BASE()}uikit/hud-m1-rust.webp)`).replace(/var\(--bw-dframe\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-frame.webp)`).replace(/var\(--bw-dband\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-band.webp)`).replace(/var\(--bw-dscrew\)/g,()=>bpvT`url(${A_BASE()}ui2/dlg-screw.svg)`).replace(/var\(--bw-gun\)/g,()=>bpvT`url(${A_BASE()}uikit/steel-gun.webp)`).replace(/var\(--bw-wood\)/g,()=>bpvT`url(${A_BASE()}uikit/wood-oxblood.webp)`); }   // текстуры подставляются ПОСЛЕДНИМ шагом: в base64 встречаются «CQW», «5cqw» и подобное, прежние замены испортили бы картинку
 let cssDone=false;
 function ensureCSS(){ if(cssDone&&document.getElementById('bw-css')) return; const s=document.createElement('style'); s.id='bw-css'; s.textContent=buildCSS(); document.head.append(s); cssDone=true; }
 
@@ -476,13 +506,14 @@ function pchip(K){ const n=K.length,h=[],d=[],m=new Array(n).fill(0);
  return t=>{ if(t<=K[0][0]) return K[0][1]; if(t>=K[n-1][0]) return K[n-1][1]; let i=0; while(t>K[i+1][0]) i++; const s=(t-K[i][0])/h[i],s2=s*s,s3=s2*s;
   return (2*s3-3*s2+1)*K[i][1]+(s3-2*s2+s)*h[i]*m[i]+(-2*s3+3*s2)*K[i+1][1]+(s3-s2)*h[i]*m[i+1]; }; }
 /* расписание: сколько секунд счётчик идёт между порогами (обычная скорость). Последний кусок до итога короче и пропорционален. */
+const CUR={cl:.3,ho:.62,op:1.1}, CUR_END=CUR.ho+CUR.op;   // занавес MAX WIN: закрывается за 0,3 с, стоит закрытым до 0,62 с, раскрывается за 1,1 с (от начала главы MAX)
 function buildSc(final,bet,isMax){
  const x=final/bet, K=[[0,0],[T0,0]]; let t=T0; const seg=[[0,10,1.05],[10,25,1.9],[25,50,2.3],[50,100,2.8]]; let done=false;
  for(const [a,b,d] of seg){ if(x>=b){ t+=d; K.push([t,b]); } else { t+=.55+(x-a)/(b-a)*d*.9; K.push([t,x]); done=true; break; } }
  if(!done){ if(x<=100){ /* ровно 100× */ } else if(x<1000){ t+=.8+Math.log10(x/100)*2.2; K.push([t,x]); } else { t+=2.5; K.push([t,1000]); t+=x<MAXX?1.5:3.3; K.push([t,x]); } }
  const f=pchip(K), tF=t, T=[Infinity,Infinity,Infinity,Infinity,Infinity,Infinity];
  for(let k=1;k<=4;k++){ if(x<CHAP[k].at) break; let lo=0,hi=tF; for(let i=0;i<40;i++){ const mid=(lo+hi)/2; if(f(mid)>=CHAP[k].at) hi=mid; else lo=mid; } T[k]=hi; }
- if(isMax||x>=MAXX) T[5]=tF;
+ if(isMax||x>=MAXX) T[5]=Math.max(tF-CUR_END,isFinite(T[4])?T[4]+.5:.6);   // MAX WIN: занавес закрывается и раскрывается, пока счёт досчитывает последний отрезок (раскрыт к концу счёта)
  const tEnd=tF+(T[5]<Infinity?4.3:1.25);
  return {final,x,f,tF,T,tEnd};
 }
@@ -532,7 +563,8 @@ const PALA={win:null,col:null,tbg:null,cut:true,paper:'0,0,0',dig:['#9a2d1d','#8
 const PALB=Object.assign({},PAL3D,{win:'#120a06',tbg:'#120a06',dig:['#fff1c0','#e8cf88']});
 const PALC=Object.assign({},PALA,{dig:['#2e1d14','#241610'],coin:['#2e1d14','#2e1d14','#2e1d14','rgba(0,0,0,0)','rgba(0,0,0,0)','#ddd0a8'],dot:['#2e1d14','#2e1d14'],tt:[['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#241a12','#241a12'],['#8e2a1c','#8e2a1c']]});
 const PALD=Object.assign({},PALA,{ol:'#1a0905',dig:['#f7ecd0','#e5d3a2'],dsh:'rgba(10,3,1,.9)',dot:['#f3e3b0','#d2b46a'],coin:['#f3e3b0','#d2b46a','#a98a44','rgba(26,9,5,.9)','rgba(0,0,0,0)','#3a1a0a'],tsh:'rgba(10,3,1,.7)',tt:[['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f3e6c4','#f3e6c4'],['#f6dc8a','#f6dc8a']]});
-const PALP={a:PALA,b:PALB,c:PALC,d:PALD};
+const PALB2=Object.assign({},PALB,{win:'#ccb987',col:['#c2ae7b','#ccb987','#bda978'],edge:'96,70,34',ea:.55,dig:['#5c2419','#43190f'],dsh:'rgba(255,248,222,.55)',sep:['#c0ac79','#98804c','#c0ac79'],coin:['#9a3a28','#7a2a1c','#5a1c12','rgba(30,8,4,.5)','rgba(255,240,200,.3)','#efe0b4'],dot:['#5c2419','#43190f']});   /* окно: кремово-охристая эмаль, не белая и не лимонная; барабаны темнеют к краю цветом тени-охры, не чёрным */
+const PALP={a:PALA,b:PALB,b2:PALB2,b3:PALB,c:PALC,d:PALD};
 const easeBack=u=>{ u=clamp(u); const c1=1.9, c3=c1+1; return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2); };
 /* текстуры кодом (один раз на страницу): пятна и царапины, зерно, облупленная краска */
 const TEX={};
@@ -586,7 +618,7 @@ function play(o){
  const fmtRaw=o.moneyFmt||defaultFmt, fmt=c=>{ let s=fmtRaw(c===finalC&&o.amount>=0?o.amount:c/100);   /* итог — точная выплата игры, а не округлённые центы (иначе ARS и суммы с долями цента расходятся с WIN) */ if(typeof window.bpSocialFix==='function') s=window.bpSocialFix(s); return s; };
  const betC=Math.max(1,Math.round((o.bet>0?o.bet:1)*100)), finalC=Math.max(0,Math.round((o.amount||0)*100)), isMax=!!o.isMax||finalC>=MAXX*betC;
  const RMODE=roccoMode(o), SUM=o.summary&&o.summary.title?o.summary:null;   // SUM — шоу как итог бонуса (см. заголовок файла)
- const root=document.createElement('div'); const FXK=fxMode(o), CL=FXK!=='old'; root.id='bp-big'; root.className='bw-root'+(isMax?' max':'')+(CL?' cl':''); root.dataset.fx=FXK; const PLATE=CL?plateOpt(o):'', PLK=CL?(PLATE==='0'?'dlg':PLATE?'bp':BigWinFx.opt('pl',o)):'', HTK=CL?BigWinFx.opt('hint',o):''; const NOTE=PLK==='note', DLG=PLK==='dlg', LPK=CL?(NOTE?'bulbs':BigWinFx.opt('lamp',o)):'', TPK=CL?(NOTE||DLG?'none':BigWinFx.opt('top',o)):'', PALX=PALP[PLATE]||(NOTE?PAL3N:DLG?PAL3D:PAL3); if(CL){ root.dataset.pl=PLK; root.dataset.lamp=LPK; root.dataset.hint=HTK; root.dataset.top=TPK; root.dataset.bwp=PLATE; } if(SUM) root.dataset.sum='1'; root.setAttribute('role','dialog'); root.setAttribute('aria-label',(isMax?'Max win ':'Big win ')+fmt(finalC));
+ const root=document.createElement('div'); const FXK=fxMode(o), CL=FXK!=='old'; root.id='bp-big'; root.className='bw-root'+(isMax?' max':'')+(CL?' cl':''); root.dataset.fx=FXK; const PLATE=CL?plateOpt(o):'', PLK=CL?(PLATE==='0'?'dlg':PLATE?'bp':BigWinFx.opt('pl',o)):'', HTK=CL?BigWinFx.opt('hint',o):''; const NOTE=PLK==='note', DLG=PLK==='dlg', LPK=CL?(NOTE?'bulbs':BigWinFx.opt('lamp',o)):'', TPK=CL?(NOTE||DLG?'none':BigWinFx.opt('top',o)):'', PALX=PALP[PLATE]||(NOTE?PAL3N:DLG?PAL3D:PAL3); if(CL){ root.dataset.pl=PLK; root.dataset.lamp=LPK; root.dataset.hint=HTK; root.dataset.top=TPK; root.dataset.bwp=PLATE; root.dataset.mw=isMax?mwOpt(o):'0'; } if(SUM) root.dataset.sum='1'; root.setAttribute('role','dialog'); root.setAttribute('aria-label',(isMax?'Max win ':'Big win ')+fmt(finalC));
  let closed=false, resolve, onKey=null; const promise=new Promise(r=>resolve=r);
  const under=document.getElementById('app'), underVis=under?under.style.visibility:'';   // игра под непрозрачным шоу не рисуется: меньше нагрузки на слабых устройствах
  const gone=()=>{ if(root.isConnected) root.remove(); if(under) under.style.visibility=underVis; };
@@ -619,23 +651,23 @@ const roccoHTML=RMODE==='eyes'?`<div class="bw-re" data-re><i class="bw-re-pit">
   ${roccoHTML}
   <div class="bw-cctv"><div class="bw-tint"></div><div class="bw-scan"></div><div class="bw-roll"></div><div class="bw-br a"></div><div class="bw-br b"></div><div class="bw-br c"></div><div class="bw-br d"></div>
    <div class="bw-hud tl">CAM 03 · HALL</div><div class="bw-hud tr"><i class="rec"></i>REC</div><div class="bw-hud bl" data-tc>02:14:07</div><div class="bw-tear a"></div><div class="bw-tear b"></div><div class="bw-drop"></div><div class="bw-noise"></div></div>
-  <div class="bw-vig"></div><div class="bw-cur l"></div><div class="bw-cur r"></div>
+  <div class="bw-vig"></div>
   <div class="bw-ui">
    <div class="bw-obj" data-obj><div class="bw3">${CL?'':'<i class="bw3-bell"><b></b><u></u></i>'}<div class="bw3-body">${railHTML}<i class="bw3-scr tl"></i><i class="bw3-scr tr"></i><i class="bw3-scr bl"></i><i class="bw3-scr br"></i>
-    <div class="bw3-sign" data-sign><span data-kick>BIG WIN</span></div>
+    <div class="bw3-sign" data-sign><span data-kick>BIG WIN</span>${isMax&&CL&&mwOpt(o)==='2'?'<i class="mwl t">'+'<b></b>'.repeat(17)+'</i><i class="mwl b">'+'<b></b>'.repeat(17)+'</i>':''}</div>
     <div class="bw3-win"><canvas data-wcv></canvas><i class="bw3-glass"><i class="bw3-sweep"></i></i><i class="bw3-fl"></i></div>
     <div class="bw3-tit"><canvas data-tcv></canvas><i class="bw3-glass"></i></div>
     </div></div></div>
    <div class="bw-hint" data-hint><i class="bw-hl"></i><span class="bw-ht" data-ht></span><i class="bw-hl r"></i></div>
   </div>
-  <canvas class="bw-cv bw-cvf" data-cvf style="z-index:6"></canvas></div>
+  <canvas class="bw-cv bw-cvf" data-cvf style="z-index:6"></canvas><canvas class="bw-cv bw-cvc" data-cvc style="z-index:7"></canvas></div>
   <div class="bw-sr" data-sr aria-live="polite"></div>${defsHTML}`;
  setBg(); document.body.append(root);
  if(under){ if(isRM()) under.style.visibility='hidden'; else { root.style.opacity='0'; void root.offsetWidth; root.style.transition=`opacity ${FADE_IN*SLW()}s linear`; root.style.opacity='1';
   let d0=0; const inDone=()=>{ if(d0) return; d0=1; root.removeEventListener('transitionend',inEnd); root.style.transition=''; root.style.opacity=''; if(!closed&&under) under.style.visibility='hidden'; }, inEnd=e=>{ if(e.target===root) inDone(); };
   root.addEventListener('transitionend',inEnd); setTimeout(inDone,FADE_IN*SLW()*2000+400); } }   // зал прячем, когда оверлей проявился (по окончании перехода, а не по таймеру: на тормозящей странице таймер раньше кадра)   // оверлей проявляется за 0,16 с поверх зала (зал скрывается после): Рокко шоу стоит ровно на Рокко зала и не прыгает
 const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'), SIGN=q('[data-sign]'), HINT=q('[data-hint]'), HT=q('[data-ht]'), SR=q('[data-sr]'), TC=q('[data-tc]'),
-  CVB=q('[data-cvb]'), CVF=q('[data-cvf]'), WCV=q('[data-wcv]'), TCV=q('[data-tcv]'), SWEEP=q('.bw3-sweep'), BELL=q('.bw3-bell'), RAIL=[...root.querySelectorAll('.bw3rb')], RE=q('[data-re]'), RM=q('[data-rm]'), MV=q('.bw-mon-v'), REP=RE?[...RE.querySelectorAll('.bw-re-e b')]:[];
+  CVB=q('[data-cvb]'), CVF=q('[data-cvf]'), CVC=q('[data-cvc]'), WCV=q('[data-wcv]'), TCV=q('[data-tcv]'), SWEEP=q('.bw3-sweep'), BELL=q('.bw3-bell'), RAIL=[...root.querySelectorAll('.bw3rb')], RE=q('[data-re]'), RM=q('[data-rm]'), MV=q('.bw-mon-v'), REP=RE?[...RE.querySelectorAll('.bw-re-e b')]:[];
  OBJ=q('[data-obj]'); LPS=[...root.querySelectorAll('.bw3l')]; VIDS=[...root.querySelectorAll('video')];
  VIDS.forEach(v=>{ v.muted=true; v.setAttribute('playsinline',''); });
   const V=(n,v)=>root.style.setProperty(n,v), OV=(n,v)=>OBJ.style.setProperty(n,v);
@@ -650,7 +682,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
  /* Не поместился рядом с плашкой — на широком экране (телефон боком) сдвигаем плашку влево ровно настолько, чтобы Рокко встал на своё место (--rkdx в CSS у --cx); не хватает места и так — Рокко нет */
  function roccoFit(){ if(!ROC) return; root.style.setProperty('--rkdx','0px'); ROC.layout(); if(ROC.fit||!ROC.box||S.dev==='phone'||CL) return;
   const b=ROC.box, right=L.px+L.pw/2, left=L.px-L.pw/2, dx=Math.ceil(right-(b.l-6)); if(dx>0&&left-dx>=8){ root.style.setProperty('--rkdx',dx+'px'); layout(); ROC.layout(); } }
- const ctxB=CVB.getContext('2d'), ctxF=CVF.getContext('2d'), ctxW=WCV.getContext('2d'), ctxT=TCV.getContext('2d'), BW3=q('.bw3');
+ const ctxB=CVB.getContext('2d'), ctxF=CVF.getContext('2d'), ctxC=CVC.getContext('2d'), ctxW=WCV.getContext('2d'), ctxT=TCV.getContext('2d'), BW3=q('.bw3');
  let FX=[], IMP=[]; const DC={fx:FXK,W:0,H:0,u:10,dpr:1,lamp:.9,ps:1};   // DC — общие числа для рисования частиц bigwin-fx.js
  /* ---- табло: раскладка и барабаны (холсты), строка главы, лампы ---- */
  const NR=isMax?5:4, PQ={k:1,s:14,items:[],spr:null,ttl:null,coin:null,wh:24,sc:1};
@@ -710,9 +742,9 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
     c.globalAlpha=1;
     if(pal.paper){ gr=c.createLinearGradient(0,0,0,H); gr.addColorStop(0,`rgba(${pal.paper},1)`); gr.addColorStop(.2,`rgba(${pal.paper},.97)`); gr.addColorStop(.3,`rgba(${pal.paper},.4)`); gr.addColorStop(.37,`rgba(${pal.paper},0)`); gr.addColorStop(.63,`rgba(${pal.paper},0)`); gr.addColorStop(.7,`rgba(${pal.paper},.4)`); gr.addColorStop(.8,`rgba(${pal.paper},.97)`); gr.addColorStop(1,`rgba(${pal.paper},1)`); if(pal.cut) c.globalCompositeOperation='destination-out'; c.fillStyle=gr; c.fillRect(x,0,w,H); c.restore(); }   // записка: края барабана уходят в цвет бумаги
     else {
-    gr=c.createLinearGradient(0,0,0,H); gr.addColorStop(0,'rgba(0,0,0,.9)'); gr.addColorStop(.2,'rgba(0,0,0,.32)'); gr.addColorStop(.38,'rgba(0,0,0,0)'); gr.addColorStop(.62,'rgba(0,0,0,0)'); gr.addColorStop(.8,'rgba(0,0,0,.4)'); gr.addColorStop(1,'rgba(0,0,0,.92)'); c.fillStyle=gr; c.fillRect(x,0,w,H);
+    gr=c.createLinearGradient(0,0,0,H); { const E=pal.edge||'0,0,0', ea=pal.ea||1; gr.addColorStop(0,`rgba(${E},${.9*ea})`); gr.addColorStop(.2,`rgba(${E},${.32*ea})`); gr.addColorStop(.38,`rgba(${E},0)`); gr.addColorStop(.62,`rgba(${E},0)`); gr.addColorStop(.8,`rgba(${E},${.4*ea})`); gr.addColorStop(1,`rgba(${E},${.92*ea})`); } c.fillStyle=gr; c.fillRect(x,0,w,H);
     gr=c.createLinearGradient(0,cy-H*.34,0,cy-H*.14); gr.addColorStop(0,'rgba(255,240,215,0)'); gr.addColorStop(.5,'rgba(255,240,215,.09)'); gr.addColorStop(1,'rgba(255,240,215,0)'); c.fillStyle=gr; c.fillRect(x,cy-H*.34,w,H*.2);
-    gr=c.createLinearGradient(x,0,x+w,0); gr.addColorStop(0,'rgba(255,230,190,.10)'); gr.addColorStop(.12,'rgba(255,230,190,0)'); gr.addColorStop(.88,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(0,0,0,.35)'); c.fillStyle=gr; c.fillRect(x,0,w,H);
+    gr=c.createLinearGradient(x,0,x+w,0); gr.addColorStop(0,'rgba(255,230,190,.10)'); gr.addColorStop(.12,'rgba(255,230,190,0)'); gr.addColorStop(.88,'rgba(0,0,0,0)'); gr.addColorStop(1,`rgba(${pal.edge||'0,0,0'},${.35*(pal.ea||1)})`); c.fillStyle=gr; c.fillRect(x,0,w,H);
     c.restore(); } }
    if(i<n-1&&(cl.t==='dg'||it[i+1].t==='dg')){ const fx=x+w+fin/2, gg=c.createLinearGradient(fx-fin/2,0,fx+fin/2,0); gg.addColorStop(0,pal.sep[0]); gg.addColorStop(.5,pal.sep[1]); gg.addColorStop(1,pal.sep[2]); c.fillStyle=gg; c.fillRect(fx-fin/2,0,fin,H); } }); }
  function plqTitle(t,T){   // строка главы — барабан из строк (пусто, затем названия глав), на каждой главе перекатывается с отскоком
@@ -729,7 +761,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
  function layout(){
   const r=root.getBoundingClientRect(); L.cw=r.width||innerWidth; L.ch=r.height||innerHeight; L.dpr=Math.min(2,window.devicePixelRatio||1);
   L.u=S.dev==='phone'?L.cw/100:Math.min(L.cw/100,L.ch/62.5);
-  L.dprB=.5; L.dprF=Math.min(1.5,L.dpr); sizeCanvas(CVB,L.cw,L.ch,L.dprB); sizeCanvas(CVF,L.cw,L.ch,L.dprF);
+  L.dprB=.5; L.dprF=Math.min(1.5,L.dpr); sizeCanvas(CVB,L.cw,L.ch,L.dprB); sizeCanvas(CVF,L.cw,L.ch,L.dprF); sizeCanvas(CVC,L.cw,L.ch,1); S.curOn=1;
   L.pw=OBJ.offsetWidth; L.ph=OBJ.offsetHeight; L.em=parseFloat(getComputedStyle(OBJ).fontSize)||10; L.px=OBJ.offsetLeft+(OBJ.offsetParent&&OBJ.offsetParent!==root?OBJ.offsetParent.offsetLeft:0); L.py=OBJ.offsetTop;
   buildFx(); }
  /* ---- частицы: конфетти, серпантин, искры. Все положения — формулы от времени (с точностью до перемотки) ---- */
@@ -749,7 +781,7 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
    if(k===3){ rain(t,100,pal,41,1.8,3); cannon(t,-1,50,pal,42,1.15,3); cannon(t,1,50,pal,43,1.15,3); sparks(t,48,44,1.3); }
    if(k===4){ rain(t,90,pal,51,1.4,0); cannon(t,-1,40,pal,52,1.05); cannon(t,1,40,pal,53,1.05); sparks(t,40,54,1.2); }
    ring(t,k===3?'#ff6a48':k===4?'#9fe0c0':'#e0aa4a',1+.12*k); }
-  if(isM){ const t=T[5]+2.0; rain(t,200,PAL.gold,61,2.4,8); cannon(t,-1,90,PAL.gold,62,1.3,5); cannon(t,1,90,PAL.gold,63,1.3,5); sparks(t,70,64,1.4); ring(T[5],'#f3e6c4',1.8); ring(t,'#e0aa4a',1.6); }
+  if(isM){ const t=T[5]+CUR_END; rain(t,200,PAL.gold,61,2.4,8); cannon(t,-1,90,PAL.gold,62,1.3,5); cannon(t,1,90,PAL.gold,63,1.3,5); sparks(t,70,64,1.4); ring(t,'#f3e6c4',1.8); ring(t+.15,'#e0aa4a',1.6); }   // конфетти — когда занавес раскрылся
   else { const pal=sc.x>=100?PAL.cctv:sc.x>=50?PAL.red:PAL.warm; cannon(sc.tF,-1,64,PAL.gold,71,1.15,3); cannon(sc.tF,1,64,PAL.gold,72,1.15,3); rain(sc.tF+.05,50,PAL.gold,73,1.2); sparks(sc.tF,30,74); ring(sc.tF,'#e0aa4a',1.2); }
   const FXC={fx:FXK,u,W,H,ps,px:L.px,py:L.py,pw:L.pw,ph:L.ph,lamp:.9,dpr:L.dprF};
   for(const b of bursts){
@@ -819,13 +851,41 @@ const q=s=>root.querySelector(s), STAGE=q('[data-stage]'), KICKT=q('[data-kick]'
   if(!st&&!s.lq){ g.globalCompositeOperation='lighter'; const R=14*L.u; for(let i=0;i<34;i++){ const h1=hash(i*31+7),h2=hash(i*17+3),h3=hash(i*5+11); const x=(h1*W+Math.sin(t*.2+i)*3*L.u)%W, y=((h2*H+t*(2+h3*5)*L.u*.5)%H); const tw=.5+.5*Math.sin(t*(1+h3*2)+i*3);
     g.fillStyle=`rgba(255,226,170,${(.16+.2*tw)*lamp})`; g.beginPath(); g.arc(x,y,Math.max(1,.16*L.u*(.6+h3)),0,6.283); g.fill(); } }
   g.globalCompositeOperation='source-over'; }
+
+ /* ---- занавес MAX WIN (владелец 2026-10-13): ПЕРЕД Рокко и плашкой. Закрывается с боков за 0,3 с, потом раскрывается за 1,1 с: ткань — столбцы материала с задержкой от края, который тянут (ведущая кромка идёт первой, остальное подтягивается),
+    складки привязаны к ткани (при сборе густеют и темнеют), низ ведущей кромки подтягивается вверх к краю, лёгкое колыхание и отскок после остановки. Собранные у краёв половины остаются рамкой сцены. Матовый бархат: ни бликов, ни свечения.
+    В режиме «меньше движения» — сразу раскрытое положение без качания ---- */
+ function drawCurtain(t,st){
+  const g=ctxC, T5=S.sc.T[5], u=T5===Infinity?-1:t-T5, W=L.cw, H=L.ch;
+  if(u<0){ if(S.curOn){ g.setTransform(1,0,0,1,0,0); g.clearRect(0,0,CVC.width,CVC.height); S.curOn=0; } return; }
+  S.curOn=1; g.setTransform(CVC.width/W,0,0,CVC.height/H,0,0); g.clearRect(0,0,W,H);
+  const N=46, ph=S.dev==='phone', gw=(ph?.055:.1)*W, half=W/2+.012*W, NP=ph?5:7, OPN=CUR.ho+CUR.op;
+  const sm2=x=>{ x=clamp(x); return x*x*x*(x*(6*x-15)+10); };   // плавнее: старт и остановка тканью, а не рывком
+  const po=clamp((u-CUR.ho)/CUR.op), pc=clamp(u/CUR.cl), s2=Math.max(0,u-OPN), env=st?0:(u<CUR.ho?0:Math.exp(-Math.max(0,u-(CUR.ho+CUR.op*.55))*1.5));
+  const col=new Array(N+1);
+  for(let k=0;k<=N;k++){ const j=k/N, xo=j*gw, xf=xo-gw*1.3, xc=j*half;
+   let x, pj=0, lift=0;
+   if(u<CUR.ho){ const c=sm2((pc-(1-j)*.35)/.65); x=xf+(xc-xf)*c; lift=H*.07*j*(1-c)*(c>0?1:0); }
+   else { pj=sm((po-(1-j)*.34)/.66); x=xc+(xo-xc)*pj; lift=H*.5*pj*Math.pow(j,1.5); }
+   if(!st){ x+=-gw*.5*j*Math.exp(-5*s2)*Math.sin(15*s2)*(u>=OPN?1:0)+W*.006*env*(.3+.7*j)*Math.sin(u*8.5+j*4.1); lift+=H*.014*env*pj*Math.sin(u*7+j*5); }
+   col[k]={x,pj,lift,j}; }
+  const base=[112,19,16], fold=(k,side)=>{ const c=col[k], A=.62+.3*c.pj, ph=c.j*NP*6.2832+(side?1.2:0)+.9*Math.sin(c.j*9.3), b=Math.pow(.5+.5*Math.cos(ph),1.5)*.8+.2*(.5+.5*Math.cos(ph*2.3+1)); return (.32+.78*(1-A*(1-b)))*(.88+.12*hash(k*7+(side?91:3))); };
+  for(const side of [0,1]){
+   const X=k=>side?W-col[k].x:col[k].x, XL=X(N), yL=Math.max(H*.15,H-col[N].lift);
+   const sg=g.createLinearGradient(XL,0,XL+(side?-1:1)*.04*W,0); sg.addColorStop(0,'rgba(0,0,0,.42)'); sg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=sg; g.fillRect(Math.min(XL,XL+(side?-1:1)*.04*W),0,.04*W,yL);   // тень от кромки на сцену: тёмная и сухая, без ореола
+   for(let k=0;k<N;k++){ const xa=X(k), xb=X(k+1), x0=Math.min(xa,xb), w=Math.abs(xb-xa)+1, yb=Math.max(H*.15,H-(col[k].lift+col[k+1].lift)/2), f=fold(k,side);
+    g.fillStyle=`rgb(${Math.round(base[0]*f)},${Math.round(base[1]*f)},${Math.round(base[2]*f)})`; g.fillRect(x0,0,w,yb); } }
+  g.globalCompositeOperation='source-atop'; const vg=g.createLinearGradient(0,0,0,H); vg.addColorStop(0,'rgba(10,1,1,.55)'); vg.addColorStop(.22,'rgba(10,1,1,.08)'); vg.addColorStop(.7,'rgba(10,1,1,.1)'); vg.addColorStop(1,'rgba(10,1,1,.5)'); g.fillStyle=vg; g.fillRect(0,0,W,H); g.globalCompositeOperation='source-over';
+  const pel=H*(ph?.045:.06), py=-pel*(1-sm(u/CUR.cl)); g.fillStyle='#4a0d0a'; g.fillRect(0,py,W,pel); for(let i=0;i<24;i++){ g.fillStyle=`rgba(10,1,1,${.12+.14*((i*7)%3)/2})`; g.fillRect(i*W/24,py,W/48,pel); } g.fillStyle='rgba(10,1,1,.5)'; g.fillRect(0,py+pel-2,W,2);   // верхняя планка: стоит на месте, пока занавес собран у краёв
+ }
  /* ---- конфетти, серпантин, искры, кольца ---- */
  function drawFront(t,st,s){
   const g=ctxF, dpr=L.dprF, W=L.cw, H=L.ch, u=L.u; g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H); if(st) return;
   if(CL){ DC.W=W; DC.H=H; DC.u=u; DC.dpr=dpr; DC.lamp=s.lamp; }
   const dark=s.ch===4;   // на 100× часть конфетти — квадратики помех
   let ci=0;
-  for(const p of FX){ if(p.t0>t) break; const tau=t-p.t0; if(p.fk){ if(tau>p.life||(s.lq&&(ci++&1))) continue; BigWinFx.draw(g,p,tau,DC); continue; } if(s.lq&&p.ty==='c'&&(ci++&1)) continue;
+  const Tm=S.sc.T[5]; for(const p of FX){ if(p.t0>t) break; if(Tm<Infinity&&p.t0<Tm&&t>Tm+CUR.cl) continue; const tau=t-p.t0;   // MAX: прежнее конфетти уходит под закрытый занавес, новое — после раскрытия
+   if(p.fk){ if(tau>p.life||(s.lq&&(ci++&1))) continue; BigWinFx.draw(g,p,tau,DC); continue; } if(s.lq&&p.ty==='c'&&(ci++&1)) continue;
    if(p.ty==='ring'){ if(tau>p.life) continue; const e=easeOut(tau/p.life), d=e*(1.0*L.em)*p.amp+.3*L.em, a=Math.pow(1-e,1.6); g.save(); g.globalAlpha=a*.9; g.lineWidth=Math.max(1.2,.1*L.em*(1-e)); g.strokeStyle=p.col; g.globalCompositeOperation='lighter';
      g.beginPath(); const x=L.px-L.pw/2-d, y=L.py-L.ph/2-d, w=L.pw+2*d, h=L.ph+2*d, r=.3*L.em+d*.6; g.roundRect?g.roundRect(x,y,w,h,r):g.rect(x,y,w,h); g.stroke(); g.restore(); continue; }
    if(tau>p.life) continue;
@@ -867,8 +927,8 @@ function sumState(on){   // шоу доиграно (или перемотано
     if(!st&&base>0) for(const e of evs){ const u=t-e-i*.04; if(u>=0) on+=1.1*Math.exp(-u*7.5); }   // на пороге по ряду ламп бежит вспышка
     sv(b,'--on',on.toFixed(2)); if(i===RAIL_TIRED) sv(b,'--rf',(st?1:1-.7*sagAt(t,3.9,.6)).toFixed(2)); }); }
   let bell=0; if(!st){ const ev=[...new Set([...T.slice(1).filter(x=>isFinite(x)),sc.tF])]; ev.forEach(e=>{ if(t>=e) bell+=osc(t-e-.02,26,34,5.2); }); } if(BELL) sv(BELL,'--bl',bell.toFixed(2));
-  const mxu=T[5]===Infinity?-1:t-T[5], on=mxu>=(st?0:.2)?1:0;   // MAX WIN: плашка «BIG WIN» перекрашивается и меняет надпись (один раз, за 0,4 с)
-  sv(BW3,'--mxm',(mxu<0?0:st?1:sm(mxu/.4)).toFixed(3)); if(PQ.mx!==on){ PQ.mx=on; BW3.dataset.mx=on; }
+  const mxu=T[5]===Infinity?-1:t-T[5], on=mxu>=(st?0:.38)?1:0;   // MAX WIN: плашка «BIG WIN» перекрашивается и меняет надпись (один раз, за 0,4 с)
+  sv(BW3,'--mxm',(mxu<.35&&!st?0:st?1:sm((mxu-.35)/.25)).toFixed(3)); if(PQ.mx!==on){ PQ.mx=on; BW3.dataset.mx=on; }
   setKick(SUM&&fn?SUM.title:on?'MAX WIN':'BIG WIN'); }
   function render(t){
   const sc=S.sc, T=sc.T, st=S.static||isRM();   /* st — статичный режим: никакого мерцания, качания и мигания */
@@ -881,21 +941,22 @@ function sumState(on){   // шоу доиграно (или перемотано
 
   const pulse=st?0:(()=>{ const p=(t*1.15)%1; return Math.max(Math.exp(-Math.pow((p-.08)/.05,2)),.7*Math.exp(-Math.pow((p-.3)/.06,2))); })();
   /* свет: лампа над столом */
-  let ropv=1, lamp=.6*sm(t/.3), bgb=.14+.3*lamp, rb=.42+.2*i0, jx=0, blk=0, drop=0, cur=0, rrot=0, vs=60;
+  let ropv=1, lamp=.6*sm(t/.3), bgb=.14+.3*lamp, rb=.42+.2*i0, jx=0, blk=0, drop=0, rrot=0, vs=60;
   const slot=Math.floor(t*12), spike=st?0:Math.exp(-(t-.17)*16)*(t>=.17?1:0);   // вспышка света при ударе плашки: короткий скачок экспозиции фона
   if(!st&&t<.17){ lamp=.1; }   // до удара плашки свет «выбит»: одна тёмная пауза и один щелчок (раньше строб 40 Гц)
   if(ch===1){ lamp=tc<.14&&!st?.1:.6+.35*sm(tc/.5); bgb=.16+.34*lamp; rb=.5+.3*lamp; vs=58; }
   else if(ch===2){ const dipW=[[.06,.16],[.64,.74],[1.25,1.33],[1.9,1.98]].some(w=>tc>=w[0]&&tc<w[1]); lamp=st?.95:(dipW?.2:.95);  /* четыре провала света за первые 2 с главы, не чаще двух в любую секунду (раньше — случайные, до 12 раз в секунду) */ bgb=.12+.4*lamp; rb=.28+.62*lamp; jx=(!st&&lamp<.5)?(hash(slot*5)-.5)*.5:0; vs=54; }
   else if(ch===3){ lamp=.34+.1*pulse; bgb=.2+.08*pulse; rb=.62+.08*pulse; vs=46-6*pulse; }
   else if(ch===4){ lamp=.46; bgb=.25; rb=.78; vs=40; const sl=Math.floor((tc-.9)*2), ph2=(tc-.9)*2-sl, hv=sl>=0&&!st&&!atEnd?hash(sl*13+1):1, g=hv<.3&&ph2<.14, dr=!st&&!atEnd&&(tc<.12||(hv>=.3&&hv<.42&&ph2>=.2&&ph2<.3)); jx=g?(hash(slot*5)-.5)*1.4:0; drop=dr?1:0; lamp=g?.2:.46; }   // помехи редкие и по расписанию: после первой секунды главы — одна ячейка в полсекунды, и в ней либо сбой света, либо кадр «сигнал пропал» (не чаще двух вспышек в секунду)   // atEnd: последний кадр шоу стоит на экране (итог бонуса) — не должен застыть на кадре «сигнал пропал»
-  else if(ch===5){ vs=34; const u=t-T[5]; lamp=sm((u-.7)/.5)*.95; bgb=u<.55?0:.05+.05*sm((u-.7)/1.5); rb=.85; blk=u<.05?sm(u/.05):u<.55?1:.7+.3*(1-sm((u-.55)/1.2)); cur=sm((u-2.1)/1.4);
-   const b=sm((u-1.3)/.7)*(1-sm((u-2.3)/.8)); rrot=-5*b; ropv=u<.05?1-sm(u/.05):u<.62?0:sm((u-.62)/.35); }
-  if(st&&ch===5){ blk=.7; lamp=.95; bgb=.08; cur=1; ropv=1; }
+  else if(ch===5){ const u=t-T[5], C0=CUR.cl; vs=u<C0?40:34; lamp=u<C0?.46:sm((u-.7)/.5)*.95; bgb=u<C0?.25:u<.55?0:.05+.05*sm((u-.7)/1.5); rb=u<C0?.78:.85;   // до закрытия занавеса сцена как на 100×, чернота и смена ролика — за закрытым занавесом
+   blk=u<C0?0:u<C0+.05?sm((u-C0)/.05):u<.55?1:.7+.3*(1-sm((u-.55)/1.2));
+   const b=sm((u-1.3)/.7)*(1-sm((u-2.3)/.8)); rrot=-5*b; ropv=u<C0?1:u<CUR.ho?0:sm((u-CUR.ho)/.35); }
+  if(st&&ch===5){ blk=.7; lamp=.95; bgb=.08; ropv=1; }
   bgb+=spike*.75; if(t<.17&&!st){ bgb=.05+.25*lamp; rb=.2; }
   for(const k of [1,2,3,4]){ const u=t-T[k]; if(!st&&u>=0&&u<.2){ bgb+=.38*Math.exp(-u*14); } }
   V('--i0',i0.toFixed(3)); for(let k=1;k<=5;k++) V('--i'+k,I(k).toFixed(3)); V('--i3',(I(3)*(1-.85*I(4))).toFixed(3)); V('--i4',(I(4)*(1-I(5))).toFixed(3));
   V('--lamp',lamp.toFixed(3)); V('--dim',(1-clamp(bgb)).toFixed(3)); V('--rb',rb.toFixed(3)); if(ch>=3) V('--pulse',pulse.toFixed(3));   /* сирена видна с главы 3: до неё переменная не меняется, и сирена (прозрачная) не перерисовывается каждый кадр */ V('--vs',vs+'%');
-  V('--blk',blk.toFixed(3)); V('--drop',drop); V('--cur',cur.toFixed(3)); V('--jx',U(jx));
+  V('--blk',blk.toFixed(3)); V('--drop',drop); V('--jx',U(jx));
 
   /* дрожь всей сцены от ударов */
   let shx=0, shy=0, shr=0;
@@ -919,7 +980,7 @@ function sumState(on){   // шоу доиграно (или перемотано
   const lq=S.lowq&&S.running; S.fc=(S.fc||0)+1;
   if(!lq||S.fc%3===0) drawBack(t,st,{ch,lamp,pulse,u5,i3:I(3)*(1-.85*I(4)),fan,lq});
 
-  drawFront(t,st,{ch,lq,lamp});
+  drawFront(t,st,{ch,lq,lamp}); drawCurtain(t,st);
 
   /* плашка */
   const lampN=clamp(lamp/.95); OV('--ob',(.5+.5*lampN).toFixed(3));
@@ -977,7 +1038,7 @@ function sumState(on){   // шоу доиграно (или перемотано
  });
  return promise;
 }
-window.BigWinShow={play,warm,MAXX,plates:{list:PLATES,def:PLATE_DEF,opt:plateOpt}};
+window.BigWinShow={play,warm,MAXX,plates:{list:PLATES,def:PLATE_DEF,opt:plateOpt},mwtop:{list:MWTOPS,def:MW_DEF,opt:mwOpt}};
 // fb/perf 2026-10-12: прогрев шоу (CSS, текстуры, спрайты лучей, 3 ролика Рокко ≈3 МБ) — после роликов и звуков первого спина (loadgate.js), а не на старте: раньше он делил канал с глотанием/броском и давал длинные задачи (≈0,4 с при 4× замедлении процессора)
 const warmLater=()=>{ const go=()=>(window.requestIdleCallback||setTimeout)(warm); if(window.BPLoad) BPLoad.whenOpen('audio',go,1500); else go(); };
 if(document.readyState==='complete') warmLater(); else addEventListener('load',warmLater);
